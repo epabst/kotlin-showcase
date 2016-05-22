@@ -7,6 +7,6 @@ compileKotlin2Js {
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
-  compile "net.yested:Yested:0.0.103"
+  compile "net.yested:Yested:SNAPSHOT-1"
   testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
