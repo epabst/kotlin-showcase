@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title>ZZZAppNameZZZ</title>
+    <title>Yested</title>
 
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css"/>
+    <link rel="stylesheet" href="css/sweet-alert.css"/>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -20,8 +21,15 @@
 
     <!-- Yested uses jQuery library a bit -->
     <script src="lib/jquery-1.11.3.min.js"></script>
-    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="lib/jquery-ui.min.js"></script>
 
+    <script type="text/javascript">
+        // Change JQueryUI plugin names to fix name collision with Bootstrap.
+        $.widget.bridge('uitooltip', $.ui.tooltip);
+        $.widget.bridge('uibutton', $.ui.button);
+    </script>
+
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
     <!-- This is a JS implementation of Kotlin libraries - extracted by Intellij IDEA (check box in module dependencies and build) -->
     <script src="../../build/classes/main/lib/kotlin.js"></script>
     <!-- cordova script (this is not used during development) -->
@@ -29,9 +37,13 @@
     <!-- This is Yested library - extracted by Intellij IDEA (check box in module dependencies and build) -->
     <script src="../../build/classes/main/lib/Yested.js"></script>
 
+    <script src="lib/spin.min.js"></script>
+    <script src="lib/Chart.js"></script>
     <script src="lib/bootstrap-tagsinput.min.js"></script>
     <script src="lib/moment-with-locales.js"></script>
     <script src="lib/bootstrap-datetimepicker.min.js"></script>
+    <script src="lib/sweet-alert.min.js"></script>
+    <script src="lib/jquery.ba-throttle-debounce.min.js"></script>
 </head>
 
 <body role="document">

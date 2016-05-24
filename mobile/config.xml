@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="org.ZZZQualifiedPackageNameZZZ" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>ZZZAppNameZZZ</name>
+<widget id="com.ionicframework.Yested" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Yested</name>
   <description>
-    ZZZAppDescriptionZZZ
+    Yested Example
   </description>
-  <author email="ZZZEmailZZZ" href="ZZZWebsiteZZZ">
-    ZZZDeveloperNameZZZ
+  <author email="jan.kovar79@gmail.com" href="http://www.yested.net/">
+    Jan Kovar
   </author>
   <content src="index.html"/>
   <access origin="*"/>
