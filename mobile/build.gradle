@@ -1,0 +1,10 @@
+group 'com.github.epabst.kickstart'
+version '1.0-SNAPSHOT'
+
+apply plugin: "kotlin2js"
+
+dependencies {
+//  compile project(":webclient")
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+}

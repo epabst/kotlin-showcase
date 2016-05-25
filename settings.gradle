@@ -1,0 +1,2 @@
+rootProject.name = 'kickstart'
+include 'common', 'webclient', 'backend', 'mobile'

@@ -1,0 +1,52 @@
+group 'com.github.epabst.kickstart'
+version '1.0-SNAPSHOT'
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+apply plugin: 'kotlin2js'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+}
+
+task jarSources(type: Jar) {
+  from sourceSets.main.allSource
+  classifier = 'source'
+}
+artifacts {
+  compile jarSources
+}
+
+def outDir = "${buildDir}/kotlin2js/main/"
+
+compileKotlin2Js.kotlinOptions.outputFile = outDir + "kickstart-common.js"
+
+jar {
+  from sourceSets.main.allSource
+  include "**/*.kt"
+
+  from outDir
+  include "**/*.js"
+
+  manifest {
+    attributes(
+            "Specification-Title": "kickstart-common JavaScript lib",
+            "Kotlin-JS-Module-Name": "kickstart-common"
+    )
+  }
+}
+
+jar.dependsOn(compileKotlin2Js)

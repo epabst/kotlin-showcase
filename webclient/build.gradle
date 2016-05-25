@@ -1,0 +1,12 @@
+apply plugin: "kotlin2js"
+
+compileKotlin2Js {
+  kotlinOptions.outputFile = "webclient/build/static/js/app.js"
+  kotlinOptions.sourceMap = true
+}
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
+  compile "net.yested:Yested:0.0.103"
+  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+}

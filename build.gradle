@@ -1,0 +1,27 @@
+buildscript {
+  ext {
+    kotlin_version = '1.0.1-2'
+  }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+allprojects {
+  apply plugin: 'idea'
+  group 'com.github.epabst.kickstart'
+  version '1.0-SNAPSHOT'
+  ext {
+    kotlin_version = '1.0.1-2'
+  }
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+      url "http://nexus.yested.net/nexus/content/repositories/releases/"
+    }
+  }
+}
