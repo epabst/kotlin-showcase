@@ -3,14 +3,32 @@ package complex
 import net.yested.*
 import net.yested.bootstrap.*
 import org.w3c.dom.HTMLElement
-import java.util.*
+
+@native interface ContinentJS {
+    val label: String
+}
+
+fun Continent(continent: ContinentJS) = Continent.byLabel(continent.label)
 
 enum class Continent(val label:String) {
     EUROPE("Europe"),
     AMERICA("America"),
     ASIA("Asia"),
-    AFRICA("Africa")
+    AFRICA("Africa");
+
+    companion object {
+        fun byLabel(label: String): Continent {
+            return values().find { it.label == label } ?: throw IllegalArgumentException("unknown label=" + label)
+        }
+    }
 }
+
+@native interface CityJS {
+    val name: String
+    val continent: ContinentJS
+}
+
+fun City(city: CityJS): City = City(city.name, Continent(city.continent))
 
 data class City(val name:String, val continent:Continent)
 
@@ -56,7 +74,7 @@ class DetailScreen(
 
 }
 
-class MasterScreen(val list:ArrayList<City>, val editHandler:Function1<City?, Unit>) : Component {
+class MasterScreen(val repository:Repository<City>, val editHandler:Function1<City?, Unit>) : Component {
 
     val grid =
             Grid(columns = arrayOf(
@@ -74,12 +92,12 @@ class MasterScreen(val list:ArrayList<City>, val editHandler:Function1<City?, Un
                             sortFunction = compareByValue<City, String> { it.name })));
 
     fun deleteCity(city: City) {
-        list.remove(city)
-        grid.list = list
+        repository.remove(city)
+        grid.list = repository.list
     }
 
     init {
-        grid.list = list
+        grid.list = repository.list
     }
 
     override val element: HTMLElement
@@ -94,16 +112,8 @@ class MasterDetailDemo(): Component {
 
     val placeholder = Div()
 
-    val list = arrayListOf(
-            City("Prague", Continent.EUROPE),
-            City("London", Continent.EUROPE),
-            City("New York", Continent.AMERICA))
-
     fun saveCity(originalCity: City?, newCity: City) {
-        if (originalCity != null) {
-            list.remove(originalCity)
-        }
-        list.add(newCity)
+        Factory.cityRepository.save(originalCity, newCity)
         displayMasterScreen()
     }
 
@@ -112,7 +122,7 @@ class MasterDetailDemo(): Component {
     }
 
     fun displayMasterScreen() {
-        placeholder.setChild(MasterScreen(list, { editCity(it) }), Fade())
+        placeholder.setChild(MasterScreen(Factory.cityRepository, { editCity(it) }), Fade())
     }
 
     init {
