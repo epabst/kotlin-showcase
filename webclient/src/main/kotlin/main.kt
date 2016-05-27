@@ -10,6 +10,8 @@ import net.yested.with
  */
 fun main(args: Array<String>) {
 
+    initializeForCordova()
+
     //here we create some div with a header and a list
     val div = Div() with {
         h1 {
