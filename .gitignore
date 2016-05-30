@@ -12,3 +12,4 @@ out/
 .classpath
 target/
 tmp/
+015_copy_app_to_synced_folder.js

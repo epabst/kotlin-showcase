@@ -1,7 +1,7 @@
 apply plugin: "kotlin2js"
 
 compileKotlin2Js {
-  kotlinOptions.outputFile = "out/production/webclient/webclient.js"
+  kotlinOptions.outputFile = "webclient/src/main/web/gen/webclient.js"
   kotlinOptions.sourceMap = true
 }
 

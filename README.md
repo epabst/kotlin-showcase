@@ -7,16 +7,24 @@ A kickstarted application for web and mobile with a backend all using Kotlin.
 * webclient - javascript web application
 * mobile - hybrid mobile application using KotlinJS and Cordova to run on Android, iOS, Windows Phones, etc.
 
-# How to Build
+# How to Prepare to Build webclient
 
 * The webclient module requires exporting some Kotlin libraries to Javascript.  
 Run "./gradlew idea", open project in IntelliJ, at the prompt, 
 click "Configure modules as Kotlin (JavaScript) modules", 
 select the webclient module and "Use library from plugin", 
-edit the webclient module settings and check the export boxes for KotlinJavaScript and Yested, 
-and build the project in IntelliJ.
-It will generate some files in out/production/webclient/lib
+edit the webclient module settings and check the export boxes for KotlinJavaScript and Yested
+as well as setting the module output path to webclient/src/main/web/gen.
+ 
+# How to Build webclient
 
-# How to Run from IntelliJ
+Compile the webclient module in IntelliJ (e.g. right-click on the webclient module and click "Compile").
+It will generate some files in webclient/src/main/web/gen
+
+# How to Run webclient from IntelliJ
 
 In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Browser".  Voila!
+
+# How to Build mobile
+
+See mobile/README.md

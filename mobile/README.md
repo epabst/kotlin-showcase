@@ -1,25 +1,44 @@
-Ionic App Base
+Hybrid Mobile App 
 =====================
 
-A starting project for Ionic that optionally supports using custom SCSS.
+A hybrid mobile app that uses ionic/cordova to wrap the webclient into a mobile app for Android and iOS.
 
-## Using this project
-
-We recommend using the [Ionic CLI](https://github.com/driftyco/ionic-cli) to create new Ionic projects that are based on this project but use a ready-made starter template.
-
-For example, to start a new Ionic project with the default tabs interface, make sure the `ionic` utility is installed:
+## Preparing to run mobile app
 
 ```bash
 $ npm install -g ionic
+$ npm install ncp
+$ npm install replace
 ```
 
-Then run: 
+## Running mobile app
+
+To build and run it, follow these steps:
+
+1) First build the webclient (see ../README.md)
+
+2) cd into `mobile` and run:
 
 ```bash
-$ ionic start myProject tabs
+$ ionic platform add android
+$ ionic build android
+$ ionic emulate android
 ```
 
-More info on this can be found on the Ionic [Getting Started](http://ionicframework.com/getting-started) page and the [Ionic CLI](https://github.com/driftyco/ionic-cli) repo.
+Substitute "android" with "ios" if on a Mac.  The ios development toolchain is a lot easier to work with until you need to do anything custom to Android.
 
-## Issues
-Issues have been disabled on this repo, if you do find an issue or have a question consider posting it on the [Ionic Forum](http://forum.ionicframework.com/).  Or else if there is truly an error, follow our guidelines for [submitting an issue](http://ionicframework.com/submit-issue/) to the main Ionic repository.
+3) Run the resulting package: platforms/android/ant-build/MainActivity-debug.apk
+
+## To deploy to ionic.io:
+
+WARNING: The Ionic View app won't install for me on my phone, so this may not work for you either.  
+It says that parental controls won't allow the app, but parental controls are off.
+
+```bash
+$ ionic io init
+$ ionic add ionic-platform-web-client
+$ ionic plugin add ionic-plugin-deploy
+$ ionic upload --deploy
+```
+
+To view your app, install the Ionic View app: http://view.ionic.io/
