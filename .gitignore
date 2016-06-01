@@ -1,0 +1,14 @@
+.idea/
+.settings/
+bin/
+*.log
+proguard/
+local.properties
+*.DS_Store
+out/
+*.iml
+*.ipr
+.project
+.classpath
+target/
+tmp/
