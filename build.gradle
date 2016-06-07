@@ -12,7 +12,7 @@ buildscript {
 
 allprojects {
   apply plugin: 'idea'
-  group 'com.github.epabst.kickstart'
+  group 'com.github.epabst.kotlin-showcase'
   version '1.0-SNAPSHOT'
   ext {
     kotlin_version = '1.0.2'
