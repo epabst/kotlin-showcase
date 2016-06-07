@@ -7,7 +7,7 @@ A kickstarted application for web and mobile with a backend all using Kotlin.
 * webclient - javascript web application
 * mobile - hybrid mobile application using KotlinJS and Cordova to run on Android, iOS, Windows Phones, etc.
 
-# To Customize 
+# To Personalize
 
 Search for "ZZZ" and replace it with the information for your custom app.
 
