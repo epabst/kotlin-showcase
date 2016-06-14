@@ -1,3 +1,5 @@
+package client
+
 import common.Hello
 import net.yested.el
 import net.yested.Div
