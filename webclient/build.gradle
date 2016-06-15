@@ -13,4 +13,5 @@ compileTestKotlin2Js {
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
   compile "net.yested:Yested:SNAPSHOT-1"
+  compile project(":common")
 }

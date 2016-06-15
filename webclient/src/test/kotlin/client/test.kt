@@ -1,5 +1,7 @@
 package client
 
+import common.Hello
+
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
  * @author Eric Pabst (epabst@gmail.com)
@@ -22,7 +24,7 @@ fun main(args: Array<String>) {
 
     describe("Hello") {
         it("must be able to say Hello World") {
-            HelloWorld.message.mustBe("Hello World")
+            Hello.hello().mustBe("Hello World")
         }
     }
 }

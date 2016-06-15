@@ -11,42 +11,14 @@ buildscript {
   }
 }
 
-apply plugin: 'kotlin2js'
+apply plugin: 'kotlin'
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+  testCompile "junit:junit:4.12"
 }
-
-task jarSources(type: Jar) {
-  from sourceSets.main.allSource
-  classifier = 'source'
-}
-artifacts {
-  compile jarSources
-}
-
-def outDir = "${buildDir}/kotlin2js/main/"
-
-compileKotlin2Js.kotlinOptions.outputFile = outDir + "kickstart-common.js"
-
-jar {
-  from sourceSets.main.allSource
-  include "**/*.kt"
-
-  from outDir
-  include "**/*.js"
-
-  manifest {
-    attributes(
-            "Specification-Title": "kickstart-common JavaScript lib",
-            "Kotlin-JS-Module-Name": "kickstart-common"
-    )
-  }
-}
-
-jar.dependsOn(compileKotlin2Js)
