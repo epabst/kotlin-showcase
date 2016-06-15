@@ -1,12 +1,16 @@
 apply plugin: "kotlin2js"
 
 compileKotlin2Js {
-  kotlinOptions.outputFile = "webclient/src/main/web/gen/webclient.js"
+  kotlinOptions.outputFile = "webclient/build/classes/main/webclient_main.js"
+  kotlinOptions.sourceMap = true
+}
+
+compileTestKotlin2Js {
+  kotlinOptions.outputFile = "build/classes/test/webclient_test.js"
   kotlinOptions.sourceMap = true
 }
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
   compile "net.yested:Yested:SNAPSHOT-1"
-  testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }

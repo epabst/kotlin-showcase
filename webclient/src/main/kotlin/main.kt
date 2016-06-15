@@ -2,6 +2,10 @@ import net.yested.el
 import net.yested.Div
 import net.yested.with
 
+object HelloWorld {
+    val message = "Hello World"
+}
+
 /**
  * The main entrypoint of the app.
  * @author Eric Pabst (epabst@gmail.com)
@@ -15,7 +19,7 @@ fun main(args: Array<String>) {
     //here we create some div with a header and a list
     val div = Div() with {
         h1 {
-            +"Hello World" //plus add given text as textContent to HTML element (h1)
+            +HelloWorld.message //plus add given text as textContent to HTML element (h1)
         }
         ul {
             li {

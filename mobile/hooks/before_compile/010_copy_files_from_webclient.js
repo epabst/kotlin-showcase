@@ -28,37 +28,48 @@ rimraf(path.join('www','*'), function() {
   console.log('Deleting "www" directory complete.');
 
   copy(path.join('..', 'webclient', 'src', 'main', 'web'), 'www', function() {
-    console.log('Creating "www/js" directory.');
-    try {
-      fs.mkdirSync(path.join('www', 'js'), function (err) {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('Creating "www/js" directory complete.');
-        }
-      });
-    } catch(ex) {}
-    console.log('Creating "www/js" directory complete.');
-    copy(path.join('www', 'gen', 'webclient.js'), path.join('www', 'js', 'app.js'), function() {
-      copy(path.join('www', 'gen', 'webclient.meta.js'), path.join('www', 'js', 'app.meta.js'), function() {
-        console.log('Doing CORDOVA replacements:');
-        replace({
-            regex: "<!--CORDOVA (.*?)-->",
-            replacement: "$1",
-            paths: ['www/index.html'],
-            recursive: false,
-            silent: false,
+    copy(path.join('..', 'webclient', 'build', 'classes', 'main'), 'www', function() {
+      console.log('Creating "www/js" directory.');
+      try {
+        fs.mkdirSync(path.join('www', 'js'), function (err) {
+          if (err) {
+            console.error(err);
+          } else {
+            console.log('Creating "www/js" directory complete.');
+          }
         });
-        console.log('Doing CORDOVA replacements complete.');
-        console.log('Doing app.js replacements:');
-        replace({
-            regex: "gen/webclient.",
-            replacement: "js/app.",
-            paths: ['www/index.html'],
-            recursive: false,
-            silent: false,
+      } catch(ex) {}
+      console.log('Creating "www/js" directory complete.');
+      copy(path.join('www', 'webclient_main.js'), path.join('www', 'js', 'app.js'), function() {
+        copy(path.join('www', 'webclient_main.meta.js'), path.join('www', 'js', 'app.meta.js'), function() {
+          console.log('Doing CORDOVA replacements:');
+          replace({
+              regex: "<!--CORDOVA (.*?)-->",
+              replacement: "$1",
+              paths: ['www/index.html'],
+              recursive: false,
+              silent: false,
+          });
+          console.log('Doing CORDOVA replacements complete.');
+          console.log('Doing build directory replacements:');
+          replace({
+              regex: "../../build/classes/main/",
+              replacement: "",
+              paths: ['www/index.html'],
+              recursive: false,
+              silent: false,
+          });
+          console.log('Doing build directory replacements complete.');
+          console.log('Doing app.js replacements:');
+          replace({
+              regex: "webclient_main.",
+              replacement: "js/app.",
+              paths: ['www/index.html'],
+              recursive: false,
+              silent: false,
+          });
+          console.log('Doing app.js replacements complete.');
         });
-        console.log('Doing app.js replacements complete.');
       });
     });
   });
