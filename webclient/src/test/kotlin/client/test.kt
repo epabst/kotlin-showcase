@@ -1,6 +1,7 @@
 package client
 
-import kotlin.properties.Delegates
+import QUnit.module
+import QUnit.test
 
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
@@ -9,21 +10,19 @@ import kotlin.properties.Delegates
  * Time: 10:33 PM
  */
 
-@native("QUnit") val qunit: dynamic by Delegates.notNull()
-val assert = qunit.assert
-
 fun main(args: Array<String>) {
+    module("Hello") {
+        test("hello test") {
+            val t: Any = "1"
+            t.shouldBe("1")
+        }
 
-    qunit.test( "hello test")  {
-        val t: Any = "1"
-        assert.ok("1" == t, "1 should equal Any 1")
-    }
+        test("hello test") {
+            1.shouldBe(1)
+        }
 
-    qunit.test( "hello test")  {
-        assert.equal(1, 1, "1 should equal 1")
-    }
-
-    qunit.test( "HelloWorld test")  {
-        assert.equal(HelloWorld.message, "Hello World")
+        test("HelloWorld test") {
+            HelloWorld.message.shouldBe("Hello World")
+        }
     }
 }
