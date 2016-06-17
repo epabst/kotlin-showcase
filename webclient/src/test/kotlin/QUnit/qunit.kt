@@ -1,15 +1,24 @@
 package QUnit
 
+import java.util.*
+import kotlin.properties.Delegates
+
 /**
  * The QUnit API.
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 6/16/16
  * Time: 5:48 AM
  */
+val moduleStack = ArrayList<String>()
+
 fun module(name: String, nested: () -> Unit) {
-    //todo figure out why the nested function can't be passed in to QUnit natively so that nested modules show up right.
-    qUnitModule(name)
+    //todo figure out why the nested function can't be passed in to QUnit natively so that nested modules show up right
+    // without having to emulate it here.
+    moduleStack.add(name)
+    qUnitModule(moduleStack.joinToString(" "))
     nested()
+    moduleStack.removeAt(moduleStack.size - 1)
+    qUnitModule(moduleStack.joinToString(" "))
 }
 
 @native("QUnit.module")
@@ -19,7 +28,7 @@ private fun qUnitModule(name: String) { noImpl }
 fun test(name: String, nested: () -> Unit) { noImpl }
 
 @native("QUnit.assert")
-val assert: Assert
+val assert: Assert by Delegates.notNull()
 
 @native
 interface Assert {

@@ -1,8 +1,5 @@
 package client
 
-import QUnit.module
-import QUnit.test
-
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
  * @author Eric Pabst (epabst@gmail.com)
@@ -11,18 +8,21 @@ import QUnit.test
  */
 
 fun main(args: Array<String>) {
-    module("Hello") {
-        test("hello test") {
+    describe("mustBe") {
+        it("must handle strings") {
             val t: Any = "1"
-            t.shouldBe("1")
+            t.mustBe("1")
         }
 
-        test("hello test") {
-            1.shouldBe(1)
+        it("must handle numbers") {
+            1.mustBe(1)
         }
 
-        test("HelloWorld test") {
-            HelloWorld.message.shouldBe("Hello World")
+    }
+
+    describe("Hello") {
+        it("must be able to say Hello World") {
+            HelloWorld.message.mustBe("Hello World")
         }
     }
 }
