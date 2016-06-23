@@ -1,7 +1,13 @@
 apply plugin: "kotlin2js"
 
+sourceSets {
+   main.kotlin.srcDirs += project(':common').sourceSets.main.kotlin.srcDirs
+   test.kotlin.srcDirs += project(':common').sourceSets.main.kotlin.srcDirs
+   test.kotlin.srcDirs += 'src/main/kotlin'
+}
+
 compileKotlin2Js {
-  kotlinOptions.outputFile = "webclient/build/classes/main/webclient_main.js"
+  kotlinOptions.outputFile = "build/classes/main/webclient_main.js"
   kotlinOptions.sourceMap = true
 }
 
@@ -13,5 +19,4 @@ compileTestKotlin2Js {
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
   compile "net.yested:Yested:SNAPSHOT-1"
-  compile project(":common")
 }
