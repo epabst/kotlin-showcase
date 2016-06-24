@@ -1,15 +1,37 @@
 apply plugin: "kotlin2js"
 
+// copyCommonSource is here to solve the problem that I need the common module to be compiled to the JVM for unit tests
+// and for the backend, and compiled to Javascript for the webclient and mobile modules.  I wanted the build to just work
+// IntelliJ to just work for test-driven development for both JVM unit tests
+// as well as opening the webclient app's index.html or test runner.html in a browser.
+//
+// Here are some ideas I tried:
+// 1. Apply the 'kotlin' and the 'kotlin2js' plugins both in the common module.
+//    Result: I wasn't able to get this to work yet and it was awkward and problematic.
+//      I struggled with how to have different gradle configurations that without causing problems for IDE.
+//      IntelliJ would complain about not finding methods or that libraries are not compatible with KotlinJS.
+// 2. Add common/src/main/kotlin as a source directory for both the common module and the webclient module.
+//      IntelliJ would not allow the tests or the webclient to compile because this setup is not allowed.
+//      I could manually choose to remove it from one of the modules and be able to work,
+//      but I'd prefer no manual steps, and to easily switch between JVM unit tests and Javascript development.
+// 3. soft-link the common directory to fool IntelliJ into allowing two modules to share the same source.
+//      Result:  Failed.  IntelliJ resolves directory soft-links and complains about
+// 4. Automate copying common/src/main/kotlin for use by webclient's kotlin2js.
+//      Result: This worked really well.  The build and IntelliJ both work well.
+//      I do have to be careful to change the original files and not the copies.
+task copyCommonSource(type: Copy) {
+  from("../common/src/main/kotlin")
+  into("build/gen/main/kotlin")
+}
+
 sourceSets {
-   main.kotlin.srcDirs += project(':common').sourceSets.main.kotlin.srcDirs
-   test.kotlin.srcDirs += project(':common').sourceSets.main.kotlin.srcDirs
-   test.kotlin.srcDirs += 'src/main/kotlin'
+  main.kotlin.srcDirs += 'build/gen/main/kotlin'
 }
 
 compileKotlin2Js {
   kotlinOptions.outputFile = "build/classes/main/webclient_main.js"
   kotlinOptions.sourceMap = true
-}
+}.dependsOn(copyCommonSource)
 
 compileTestKotlin2Js {
   kotlinOptions.outputFile = "build/classes/test/webclient_test.js"
