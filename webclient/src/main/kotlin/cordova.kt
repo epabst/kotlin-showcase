@@ -1,5 +1,6 @@
 import org.w3c.dom.Window
 import kotlin.browser.window
+import kotlin.properties.Delegates
 
 /**
  * Support for Cordova.
@@ -8,7 +9,7 @@ import kotlin.browser.window
  * Time: 4:04 PM
  */
 
-@native val Window.cordova: Cordova?
+@native val Window.cordova: Cordova? by lazy { null }
 
 @native interface Cordova { val plugins: CordovaPlugins? }
 
@@ -20,7 +21,7 @@ import kotlin.browser.window
 	fun disableScroll(disable: Boolean)
 }
 
-@native val Window.StatusBar: StatusBar?
+@native val Window.StatusBar: StatusBar? by lazy { null }
 
 @native interface StatusBar { fun styleDefault() }
 
