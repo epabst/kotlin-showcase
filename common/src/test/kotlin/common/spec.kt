@@ -9,5 +9,5 @@ import kotlin.test.assertEquals
  * Time: 5:59 AM
  */
 fun <T> T.mustBe(expected: T) {
-    assertEquals(this, expected)
+    assertEquals(expected, this)
 }
