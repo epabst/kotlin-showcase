@@ -22,7 +22,10 @@ To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compile
  
 # How to Build webclient
 
-Compile the webclient_main module in IntelliJ (e.g. right-click on the webclient module and click "Compile").
+First run ./gradlew build in this top-level directory.  
+This will copy the common module's source code into the webclient/build/gen/kotlin directory. 
+
+Then compile the webclient_main module in IntelliJ (e.g. right-click on the webclient module and click "Compile").
 It will generate some files in webclient/build/classes/main.
 
 # How to Run webclient from IntelliJ
