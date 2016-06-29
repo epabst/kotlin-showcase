@@ -28,6 +28,10 @@ sourceSets {
   main.kotlin.srcDirs += 'build/gen/main/kotlin'
 }
 
+sourceSets {
+  test.kotlin.srcDirs += 'build/gen/main/kotlin'
+}
+
 compileKotlin2Js {
   kotlinOptions.outputFile = "build/classes/main/webclient_main.js"
   kotlinOptions.sourceMap = true
