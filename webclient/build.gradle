@@ -29,6 +29,7 @@ sourceSets {
 }
 
 sourceSets {
+  test.kotlin.srcDirs += 'src/main/kotlin'
   test.kotlin.srcDirs += 'build/gen/main/kotlin'
 }
 
