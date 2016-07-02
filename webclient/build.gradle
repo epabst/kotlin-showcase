@@ -33,12 +33,12 @@ sourceSets {
 }
 
 compileKotlin2Js {
-  kotlinOptions.outputFile = "build/classes/main/webclient_main.js"
+  kotlinOptions.outputFile = "webclient/build/classes/main/webclient_main.js"
   kotlinOptions.sourceMap = true
 }.dependsOn(copyCommonSource)
 
 compileTestKotlin2Js {
-  kotlinOptions.outputFile = "build/classes/test/webclient_test.js"
+  kotlinOptions.outputFile = "webclient/build/classes/test/webclient_test.js"
   kotlinOptions.sourceMap = true
 }
 
