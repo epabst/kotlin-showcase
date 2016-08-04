@@ -1,0 +1,32 @@
+task copyWebClientExceptHtml(type: Copy) {
+  from("${project(':webclient').projectDir}/src/main/web")
+  from("${project(':webclient').projectDir}/build/classes/main")
+  include("**/*")
+  exclude("index.html")
+  into("www")
+}
+
+task copyWebClientHtml(type: Copy) {
+  from("${project(':webclient').projectDir}/src/main/web")
+  from("${project(':webclient').projectDir}/build/classes/main")
+  include("index.html")
+  into("www")
+  filter { String line -> line
+    .replaceAll("<!--CORDOVA (.*?)-->", "\\1")
+    .replace("../../build/classes/main/", "")
+    .replace("webclient_main.", "js/app.") }
+}
+
+// Copy webclient files
+// Automatically copies files from the webclient module to this module.
+// This allows sharing code between the two modules and enables using KotlinJS
+
+task prepareMobile(type: Copy) {
+  from("www")
+  include("webclient_main*.js")
+  into("www/js")
+  rename { String fileName -> fileName.replace("webclient_main", "app") }
+}
+
+prepareMobile.dependsOn(copyWebClientExceptHtml)
+prepareMobile.dependsOn(copyWebClientHtml)
