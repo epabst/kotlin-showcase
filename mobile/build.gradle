@@ -6,6 +6,12 @@ task copyWebClientExceptHtml(type: Copy) {
   into("www")
 }
 
+// kotlin.js and Yested.js must exist.  Follow the instructions in ../README.md to generate them.
+copyWebClientExceptHtml.doFirst {
+  assert file("${project(':webclient').projectDir}/build/classes/main/lib/kotlin.js").exists()
+  assert file("${project(':webclient').projectDir}/build/classes/main/lib/Yested.js").exists()
+}
+
 task copyWebClientHtml(type: Copy) {
   from("${project(':webclient').projectDir}/src/main/web")
   from("${project(':webclient').projectDir}/build/classes/main")
