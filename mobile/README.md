@@ -7,8 +7,6 @@ A hybrid mobile app that uses cordova to wrap the webclient into a mobile app fo
 
 ```bash
 $ npm install -g cordova
-$ npm install ncp
-$ npm install replace
 ```
 
 ## Running mobile app
