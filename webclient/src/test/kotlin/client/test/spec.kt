@@ -1,4 +1,4 @@
-package client
+package client.test
 
 import QUnit.module
 import QUnit.test
@@ -36,7 +36,7 @@ private fun <T> T.equalTo(expected: T): Boolean {
             var index = 0
             do {
                 if (!this[index].equalTo(expected[index])) {
-                    return false;
+                    return false
                 }
                 index += 1
             } while (index < size)
