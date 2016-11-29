@@ -13,6 +13,7 @@ Search for "ZZZ" and replace it with the information for your custom app.
 
 # How to Prepare to Build webclient
 
+* Before building webclient, first build https://github.com/jean79/yested using "mvn clean install".
 * The webclient_main module requires exporting some Kotlin libraries to Javascript.
 In IntelliJ, open the settings.gradle file in the top-level directory,
 with the "separate module per source set" option, 
