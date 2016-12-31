@@ -1,8 +1,9 @@
 apply plugin: "kotlin2js"
 
-// copyCommonSource is here to solve the problem that I need the common module to be compiled to the JVM for unit tests
-// and for the backend, and compiled to Javascript for the webclient and mobile modules.  I wanted the build to just work
-// IntelliJ to just work for test-driven development for both JVM unit tests
+// linkCommonSource is here to solve the problem that I need the common module to be compiled to the JVM for unit tests
+// and for the backend, and compiled to Javascript for the webclient and mobile modules.
+// I wanted the build to just work,
+// IntelliJ to just work for test-driven development for both JVM unit tests,
 // as well as opening the webclient app's index.html or test runner.html in a browser.
 //
 // Here are some ideas I tried:
@@ -14,29 +15,24 @@ apply plugin: "kotlin2js"
 //      IntelliJ would not allow the tests or the webclient to compile because this setup is not allowed.
 //      I could manually choose to remove it from one of the modules and be able to work,
 //      but I'd prefer no manual steps, and to easily switch between JVM unit tests and Javascript development.
-// 3. soft-link the common directory to fool IntelliJ into allowing two modules to share the same source.
-//      Result:  Failed.  IntelliJ resolves directory soft-links and complains about
-// 4. Automate copying common/src/main/kotlin for use by webclient's kotlin2js.
+// 3. Automate copying common/src/main/kotlin for use by webclient's kotlin2js.
 //      Result: This worked really well.  The build and IntelliJ both work well.
-//      I do have to be careful to change the original files and not the copies.
-task copyCommonSource(type: Copy) {
-  from("../common/src/main/kotlin")
-  into("build/gen/main/kotlin")
-}
-
-sourceSets {
-  main.kotlin.srcDirs += 'build/gen/main/kotlin'
+//      However, I do have to be careful to change the original files and not the copies.
+// 4. Symlink the common directory to make IntelliJ allow two modules to share the same source.
+//      Result:  This worked well.
+task linkCommonSource << {
+  ant.symlink(action: "delete", link: "webclient/src/main/kotlin/common")
+  ant.symlink(resource: "../../../../common/src/main/kotlin/common", link: "webclient/src/main/kotlin/common")
 }
 
 sourceSets {
   test.kotlin.srcDirs += 'src/main/kotlin'
-  test.kotlin.srcDirs += 'build/gen/main/kotlin'
 }
 
 compileKotlin2Js {
   kotlinOptions.outputFile = "webclient/build/classes/main/webclient_main.js"
   kotlinOptions.sourceMap = true
-}.dependsOn(copyCommonSource)
+}.dependsOn(linkCommonSource)
 
 compileTestKotlin2Js {
   kotlinOptions.outputFile = "webclient/build/classes/test/webclient_test.js"
