@@ -27,15 +27,28 @@ task copyWebClientHtml(type: Copy) {
 // Automatically copies files from the webclient module to this module.
 // This allows sharing code between the two modules and enables using KotlinJS
 
-task prepareMobile(type: Copy) {
+task prepareMobileWeb(type: Copy) {
   from("www")
   include("webclient_main*.js")
   into("www/js")
   rename { String fileName -> fileName.replace("webclient_main", "app") }
 }
 
+task prepareGenIcon(type: Copy) {
+  from(".")
+  include("config.xml")
+  into("www")
+}
+
+task prepareMobile(type: Copy) {
+  from("resources")
+  include("logo.png")
+  into("www/img")
+}
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
+prepareMobile.dependsOn(prepareMobileWeb)
+prepareMobile.dependsOn(prepareGenIcon)
 
 task clean(type: Delete) {
   //delete fileTree(dir: 'www', include: '**/*', exclude: '.keepdir')

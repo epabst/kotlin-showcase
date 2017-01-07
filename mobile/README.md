@@ -9,6 +9,12 @@ A hybrid mobile app that uses cordova to wrap the webclient into a mobile app fo
 $ npm install -g cordova
 ```
 
+To also be able to generate multiple sizes of icons:
+```
+$ npm install -g cordova-gen-icon
+$ apt-get install imagemagick
+```
+
 ## Running mobile app
 
 To build and run it, follow these steps:
@@ -20,6 +26,7 @@ To build and run it, follow these steps:
 
 ```bash
 $ cordova platform add android --save
+$ cordova-gen-icon
 $ cordova build android
 $ cordova emulate android
 ```
