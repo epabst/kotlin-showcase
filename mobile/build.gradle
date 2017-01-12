@@ -32,6 +32,6 @@ prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
 
 task clean(type: Delete) {
-  delete fileTree(dir: 'www', include: '**/*', exclude: '.keepdir')
+  //delete fileTree(dir: 'www', include: '**/*', exclude: '.keepdir')
   delete fileTree(dir: 'platforms')
 }
