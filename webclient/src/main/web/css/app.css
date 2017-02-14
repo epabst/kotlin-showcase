@@ -1,0 +1,108 @@
+#page {
+  display: flex;
+  flex-direction: column;
+}
+#undoBar {
+  border-style: groove;
+}
+#buttonBar, #undoBar {
+  display: flex;
+  flex-direction: row;
+  flex: 3;
+}
+#buttonBar span, #undoBar span {
+  vertical-align: middle;
+}
+#form-inline {
+  display: flex;
+  flex-direction: row;
+}
+.commandDescription {
+  flex: 1;
+  overflow-x: hidden;
+}
+.flex1 {
+  flex: 1;
+}
+.page-header {
+  margin-top: 20px;
+}
+.table-responsive>table>tbody>tr>td {
+  vertical-align: middle;
+}
+input.form-control[readonly].picker__input {
+  background-color: inherit;
+  opacity: inherit;
+}
+.form-control, .input-group .form-control {
+  width: inherit;
+}
+.input-group.date, .form-control {
+  width: initial;
+}
+.form-control, .input-group.date, .input-group .form-control {
+  display: inline;
+}
+.input-group .form-control, .input-group-addon, .input-group-btn {
+    display: inherit;
+}
+.input-group.date {
+  white-space: nowrap;
+}
+.input-group .form-control.date {
+  width: initial;
+}
+.key-info {
+  border-color: red;
+  border-style: dashed;
+  border-width: thin;
+}
+.balance-alert .glyphicon {
+  color: red;
+}
+.balance-alert {
+  white-space: normal;
+}
+.btn .glyphicon-minus {
+  color: red;
+}
+.btn .glyphicon-plus {
+  color: green;
+}
+.buttonPlaceholder {
+  display: inline-block;
+  width: 35px;
+}
+.nowrap {
+  white-space: nowrap;
+  display: inline-block;
+}
+@media screen and (max-width: 35em) {
+  .table-responsive>table>tbody>tr {
+    display: flex;
+    flex-wrap: wrap;
+    border-top: 1px solid #ddd;
+  }
+  .table-responsive>table>thead {
+    display: none;
+  }
+  .table-responsive>table>tbody>tr>td {
+    position: relative;
+    flex: 1 0 25%;
+    padding: 0.4em;
+    display: inline-block;
+    border-top: 0;
+  }
+  div>div.name>a, td>div.name {
+    display: inline-block;
+    width: 9em;
+    white-space: normal;
+    overflow-x: hidden;
+  }
+  input.text {
+    width: 100%;
+  }
+  input.int {
+    width: 5em;
+  }
+}

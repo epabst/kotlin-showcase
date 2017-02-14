@@ -1,3 +1,5 @@
+apply plugin: 'base'
+
 task copyWebClientExceptHtml(type: Copy) {
   from("${project(':webclient').projectDir}/src/main/web")
   from("${project(':webclient').projectDir}/build/classes/main")
@@ -5,6 +7,8 @@ task copyWebClientExceptHtml(type: Copy) {
   exclude("index.html")
   into("www")
 }
+
+copyWebClientExceptHtml.dependsOn(clean)
 
 // kotlin.js and Yested.js must exist.  Follow the instructions in ../README.md to generate them.
 copyWebClientExceptHtml.doFirst {
@@ -50,7 +54,14 @@ prepareMobile.dependsOn(copyWebClientHtml)
 prepareMobile.dependsOn(prepareMobileWeb)
 prepareMobile.dependsOn(prepareGenIcon)
 
-task clean(type: Delete) {
-  //delete fileTree(dir: 'www', include: '**/*', exclude: '.keepdir')
-  delete fileTree(dir: 'platforms')
+clean.doLast {
+//  file("platforms").deleteDir()
+  file("www/css").deleteDir()
+  file("www/js").deleteDir()
+  file("www/webclient_main").deleteDir()
+  file("www/index.html").delete()
+  file("www/webclient_main.js").delete()
+  file("www/webclient_main.js.map").delete()
+  file("www/webclient_main.meta.js").delete()
+  file("www/lib").deleteDir()
 }

@@ -2756,7 +2756,7 @@
 
 
     function daysToYears (days) {
-        // 400 years have 146097 days (taking into account leap year rules)
+        // 400 years have 146097 days (taking into toDo leap year rules)
         return days * 400 / 146097;
     }
 

@@ -1,7 +1,5 @@
 package client.test
 
-import common.Hello
-
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
  * @author Eric Pabst (epabst@gmail.com)
@@ -10,21 +8,11 @@ import common.Hello
  */
 
 fun main(args: Array<String>) {
-    describe("mustBe") {
-        it("must handle strings") {
-            val t: Any = "1"
-            t.mustBe("1")
-        }
-
-        it("must handle numbers") {
-            1.mustBe(1)
-        }
-
-    }
-
-    describe("Hello") {
-        it("must be able to say Hello World") {
-            Hello.hello().mustBe("Hello World")
-        }
-    }
+    JavascriptProviderTest.suite()
+    RichDateTest.suite()
+    JSModelTest.suite()
+    LocalStorageRepositoryTest.suite()
+    ToDoLocalStorageRepositoryTest.suite()
+    UITest.suite()
+//    UndoComponentTest.suite()
 }

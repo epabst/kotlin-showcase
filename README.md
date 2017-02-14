@@ -1,4 +1,5 @@
-A kickstarted application for web and mobile with a backend all using Kotlin.
+# About
+Simple To-Do App.
 
 # Modules                 
 
@@ -13,7 +14,8 @@ Search for "ZZZ" and replace it with the information for your custom app.
 
 # How to Prepare to Build webclient
 
-* Before building webclient, first build https://github.com/jean79/yested using "mvn clean install".
+* Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
+* Then run "./gradlew copyCommonSource" in this top-level directory. 
 * The webclient_main module requires exporting some Kotlin libraries to Javascript.
 In IntelliJ, open the settings.gradle file in the top-level directory,
 with the "separate module per source set" option, 
@@ -49,3 +51,19 @@ See mobile/README.md
 Build the webclient (see above)
 Run webclient tests and make sure they pass.
 Build the mobile app and make sure it has basic functionality.
+
+# Credit
+Thank you to the following frameworks, tools, libraries, and languages:
+* Yested - https://github.com/jean79/yested_fw
+* Twitter Bootstrap - http://getbootstrap.com/
+* JQuery - http://jquery.com/
+* Moment.js - http://momentjs.com/
+* NumeralJS - http://numeraljs.com/
+* pickadate.js - http://amsul.ca/pickadate.js/ 
+* Javascript - http://javascript.com/
+* Kotlin - http://kotlinlang.org/
+* Cordova - http://cordova.apache.org/
+* Gradle - https://gradle.org/
+* Phonegap Build - https://build.phonegap.com/
+* QUnit test framework - http://qunitjs.com/
+* Spek test framework from JetBrains - http://spekframework.org/

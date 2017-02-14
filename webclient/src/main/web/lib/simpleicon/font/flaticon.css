@@ -1,0 +1,203 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 22/06/2016 15:04
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+.flaticon {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Flaticon';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.flaticon-arrow-angle-point-pointing-to-left-direction:before { content: "\f100"; }
+.flaticon-arrow-black-pointing-left:before { content: "\f101"; }
+.flaticon-arrow-curve:before { content: "\f102"; }
+.flaticon-arrow-curve-pointing-to-right-direction:before { content: "\f103"; }
+.flaticon-arrow-double-outline-pointing-to-left:before { content: "\f104"; }
+.flaticon-arrow-of-dots:before { content: "\f105"; }
+.flaticon-arrow-of-dots-pointing-to-left-direction:before { content: "\f106"; }
+.flaticon-arrow-of-double-point-in-diagonal:before { content: "\f107"; }
+.flaticon-arrow-of-double-point-pointing-different-directions:before { content: "\f108"; }
+.flaticon-arrow-of-double-shape-pointing-to-left:before { content: "\f109"; }
+.flaticon-arrow-of-indian-style-pointing-to-left:before { content: "\f10a"; }
+.flaticon-arrow-of-small-pixels-or-squares-and-double-line-pointing-to-left-direction:before { content: "\f10b"; }
+.flaticon-arrow-of-squares-to-left-direction:before { content: "\f10c"; }
+.flaticon-arrow-of-two-points-pointing-two-different-directions:before { content: "\f10d"; }
+.flaticon-arrow-outline:before { content: "\f10e"; }
+.flaticon-arrow-outline-pointing-down-left:before { content: "\f10f"; }
+.flaticon-arrow-outline-pointing-down-left-1:before { content: "\f110"; }
+.flaticon-arrow-pointing-down-left:before { content: "\f111"; }
+.flaticon-arrow-pointing-down-left-direction:before { content: "\f112"; }
+.flaticon-arrow-pointing-left:before { content: "\f113"; }
+.flaticon-arrow-pointing-left-1:before { content: "\f114"; }
+.flaticon-arrow-pointing-left-in-a-circle:before { content: "\f115"; }
+.flaticon-arrow-pointing-to-left:before { content: "\f116"; }
+.flaticon-arrow-pointing-to-left-1:before { content: "\f117"; }
+.flaticon-arrow-pointing-to-left-2:before { content: "\f118"; }
+.flaticon-arrow-pointing-to-left-3:before { content: "\f119"; }
+.flaticon-arrow-pointing-to-left-direction:before { content: "\f11a"; }
+.flaticon-arrow-pointing-to-left-inside-a-circle:before { content: "\f11b"; }
+.flaticon-arrow-pointing-to-left-side:before { content: "\f11c"; }
+.flaticon-arrow-pointing-to-right:before { content: "\f11d"; }
+.flaticon-arrow-pointing-to-right-1:before { content: "\f11e"; }
+.flaticon-arrow-semicircle:before { content: "\f11f"; }
+.flaticon-arrow-straight-outline-pointing-to-left:before { content: "\f120"; }
+.flaticon-arrow-straight-pointing-to-left:before { content: "\f121"; }
+.flaticon-arrow-to-left:before { content: "\f122"; }
+.flaticon-arrows-cross:before { content: "\f123"; }
+.flaticon-arrows-group-in-four-directions:before { content: "\f124"; }
+.flaticon-black-light-bulb:before { content: "\f125"; }
+.flaticon-business-man:before { content: "\f126"; }
+.flaticon-business-man-1:before { content: "\f127"; }
+.flaticon-business-woman:before { content: "\f128"; }
+.flaticon-business-woman-1:before { content: "\f129"; }
+.flaticon-business-woman-2:before { content: "\f12a"; }
+.flaticon-businessman:before { content: "\f12b"; }
+.flaticon-different-arrow-pointing-to-left:before { content: "\f12c"; }
+.flaticon-double-arrow-pointing-left-direction:before { content: "\f12d"; }
+.flaticon-double-arrow-pointing-to-left:before { content: "\f12e"; }
+.flaticon-ecological-light-bulb:before { content: "\f12f"; }
+.flaticon-ecological-light-bulb-with-a-leaf-inside:before { content: "\f130"; }
+.flaticon-folder-add-symbol:before { content: "\f131"; }
+.flaticon-folder-black-open-shape:before { content: "\f132"; }
+.flaticon-folder-black-shape:before { content: "\f133"; }
+.flaticon-folder-black-shape-variant:before { content: "\f134"; }
+.flaticon-folder-black-shape-with-a-minus-sign:before { content: "\f135"; }
+.flaticon-folder-black-shape-with-a-plus-sign:before { content: "\f136"; }
+.flaticon-folder-black-shape-with-an-horizontal-straight-line:before { content: "\f137"; }
+.flaticon-folder-couple-one-black-other-white:before { content: "\f138"; }
+.flaticon-folder-delete-symbol:before { content: "\f139"; }
+.flaticon-folder-download-symbol:before { content: "\f13a"; }
+.flaticon-folder-download-symbol-with-down-arrow:before { content: "\f13b"; }
+.flaticon-folder-edit-symbol-for-interface:before { content: "\f13c"; }
+.flaticon-folder-lock-symbol:before { content: "\f13d"; }
+.flaticon-folder-of-squares-outline:before { content: "\f13e"; }
+.flaticon-folder-open-shape:before { content: "\f13f"; }
+.flaticon-folder-outline-of-gross-line:before { content: "\f140"; }
+.flaticon-folder-outline-shape:before { content: "\f141"; }
+.flaticon-folder-remove-button:before { content: "\f142"; }
+.flaticon-folder-remove-symbol-with-a-cross:before { content: "\f143"; }
+.flaticon-folder-upload-symbol:before { content: "\f144"; }
+.flaticon-folder-upload-symbol-1:before { content: "\f145"; }
+.flaticon-folder-variant:before { content: "\f146"; }
+.flaticon-folder-with-check-mark:before { content: "\f147"; }
+.flaticon-folder-with-minus-sign:before { content: "\f148"; }
+.flaticon-folder-with-two-lines:before { content: "\f149"; }
+.flaticon-gear:before { content: "\f14a"; }
+.flaticon-gear-big-shape:before { content: "\f14b"; }
+.flaticon-gear-black-shape:before { content: "\f14c"; }
+.flaticon-gear-outline:before { content: "\f14d"; }
+.flaticon-gear-wheel:before { content: "\f14e"; }
+.flaticon-gear-wheel-in-black:before { content: "\f14f"; }
+.flaticon-gear-wheel-with-cogs:before { content: "\f150"; }
+.flaticon-gears-couple:before { content: "\f151"; }
+.flaticon-glass-with-wine:before { content: "\f152"; }
+.flaticon-glass-with-wine-rotated-in-diagonal-position:before { content: "\f153"; }
+.flaticon-key:before { content: "\f154"; }
+.flaticon-key-black-shape-rotated-in-diagonal-to-right:before { content: "\f155"; }
+.flaticon-key-black-silhouette:before { content: "\f156"; }
+.flaticon-key-black-silhouette-interface-symbol-for-login:before { content: "\f157"; }
+.flaticon-key-in-horizontal-position:before { content: "\f158"; }
+.flaticon-key-of-rectangular-shape:before { content: "\f159"; }
+.flaticon-key-shape-interface-symbol-for-password:before { content: "\f15a"; }
+.flaticon-key-thin-shape-in-diagonal-position:before { content: "\f15b"; }
+.flaticon-key-tool:before { content: "\f15c"; }
+.flaticon-key-tool-1:before { content: "\f15d"; }
+.flaticon-ley-black-shape-in-horizontal-position:before { content: "\f15e"; }
+.flaticon-light-bulb:before { content: "\f15f"; }
+.flaticon-light-bulb-1:before { content: "\f160"; }
+.flaticon-light-bulb-of-oval-shape:before { content: "\f161"; }
+.flaticon-light-bulb-outline:before { content: "\f162"; }
+.flaticon-light-bulb-outline-1:before { content: "\f163"; }
+.flaticon-lightbulb:before { content: "\f164"; }
+.flaticon-lightbulb-1:before { content: "\f165"; }
+.flaticon-lightbulb-black-shape:before { content: "\f166"; }
+.flaticon-lightbulb-black-shape-1:before { content: "\f167"; }
+.flaticon-lightbulb-of-spherical-shape:before { content: "\f168"; }
+.flaticon-lightbulb-outline:before { content: "\f169"; }
+.flaticon-lightbulb-with-a-bolt:before { content: "\f16a"; }
+.flaticon-lightbulb-with-a-leaf-inside:before { content: "\f16b"; }
+.flaticon-link-interface-symbol:before { content: "\f16c"; }
+.flaticon-link-interface-symbol-1:before { content: "\f16d"; }
+.flaticon-link-symbol:before { content: "\f16e"; }
+.flaticon-link-symbol-of-two-chains-links-linked:before { content: "\f16f"; }
+.flaticon-lock-padlock-symbol-for-protect:before { content: "\f170"; }
+.flaticon-lock-symbol:before { content: "\f171"; }
+.flaticon-magnifier:before { content: "\f172"; }
+.flaticon-magnifier-1:before { content: "\f173"; }
+.flaticon-magnifier-on-a-user:before { content: "\f174"; }
+.flaticon-magnifier-tool:before { content: "\f175"; }
+.flaticon-magnifier-tool-1:before { content: "\f176"; }
+.flaticon-magnifier-tool-2:before { content: "\f177"; }
+.flaticon-magnifier-tool-on-earth-globe:before { content: "\f178"; }
+.flaticon-magnifying-glass:before { content: "\f179"; }
+.flaticon-padlock-closed-with-keyhole:before { content: "\f17a"; }
+.flaticon-padlock-lock-shape:before { content: "\f17b"; }
+.flaticon-padlock-lock-symbol-with-security-code-system:before { content: "\f17c"; }
+.flaticon-padlock-of-circular-shape:before { content: "\f17d"; }
+.flaticon-padlock-of-closed-rounded-circular-shape:before { content: "\f17e"; }
+.flaticon-padlock-security-tool:before { content: "\f17f"; }
+.flaticon-paper-clip:before { content: "\f180"; }
+.flaticon-paper-clip-spiral-in-vertical-position:before { content: "\f181"; }
+.flaticon-power-button-symbol:before { content: "\f182"; }
+.flaticon-power-symbol:before { content: "\f183"; }
+.flaticon-power-symbol-1:before { content: "\f184"; }
+.flaticon-power-symbol-2:before { content: "\f185"; }
+.flaticon-power-symbol-in-a-circle-in-black-and-white:before { content: "\f186"; }
+.flaticon-power-symbol-inside-a-circle:before { content: "\f187"; }
+.flaticon-power-symbol-off:before { content: "\f188"; }
+.flaticon-power-symbol-on:before { content: "\f189"; }
+.flaticon-power-symbol-on-1:before { content: "\f18a"; }
+.flaticon-power-symbol-on-2:before { content: "\f18b"; }
+.flaticon-power-symbol-on-rounded-variant:before { content: "\f18c"; }
+.flaticon-power-symbol-variant:before { content: "\f18d"; }
+.flaticon-power-symbol-variant-1:before { content: "\f18e"; }
+.flaticon-power-symbol-variant-2:before { content: "\f18f"; }
+.flaticon-power-symbol-with-the-circle-of-a-broken-line:before { content: "\f190"; }
+.flaticon-power-thin-symbol:before { content: "\f191"; }
+.flaticon-redo-arrow:before { content: "\f192"; }
+.flaticon-redo-arrow-1:before { content: "\f193"; }
+.flaticon-redo-arrow-2:before { content: "\f194"; }
+.flaticon-redo-arrow-button-of-circular-shape:before { content: "\f195"; }
+.flaticon-redo-arrow-in-a-circle:before { content: "\f196"; }
+.flaticon-redo-arrow-of-circular-shape-with-half-line-broken:before { content: "\f197"; }
+.flaticon-redo-circular-arrow:before { content: "\f198"; }
+.flaticon-undo-arrow:before { content: "\f199"; }
+.flaticon-undo-arrow-1:before { content: "\f19a"; }
+.flaticon-undo-arrow-in-a-black-circle:before { content: "\f19b"; }
+.flaticon-undo-arrow-in-a-circle:before { content: "\f19c"; }
+.flaticon-undo-arrow-of-circular-shape-with-half-broken-line:before { content: "\f19d"; }
+.flaticon-undo-black-arrow-pointing-to-left:before { content: "\f19e"; }
+.flaticon-undo-circular-arrow:before { content: "\f19f"; }
+.flaticon-unlock:before { content: "\f1a0"; }
+.flaticon-unlocked-padlock:before { content: "\f1a1"; }
+.flaticon-user-black-close-up-shape:before { content: "\f1a2"; }
+.flaticon-user-male-black-shape:before { content: "\f1a3"; }
+.flaticon-user-male-black-silhouette:before { content: "\f1a4"; }
+.flaticon-user-male-outline:before { content: "\f1a5"; }
+.flaticon-user-male-shape:before { content: "\f1a6"; }
+.flaticon-user-outline:before { content: "\f1a7"; }
+.flaticon-vintage-key:before { content: "\f1a8"; }

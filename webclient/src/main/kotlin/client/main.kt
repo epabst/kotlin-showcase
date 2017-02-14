@@ -1,9 +1,34 @@
 package client
 
-import common.Hello
-import net.yested.el
-import net.yested.Div
-import net.yested.with
+import common.PlatformProvider
+import common.ID
+import net.yested.core.html.*
+import net.yested.core.properties.*
+import net.yested.core.utils.*
+import net.yested.ext.jquery.*
+import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.Location
+import kotlin.browser.document
+import kotlin.browser.window
+
+val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
+
+object UI {
+    val toDoId = Property<ID?>(null)
+    val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
+    val toDoMasterScreen: HTMLDivElement by lazy { toDoMasterScreen(ToDoMasterModel()) }
+    val toDoDetailScreen: HTMLDivElement by lazy { toDoDetailScreen(ToDoDetailModel(toDo)) }
+    val backHash = Property<String?>(null)
+    val showUndo = true.toProperty()
+    var windowLocation: Location = window.location
+    var windowHistory: History = BrowserHistory
+    fun back() {
+        windowHistory.backToHash(backHash.get())
+    }
+    fun back(count: Int) {
+        windowHistory.go(-count)
+    }
+}
 
 /**
  * The main entrypoint of the app.
@@ -14,28 +39,35 @@ import net.yested.with
 fun main(args: Array<String>) {
 
     initializeForCordova()
-
-    //here we create some div with a header and a list
-    val div = Div() with {
-        h1 {
-            +Hello.hello() //plus add given text as textContent to HTML element (h1)
-        }
-        ul {
-            li {
-                strong {
-                    +"Bolded text"
-                }
-            }
-            li {
-                a(href = "http://www.yested.net") {
-                    +"Link to Framework"
-                }
-            }
-        }
-    }
+    PlatformProvider.instance = JavascriptProvider
 
     //when we have constructed a DOM, we can take a parent element (via div.element)
-    //and append it as a child to "app" div in HTML page
-    el("page")!!.appendChild(div.element)
+    //and append it as a child to "page" div in HTML page
+    page with {
+        buttonBar(UI.backHash, UI.showUndo)
+        val divContainer: HTMLDivElement = div()
 
+        var previousHash = ""
+
+    	registerHashChangeListener { hash ->
+            console.info("new window.location.hash=$hash")
+            UI.showUndo.set(true)
+            when (hash[0]) {
+    			"#toDos", "#", "" -> {
+                    UI.backHash.set(null)
+                    divContainer.setChild(UI.toDoMasterScreen, Fade())
+                }
+    			"#toDo" -> {
+                    val toDoId = if (hash.size > 1) hash[1].toID() else null
+                    UI.backHash.set(ToDoMasterModel.toUrl())
+                    UI.toDoId.set(toDoId)
+                    divContainer.setChild(UI.toDoDetailScreen, Fade())
+                }
+    		}
+            if (hash.get(0) != previousHash) {
+                window.scrollTo(0.0, 0.0)
+            }
+            previousHash = hash[0]
+    	}
+    }
 }
