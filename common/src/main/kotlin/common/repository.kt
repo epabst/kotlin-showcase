@@ -38,7 +38,7 @@ class IdGenerator {
  * Time: 3:53 PM
  */
 interface Repository<T : WithID<T>> {
-    val list: List<T>
+    fun list(): List<T>
 
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
     fun save(original: T?, replacement: T): ID
@@ -52,7 +52,7 @@ interface Repository<T : WithID<T>> {
         }
     }
 
-    fun find(id: ID): T? = list.find { it.getID() == id }
+    fun find(id: ID): T? = list().find { it.getID() == id }
 
     fun generateID(): ID
 
@@ -88,8 +88,10 @@ internal fun <T : WithID<T>> Repository<T>.putIntoList(mutableList: ArrayList<T>
 
 open class InMemoryRepository<T : WithID<T>>(val defaultList: List<T>) : Repository<T> {
     private var idGenerator = IdGenerator()
-    override val list : ArrayList<T> = ArrayList(defaultList.map { withID(it) }.toMutableList())
+    private val list: ArrayList<T> = ArrayList(defaultList.map { withID(it) }.toMutableList())
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
+
+    override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID {
         val replacementWithID = putIntoList(list, replacement, original)

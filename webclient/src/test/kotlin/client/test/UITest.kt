@@ -33,7 +33,7 @@ object UITest {
         describe("ToDoMasterScreen") {
             it("should delete a ToDo and be able to undo it") {
                 try {
-                    val initialSize = toDoRepository.list.size
+                    val initialSize = toDoRepository.list().size
                     UI.windowLocation.hash = ToDoDetailModel.toUrl(null)
 
                     UI.windowLocation.hash = ToDoMasterModel.toUrl()
@@ -45,7 +45,7 @@ object UITest {
 
                     toDoDetailModel.save().mustBe(true)
                     UI.windowLocation.hash.mustBe(ToDoMasterModel.toUrl())
-                    (toDoRepository.list.size - initialSize).mustBe(1)
+                    (toDoRepository.list().size - initialSize).mustBe(1)
 
                     val originalUndoSize = UndoComponent.undoCount.get()
 
@@ -55,11 +55,11 @@ object UITest {
 
                     toDoDetailModel.delete()
 
-                    (toDoRepository.list.size - initialSize).mustBe(0)
+                    (toDoRepository.list().size - initialSize).mustBe(0)
                     (UndoComponent.undoCount.get() - originalUndoSize).mustBe(1)
 
                     UndoComponent.undo()
-                    (toDoRepository.list.size - initialSize).mustBe(1)
+                    (toDoRepository.list().size - initialSize).mustBe(1)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
@@ -67,7 +67,7 @@ object UITest {
 
             it("should allow undo save of a to-do") {
                 try {
-                    val originalSize = toDoRepository.list.size
+                    val originalSize = toDoRepository.list().size
                     val originalUndoCount = UndoComponent.undoCount.get()
                     val toDo = (ToDo("Txt#1") as ToDo?).toProperty()
                     val toDoDetailModel = ToDoDetailModel(toDo)
@@ -77,16 +77,16 @@ object UITest {
                     toDo.set(ToDo("Txt#2"))
                     toDoDetailModel.save().mustBe(true)
 
-                    (toDoRepository.list.size - originalSize).mustBe(2)
+                    (toDoRepository.list().size - originalSize).mustBe(2)
                     val maserModel = ToDoMasterModel(toDoRepository)
                     toDoMasterScreen(maserModel)
-                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).toList().size - originalSize).mustBe(2)
+                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
 
                     UndoComponent.undoCount.get().mustBe(originalUndoCount + 2)
                     UndoComponent.undo()
                     UndoComponent.undoCount.get().mustBe(originalUndoCount + 1)
-                    (toDoRepository.list.size - originalSize).mustBe(1)
-                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).toList().size - originalSize).mustBe(1)
+                    (toDoRepository.list().size - originalSize).mustBe(1)
+                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(1)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
@@ -143,7 +143,7 @@ object UITest {
                 val masterModel = ToDoMasterModel()
                 toDoMasterScreen(masterModel)
 
-                val originalSize = toDoRepository.list.size
+                val originalSize = toDoRepository.list().size
                 val toDo = (ToDo("Txt#1") as ToDo?).toProperty()
                 val detailModel = ToDoDetailModel(toDo)
                 toDoDetailScreen(detailModel)
@@ -151,24 +151,24 @@ object UITest {
 
                 toDo.set(ToDo("Txt#2"))
                 detailModel.save().mustBe(true)
-                (toDoRepository.list.size - originalSize).mustBe(2)
+                (toDoRepository.list().size - originalSize).mustBe(2)
 
                 UndoComponent.undo()
-                (toDoRepository.list.size - originalSize).mustBe(1)
+                (toDoRepository.list().size - originalSize).mustBe(1)
 
                 UndoComponent.redo()
-                (toDoRepository.list.size - originalSize).mustBe(2)
+                (toDoRepository.list().size - originalSize).mustBe(2)
 
                 UndoComponent.undo()
                 UndoComponent.undo()
-                (toDoRepository.list.size - originalSize).mustBe(0)
+                (toDoRepository.list().size - originalSize).mustBe(0)
 
                 UndoComponent.undoCount.get().mustBe(originalUndoCount)
                 UndoComponent.redoCount.get().mustBe(2)
 
                 UndoComponent.redo()
                 UndoComponent.redo()
-                (toDoRepository.list.size - originalSize).mustBe(2)
+                (toDoRepository.list().size - originalSize).mustBe(2)
 
                 (UndoComponent.undoCount.get() - originalUndoCount).mustBe(2)
                 UndoComponent.redoCount.get().mustBe(0)

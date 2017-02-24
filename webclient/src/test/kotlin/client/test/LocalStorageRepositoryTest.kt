@@ -21,11 +21,11 @@ object LocalStorageRepositoryTest {
                 val id1 = LocalStorageRepositoryForTesting.save(null, EntityForTesting("A"))
                 LocalStorageRepositoryForTesting.save(null, EntityForTesting("B"))
                 LocalStorageRepositoryForTesting.save(null, EntityForTesting("C"))
-                val entity1 = LocalStorageRepositoryForTesting.list.find { it.id == id1 }!!
-                val index1 = LocalStorageRepositoryForTesting.list.indexOf(entity1)
+                val entity1 = LocalStorageRepositoryForTesting.list().find { it.id == id1 }!!
+                val index1 = LocalStorageRepositoryForTesting.list().indexOf(entity1)
                 val modifiedEntity1 = entity1.copy(name = "A2")
                 LocalStorageRepositoryForTesting.save(entity1, modifiedEntity1)
-                LocalStorageRepositoryForTesting.list.indexOf(modifiedEntity1).mustBe(index1)
+                LocalStorageRepositoryForTesting.list().indexOf(modifiedEntity1).mustBe(index1)
             }
 
             it("should use the provided ID when creating an entity") {

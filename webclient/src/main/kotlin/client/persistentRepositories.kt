@@ -28,7 +28,7 @@ abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorage
         return ID((Math.random() * Long.MAX_VALUE).toLong())
     }
 
-    override val list: ArrayList<T> by lazy {
+    private val list: ArrayList<T> by lazy {
         val listString = localStorage.getItem(localStorageKey)
         if (listString != null) {
             try {
@@ -44,6 +44,8 @@ abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorage
             ArrayList(defaultList.map { withID(it) })
         }
     }
+
+    override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID {
         val replacementWithID = putIntoList(list, replacement, original)

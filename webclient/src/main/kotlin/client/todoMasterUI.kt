@@ -18,7 +18,7 @@ import kotlin.dom.appendText
  * Time: 6:37 AM
  */
 class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
-    val data = Property<Iterable<ToDo>?>(repository.list)
+    val data = Property<List<ToDo>?>(repository.list())
     val dataProperties = data.map { it?.map { it.toProperty() } }
     val currentSort = Property<SortSpecification<Property<ToDo>>?>(null)
 
@@ -26,14 +26,14 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
         repository.addListener(object : RepositoryListener<ToDo> {
             override fun onSaved(original: ToDo?, replacementWithID: ToDo) {
                 if (original == null) {
-                    data.set(repository.list)
+                    data.set(repository.list())
                 } else {
                     dataProperties.get()?.find { it.get().id == original.id }?.set(replacementWithID)
                 }
             }
 
             override fun onRemoved(item: ToDo) {
-                data.set(repository.list)
+                data.set(repository.list())
             }
         })
     }

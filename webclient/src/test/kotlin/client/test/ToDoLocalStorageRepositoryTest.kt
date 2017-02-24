@@ -22,8 +22,8 @@ object ToDoLocalStorageRepositoryTest {
 
             try {
                 val reloadedRepository = ToDoLocalStorageRepository()
-                val allItems = reloadedRepository.list
-                allItems.mustBe(repository.list)
+                val allItems = reloadedRepository.list()
+                allItems.mustBe(repository.list())
             } finally {
                 repository.remove(itemId1)
                 repository.remove(itemId2)

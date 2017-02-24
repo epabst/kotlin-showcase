@@ -11,15 +11,24 @@ import org.jetbrains.spek.api.Spek
 class InMemoryRepositoryTest : Spek({
     PlatformProvider.instance = JvmProvider
 
+    it("should snapshot list") {
+        InMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
+        val list1 = InMemoryRepositoryForTesting.list()
+
+        InMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
+        val list2 = InMemoryRepositoryForTesting.list()
+        list2.size.mustBe(list1.size + 1)
+    }
+
     it("should save into the same index as the original") {
         val id1 = InMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
         InMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
         InMemoryRepositoryForTesting.save(null, EntityForTesting("C"))
-        val entity1 = InMemoryRepositoryForTesting.list.find { it.id == id1 }!!
-        val index1 = InMemoryRepositoryForTesting.list.indexOf(entity1)
+        val entity1 = InMemoryRepositoryForTesting.list().find { it.id == id1 }!!
+        val index1 = InMemoryRepositoryForTesting.list().indexOf(entity1)
         val modifiedEntity1 = entity1.copy(name = "A2")
         InMemoryRepositoryForTesting.save(entity1, modifiedEntity1)
-        InMemoryRepositoryForTesting.list.indexOf(modifiedEntity1).mustBe(index1)
+        InMemoryRepositoryForTesting.list().indexOf(modifiedEntity1).mustBe(index1)
     }
 
     it("should notify listeners") {
