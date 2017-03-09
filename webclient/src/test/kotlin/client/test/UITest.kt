@@ -18,7 +18,7 @@ object UITest {
         PlatformProvider.instance = JavascriptProvider
         UI.windowLocation = LocationForTesting
         UI.windowHistory = HistoryForTesting
-        val today = RichDate.today()
+        val today = PlatformProvider.instance.now()
         val toDoRepository = Factory.toDoRepository
         val testToDoIds = ArrayList<ID>()
         toDoRepository.addListener(object : RepositoryListener<ToDo> {
@@ -28,7 +28,7 @@ object UITest {
 
             override fun onRemoved(item: ToDo) { }
         })
-//        toDoRepository.list.forEach { toDoRepository.remove(it) }
+        toDoRepository.list().forEach { toDoRepository.remove(it) }
 
         describe("ToDoMasterScreen") {
             it("should delete a ToDo and be able to undo it") {
