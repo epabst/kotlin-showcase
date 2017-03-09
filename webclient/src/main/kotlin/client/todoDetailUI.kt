@@ -24,7 +24,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
     fun save(): Boolean {
         if (validation.get().success) {
-            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
+            val updatedToDo = ToDo(name.get(), dueDate.get()?.toProviderDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDo.set(updatedToDo.copy(id = newId))
             UI.back()
