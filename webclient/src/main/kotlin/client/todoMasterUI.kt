@@ -67,7 +67,7 @@ fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
                         }
                     }
                 }
-                tbody(model.dataProperties) { item ->
+                tbody(model.dataProperties.sortedWith(model.currentSort)) { item ->
                     tr {
                         td { div { className = "text-left name"
                             editOnClick(item) { it.onNext { textContent = it.name } }
