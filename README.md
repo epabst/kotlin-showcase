@@ -17,10 +17,9 @@ Search for "ZZZ" and replace it with the information for your custom app.
 * Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
 * The webclient_main module requires exporting some Kotlin libraries to Javascript.
 In IntelliJ, open the settings.gradle file in the top-level directory,
-with the "separate module per source set" option, 
-edit the webclient_main module settings and check the export boxes for KotlinJavaScript and Yested.
-The module output paths should be something like webclient/build/classes/main and webclient/build/classes/test.
-To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
+with the "separate module per source set" option.  
+Note: After this, the module output paths should be something like webclient/build/classes/main and webclient/build/classes/test.
+* To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
  
 # How to Build webclient
 
