@@ -17,7 +17,7 @@ import org.w3c.dom.HTMLElement
  */
 fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(), showUndo: ReadOnlyProperty<Boolean> = true.toProperty()) {
     div { id = "buttonBar"
-        btsButton(size = ButtonSize.Small, look = ButtonLook.Default, onclick = { UI.back() }) {
+        btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { UI.back() }) {
             backHash.onNext { visible = it != null }
             flaticon("arrow-pointing-to-left-1")
         }

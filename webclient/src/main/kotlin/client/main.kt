@@ -12,6 +12,7 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
+import kotlin.dom.addClass
 
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
 
@@ -45,7 +46,7 @@ fun main(args: Array<String>) {
 
         //when we have constructed a DOM, we can take a parent element (via div.element)
         //and append it as a child to "page" div in HTML page
-        page with {
+        page with { addClass("container-fluid")
             inContext("buttonBar") { buttonBar(UI.backHash, UI.showUndo) }
             val divContainer: HTMLDivElement = div()
 

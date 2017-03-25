@@ -24,9 +24,6 @@
 .flex1 {
   flex: 1;
 }
-.page-header {
-  margin-top: 20px;
-}
 .table-responsive>table>tbody>tr>td {
   vertical-align: middle;
 }

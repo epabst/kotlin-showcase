@@ -53,7 +53,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
 fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
     return Div {
-        pageHeader { h3 { appendText("To-Do") } }
+        h2 { appendText("To-Do") }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
             btsFormItemSimple(state = model.validation.map { it.toState() }, label = "To-Do") {
                 textInput(model.name) { placeholder = "To-Do"; size = 40 }
