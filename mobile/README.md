@@ -26,7 +26,6 @@ To build and run it, follow these steps:
 
 ```bash
 $ cordova platform add android --save
-$ ../gradlew prepareMobile
 $ cp config.xml www/
 $ cordova-gen-icon
 $ rm www/config.xml
