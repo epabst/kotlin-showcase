@@ -60,4 +60,4 @@ data class EntityForTesting(val name: String, val id: ID? = null) : WithID<Entit
     override fun withID(id: ID): EntityForTesting = copy(id = id)
 }
 
-object InMemoryRepositoryForTesting : InMemoryRepository<EntityForTesting>(emptyList())
+object InMemoryRepositoryForTesting : InMemoryRepository<EntityForTesting>()

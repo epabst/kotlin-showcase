@@ -86,9 +86,9 @@ internal fun <T : WithID<T>> Repository<T>.putIntoList(mutableList: ArrayList<T>
     return replacementWithID
 }
 
-open class InMemoryRepository<T : WithID<T>>(val defaultList: List<T>) : Repository<T> {
+open class InMemoryRepository<T : WithID<T>>() : Repository<T> {
     private var idGenerator = IdGenerator()
-    private val list: ArrayList<T> = ArrayList(defaultList.map { withID(it) }.toMutableList())
+    private val list: ArrayList<T> = ArrayList()
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun list(): List<T> = list.toList()

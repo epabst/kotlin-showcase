@@ -57,6 +57,21 @@ object LocalStorageRepositoryTest {
                 LocalStorageRepositoryForTesting.remove(id1)
                 onRemovedCount.mustBe(1)
             }
+
+            it("should distinguish between empty and uninitialized") {
+                val localStorageKey = Math.random().toString()
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.isInitialized().mustBe(false)
+                val id = localRepository.save(null, EntityForTesting("hello"))
+                localRepository.isInitialized().mustBe(true)
+
+                localRepository.remove(id) // this should cause it to store an empty list into local storage.
+                localRepository.isInitialized().mustBe(true)
+
+                val localRepositoryCopy = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepositoryCopy.list().size.mustBe(0)
+                localRepositoryCopy.isInitialized().mustBe(true) // the empty list in local storage should be considered initialized.
+            }
         }
     }
 }
@@ -74,6 +89,6 @@ interface EntityForTestingJS {
 
 fun EntityForTestingJS.toNormal(): EntityForTesting = EntityForTesting(name, id?.toNormal())
 
-object LocalStorageRepositoryForTesting : LocalStorageRepository<EntityForTesting, EntityForTestingJS>("entityForTesting", { it.toNormal() }) {
-    override val defaultList: List<EntityForTesting> = emptyList()
+open class LocalStorageRepositoryForTesting(localStorageKey: String) : LocalStorageRepository<EntityForTesting, EntityForTestingJS>(localStorageKey, { it.toNormal() }) {
+    companion object : LocalStorageRepositoryForTesting("entityForTesting")
 }

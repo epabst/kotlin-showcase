@@ -20,30 +20,27 @@ object Factory {
     }
 }
 
-abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
-    protected abstract val defaultList: List<T>
+open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun generateID(): ID {
         return ID((Math.random() * Long.MAX_VALUE).toLong())
     }
 
-    private val list: ArrayList<T> by lazy {
-        val listString = localStorage.getItem(localStorageKey)
-        if (listString != null) {
-            try {
-//                println(listString)
-                val jsArray = JSON.parse<Array<JS>>(listString)
-                ArrayList(jsArray.map { toData(it) })
-            } catch (t: Throwable) {
-                println("Throwable: " + t)
-                ArrayList(defaultList.map { withID(it) })
-            }
-        }
-        else {
-            ArrayList(defaultList.map { withID(it) })
+    private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->
+        try {
+//            println(listString)
+            val jsArray = JSON.parse<Array<JS>>(listString)
+            jsArray.map { toData(it) }
+        } catch (t: Throwable) {
+            println("Throwable: " + t)
+            null
         }
     }
+
+    private val list: ArrayList<T> = listOrNull?.let { ArrayList(it) } ?: ArrayList()
+
+    fun isInitialized(): Boolean = listOrNull != null
 
     override fun list(): List<T> = list.toList()
 
@@ -67,11 +64,16 @@ abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorage
 
     private fun store() {
         localStorage.setItem(localStorageKey, JSON.stringify(list))
+        listOrNull = list
     }
 }
 
 open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() }) {
-    override val defaultList = ToDoInMemoryRepository.defaultList
-
-    companion object : ToDoLocalStorageRepository()
+    companion object : ToDoLocalStorageRepository() {
+        init {
+            if (!isInitialized()) {
+                save(null, ToDo("Write down some to-dos"))
+            }
+        }
+    }
 }
