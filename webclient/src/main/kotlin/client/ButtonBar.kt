@@ -2,7 +2,6 @@ package client
 
 import client.component.flaticon
 import client.component.visible
-import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.ext.bootstrap3.*
 import net.yested.ext.bootstrap3.ButtonLook
@@ -16,12 +15,16 @@ import org.w3c.dom.HTMLElement
  * Time: 12:03 AM
  */
 fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(), showUndo: ReadOnlyProperty<Boolean> = true.toProperty()) {
-    div { id = "buttonBar"
-        btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { UI.back() }) {
-            backHash.onNext { visible = it != null }
-            flaticon("arrow-pointing-to-left-1")
+    row { id = "buttonBar"
+        col(Col.Width.Xs(1)) {
+            btsButton(size = ButtonSize.Small, look = ButtonLook.Default, onclick = { UI.back() }) {
+                backHash.onNext { visible = it != null }
+                flaticon("arrow-pointing-to-left-1")
+            }
         }
-        span { className = "flex1"}
-        undoComponent(showUndo)
+        col(Col.Width.Xs(1)) {}
+        col(Col.Width.Xs(10)) {
+            undoComponent(showUndo)
+        }
     }
 }
