@@ -12,7 +12,6 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
-import kotlin.dom.addClass
 
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
 
@@ -53,20 +52,22 @@ fun main(args: Array<String>) {
             var previousHash = ""
 
             registerHashChangeListener { hash ->
+                console.info("new window.location.hash=$hash")
                 inContext("hash=$hash") { console.info("new window.location.hash=$hash") }
-                UI.showUndo.set(true)
+                var showUndo = true
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
-                        UI.backHash.set(null)
                         divContainer.setChild(UI.toDoMasterScreen, Fade())
+                        UI.backHash.set(null)
                     }
                     "#toDo" -> {
+                        divContainer.setChild(UI.toDoDetailScreen, Fade())
                         val toDoId = if (hash.size > 1) hash[1].toID() else null
                         UI.backHash.set(ToDoMasterModel.toUrl())
                         UI.toDoId.set(toDoId)
-                        divContainer.setChild(UI.toDoDetailScreen, Fade())
                     }
                 }
+                UI.showUndo.set(showUndo)
                 if (hash.get(0) != previousHash) {
                     window.scrollTo(0.0, 0.0)
                 }
