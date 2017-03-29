@@ -29,11 +29,12 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
 
     private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->
         try {
-//            println(listString)
+//            console.info(listString)
             val jsArray = JSON.parse<Array<JS>>(listString)
             jsArray.map { toData(it) }
         } catch (t: Throwable) {
-            println("Throwable: " + t)
+            console.info(localStorageKey + ": " + listString)
+            console.error(t)
             null
         }
     }

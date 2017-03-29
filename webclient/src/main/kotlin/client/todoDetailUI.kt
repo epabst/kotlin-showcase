@@ -42,7 +42,9 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
     }
 
     fun delete() {
-        toDoRepository.remove(toDo.get()!!)
+        toDo.get()?.let { toDo ->
+            toDoRepository.remove(toDo)
+        }
         UI.back(2)
     }
 
