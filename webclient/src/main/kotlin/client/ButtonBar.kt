@@ -2,6 +2,7 @@ package client
 
 import client.component.flaticon
 import client.component.visible
+import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.ext.bootstrap3.*
 import net.yested.ext.bootstrap3.ButtonLook
@@ -23,7 +24,7 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
                 flaticon("arrow-pointing-to-left-1"); appendText("Back")
             }
         }
-        col(Col.Width.Xs(1)) {}
+        col(Col.Width.Xs(1)) { div { className = "btn btn-lg"; nbsp() } }
         col(Col.Width.Xs(8)) {
             undoComponent(showUndo)
         }
