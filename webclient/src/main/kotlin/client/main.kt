@@ -12,8 +12,14 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
+import kotlin.dom.addClass
 
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
+
+fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
+    page.addClass("hide-splash")
+    parentDiv.setChild(element, Fade())
+}
 
 object UI {
     val toDoId = Property<ID?>(null)
@@ -57,11 +63,11 @@ fun main(args: Array<String>) {
                 var showUndo = true
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
-                        divContainer.setChild(UI.toDoMasterScreen, Fade())
+                        setChildWithoutSplash(UI.toDoMasterScreen, divContainer)
                         UI.backHash.set(null)
                     }
                     "#toDo" -> {
-                        divContainer.setChild(UI.toDoDetailScreen, Fade())
+                        setChildWithoutSplash(UI.toDoDetailScreen, divContainer)
                         val toDoId = if (hash.size > 1) hash[1].toID() else null
                         UI.backHash.set(ToDoMasterModel.toUrl())
                         UI.toDoId.set(toDoId)
