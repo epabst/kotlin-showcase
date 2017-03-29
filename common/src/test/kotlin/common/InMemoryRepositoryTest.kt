@@ -52,6 +52,50 @@ class InMemoryRepositoryTest : Spek({
         InMemoryRepositoryForTesting.remove(id1)
         onRemovedCount.mustBe(1)
     }
+
+    it("should not notify listeners for no-op save") {
+        var onSavedCount = 0
+        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                onSavedCount++
+            }
+            override fun onRemoved(item: EntityForTesting) {}
+        }
+        InMemoryRepositoryForTesting.addListener(listener)
+        onSavedCount.mustBe(0)
+
+        val originalEntity = EntityForTesting("A")
+        val id1 = InMemoryRepositoryForTesting.save(null, originalEntity)
+        onSavedCount.mustBe(1)
+
+        InMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A"))
+        onSavedCount.mustBe(1)
+
+        InMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A").withID(id1))
+        onSavedCount.mustBe(1)
+    }
+
+    it("should not notify listeners for no-op remove") {
+        var onRemovedCount = 0
+        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+            override fun onRemoved(item: EntityForTesting) {
+                onRemovedCount++
+            }
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+        }
+        InMemoryRepositoryForTesting.addListener(listener)
+        onRemovedCount.mustBe(0)
+
+        val originalEntity = EntityForTesting("A")
+        val id1 = InMemoryRepositoryForTesting.save(null, originalEntity)
+
+        InMemoryRepositoryForTesting.remove(id1)
+        onRemovedCount.mustBe(1)
+        InMemoryRepositoryForTesting.remove(id1)
+        onRemovedCount.mustBe(1)
+        InMemoryRepositoryForTesting.remove(originalEntity.withID(id1))
+        onRemovedCount.mustBe(1)
+    }
 })
 
 data class EntityForTesting(val name: String, val id: ID? = null) : WithID<EntityForTesting> {

@@ -73,17 +73,19 @@ interface RepositoryListener<T> {
     fun onRemoved(item: T)
 }
 
-internal fun <T : WithID<T>> Repository<T>.putIntoList(mutableList: ArrayList<T>, replacement: T, original: T?): T {
-    val originalID = original?.getID()
+internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID?, replacement: T): T {
     val newID: ID = originalID ?: generateID()
     val replacementWithID = withID(replacement, newID)
+    return replacementWithID
+}
+
+internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementWithID: T, originalID: ID?) {
     val index = if (originalID != null) mutableList.indexOfFirst { it.getID() == originalID } else -1
     if (index >= 0) {
         mutableList[index] = replacementWithID
     } else {
         mutableList.add(replacementWithID)
     }
-    return replacementWithID
 }
 
 open class InMemoryRepository<T : WithID<T>>() : Repository<T> {
@@ -94,16 +96,22 @@ open class InMemoryRepository<T : WithID<T>>() : Repository<T> {
     override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID {
-        val replacementWithID = putIntoList(list, replacement, original)
-        listeners.forEach { it.onSaved(original, replacementWithID) }
+        val originalID = original?.getID()
+        val replacementWithID = getOrGenerateID(originalID, replacement)
+        if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
+            putIntoList(list, replacementWithID, originalID)
+            listeners.forEach { it.onSaved(original, replacementWithID) }
+        }
         return replacementWithID.getID()!!
     }
 
     override fun generateID(): ID = idGenerator.generateID()
 
     override fun remove(item: T) {
-        list.remove(item)
-        listeners.forEach { it.onRemoved(item) }
+        val removed = list.remove(item)
+        if (removed) {
+            listeners.forEach { it.onRemoved(item) }
+        }
     }
 
     override fun addListener(listener: RepositoryListener<T>) {

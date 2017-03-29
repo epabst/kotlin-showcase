@@ -45,17 +45,23 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
     override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID {
-        val replacementWithID = putIntoList(list, replacement, original)
+        val originalID = original?.getID()
+        val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!
-        store()
-        listeners.forEach { it.onSaved(original, replacementWithID) }
+        if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
+            putIntoList(list, replacementWithID, originalID)
+            store()
+            listeners.forEach { it.onSaved(original, replacementWithID) }
+        }
         return newID
     }
 
     override fun remove(item: T) {
-        list.remove(item)
-        store()
-        listeners.forEach { it.onRemoved(item) }
+        val removed = list.remove(item)
+        if (removed) {
+            store()
+            listeners.forEach { it.onRemoved(item) }
+        }
     }
 
     override fun addListener(listener: RepositoryListener<T>) {
