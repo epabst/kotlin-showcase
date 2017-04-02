@@ -2,6 +2,7 @@ apply plugin: 'base'
 
 clean.doLast {
   file("platforms/android/assets/www").deleteDir()
+  file("platforms/android/build").deleteDir()
   file("www/css").deleteDir()
   file("www/js").deleteDir()
   file("www/webclient_main").deleteDir()
