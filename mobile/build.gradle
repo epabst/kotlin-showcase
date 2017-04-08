@@ -7,6 +7,7 @@ clean.doLast {
   file("www/js").deleteDir()
   file("www/webclient_main").deleteDir()
   file("www/index.html").delete()
+  file("www/config.xml").delete()
   file("www/webclient_main.js").delete()
   file("www/webclient_main.js.map").delete()
   file("www/webclient_main.meta.js").delete()
