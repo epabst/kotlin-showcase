@@ -26,7 +26,7 @@ Note: After this, the module output paths should be something like webclient/bui
 First run "./gradlew build" in this top-level directory.
 This will copy the common module's source code into the webclient/build/gen/kotlin directory. 
 
-Then compile the webclient_main module in IntelliJ (e.g. right-click on the webclient module and click "Compile").
+Then compile the webclient_main module in IntelliJ (e.g. right-click on the webclient/src/main directory and click "Build Module 'webclient_main'").
 It will generate some .js files in webclient/build/classes/main.
 
 # How to Run webclient from IntelliJ
