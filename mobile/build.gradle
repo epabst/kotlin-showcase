@@ -38,12 +38,6 @@ task prepareMobileWeb(type: Copy) {
   rename { String fileName -> fileName.replace("webclient_main", "index") }
 }
 
-task prepareGenIcon(type: Copy) {
-  from(".")
-  include("config.xml")
-  into("www")
-}
-
 task prepareMobile(type: Copy) {
   from("resources")
   include("logo.png")
@@ -52,7 +46,6 @@ task prepareMobile(type: Copy) {
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
 prepareMobile.dependsOn(prepareMobileWeb)
-prepareMobile.dependsOn(prepareGenIcon)
 
 clean.doLast {
 //  file("platforms").deleteDir()
