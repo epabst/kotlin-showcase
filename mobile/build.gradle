@@ -24,7 +24,7 @@ task copyWebClientHtml(type: Copy) {
   filter { String line -> line
     .replaceAll("<!--CORDOVA (.*?)-->", "\\1")
     .replace("../../build/classes/main/", "")
-    .replace("webclient_main.", "js/app.") }
+    .replace("webclient_main.", "js/index.") }
 }
 
 // Copy webclient files
@@ -35,7 +35,7 @@ task prepareMobileWeb(type: Copy) {
   from("www")
   include("webclient_main*.js")
   into("www/js")
-  rename { String fileName -> fileName.replace("webclient_main", "app") }
+  rename { String fileName -> fileName.replace("webclient_main", "index") }
 }
 
 task prepareGenIcon(type: Copy) {
