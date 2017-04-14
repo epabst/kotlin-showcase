@@ -16,6 +16,7 @@ task copyWebClientExceptHtml(type: Copy) {
   from("${project(':webclient').projectDir}/src/main/web")
   from("${project(':webclient').projectDir}/build/classes/main")
   include("**/*")
+  exclude("webclient_main")
   exclude("index.html")
   into("www")
   rename { String fileName -> fileName.replace("webclient_main.js", "js/index.js") }
