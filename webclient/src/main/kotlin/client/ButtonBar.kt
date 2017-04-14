@@ -1,6 +1,7 @@
 package client
 
 import client.component.flaticon
+import client.component.visible
 import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.ext.bootstrap3.*

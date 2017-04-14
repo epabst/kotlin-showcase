@@ -1,5 +1,6 @@
-package client.test
+package client.test.util
 
+import QUnit.assert
 import QUnit.module
 import QUnit.test
 import java.util.*
@@ -16,7 +17,7 @@ fun <T> T.mustBe(expected: T) {
     if (!equal) {
         fail("expected '$expected' but actual was '$this'")
     }
-    QUnit.assert.equal(equal, true)
+    assert.equal(equal, true)
 }
 
 fun <T> T.mustNotBe(expected: T) {
@@ -24,7 +25,7 @@ fun <T> T.mustNotBe(expected: T) {
     if (equal) {
         fail("did not expect '$expected' but it was equal: '$this'")
     }
-    QUnit.assert.notEqual(equal, true)
+    assert.notEqual(equal, true)
 }
 
 private fun <T> T.equalTo(expected: T): Boolean {

@@ -1,4 +1,4 @@
-package client
+package client.util
 
 import common.ProviderDate
 import net.yested.ext.moment.Moment

@@ -1,8 +1,7 @@
-package client
+package client.util
 
 import org.w3c.dom.Window
 import kotlin.browser.window
-import kotlin.properties.Delegates
 
 /**
  * Support for Cordova.

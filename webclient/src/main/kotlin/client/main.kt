@@ -1,5 +1,6 @@
 package client
 
+import client.util.*
 import common.PlatformProvider
 import common.ID
 import net.yested.core.html.*

@@ -1,5 +1,6 @@
 package client
 
+import client.util.slideUpRow
 import common.*
 import net.yested.core.html.*
 import net.yested.core.properties.*

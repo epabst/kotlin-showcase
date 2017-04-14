@@ -1,7 +1,9 @@
 package client.test
 
 import client.ToDoLocalStorageRepository
-import client.JavascriptProvider
+import client.test.util.it
+import client.test.util.mustBe
+import client.util.JavascriptProvider
 import common.*
 
 /**

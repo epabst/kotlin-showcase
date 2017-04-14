@@ -1,4 +1,4 @@
-package client
+package client.component
 
 import org.w3c.dom.HTMLElement
 import kotlin.dom.addClass

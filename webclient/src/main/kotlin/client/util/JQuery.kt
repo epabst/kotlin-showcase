@@ -1,4 +1,4 @@
-package client
+package client.util
 
 import jquery.JQuery
 import org.w3c.dom.Element

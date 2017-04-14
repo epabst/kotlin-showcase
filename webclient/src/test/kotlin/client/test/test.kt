@@ -1,5 +1,8 @@
 package client.test
 
+import client.test.util.JavascriptProviderTest
+import client.test.util.LocalStorageRepositoryTest
+
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
  * @author Eric Pabst (epabst@gmail.com)

@@ -1,6 +1,6 @@
 package client
 
-import client.component.flaticon
+import client.component.visible
 import common.Repository
 import common.RepositoryListener
 import common.WithID

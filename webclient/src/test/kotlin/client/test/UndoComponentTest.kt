@@ -1,6 +1,8 @@
 package client.test
 
 import client.*
+import client.test.util.*
+import client.util.JavascriptProvider
 import common.*
 
 /**

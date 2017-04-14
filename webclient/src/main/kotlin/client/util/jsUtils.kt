@@ -1,5 +1,6 @@
-package client
+package client.util
 
+import client.UI
 import kotlin.browser.window
 
 /**
@@ -9,10 +10,10 @@ import kotlin.browser.window
  * Time: 3:37 PM
  */
 interface History {
-    val length: kotlin.Int
-    fun back(): kotlin.Unit
-    fun forward(): kotlin.Unit
-    fun go(delta: kotlin.Int): kotlin.Unit
+    val length: Int
+    fun back(): Unit
+    fun forward(): Unit
+    fun go(delta: Int): Unit
 }
 
 object BrowserHistory : History {

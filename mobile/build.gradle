@@ -1,11 +1,24 @@
 apply plugin: 'base'
 
+clean.doLast {
+  file("platforms/android/assets/www").deleteDir()
+  file("www/css").deleteDir()
+  file("www/js").deleteDir()
+  file("www/webclient_main").deleteDir()
+  file("www/index.html").delete()
+  file("www/webclient_main.js").delete()
+  file("www/webclient_main.js.map").delete()
+  file("www/webclient_main.meta.js").delete()
+  file("www/lib").deleteDir()
+}
+
 task copyWebClientExceptHtml(type: Copy) {
   from("${project(':webclient').projectDir}/src/main/web")
   from("${project(':webclient').projectDir}/build/classes/main")
   include("**/*")
   exclude("index.html")
   into("www")
+  rename { String fileName -> fileName.replace("webclient_main.js", "js/index.js") }
 }
 
 copyWebClientExceptHtml.dependsOn(clean)
@@ -16,32 +29,18 @@ copyWebClientExceptHtml.doFirst {
   assert file("${project(':webclient').projectDir}/build/classes/main/lib/Yested.js").exists()
 }
 
+// Copy webclient files
+// Automatically copies files from the webclient module to this module.
+// This allows sharing code between the two modules and enables using KotlinJS
+
 task copyWebClientHtml(type: Copy) {
   from("${project(':webclient').projectDir}/src/main/web")
-  from("${project(':webclient').projectDir}/build/classes/main")
   include("index.html")
   into("www")
   filter { String line -> line
     .replaceAll("<!--CORDOVA (.*?)-->", "\\1")
     .replace("../../build/classes/main/", "")
-    .replace("webclient_main.", "js/app.") }
-}
-
-// Copy webclient files
-// Automatically copies files from the webclient module to this module.
-// This allows sharing code between the two modules and enables using KotlinJS
-
-task prepareMobileWeb(type: Copy) {
-  from("www")
-  include("webclient_main*.js")
-  into("www/js")
-  rename { String fileName -> fileName.replace("webclient_main", "app") }
-}
-
-task prepareGenIcon(type: Copy) {
-  from(".")
-  include("config.xml")
-  into("www")
+    .replace("webclient_main.", "js/index.") }
 }
 
 task prepareMobile(type: Copy) {
@@ -51,17 +50,3 @@ task prepareMobile(type: Copy) {
 }
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
-prepareMobile.dependsOn(prepareMobileWeb)
-prepareMobile.dependsOn(prepareGenIcon)
-
-clean.doLast {
-//  file("platforms").deleteDir()
-  file("www/css").deleteDir()
-  file("www/js").deleteDir()
-  file("www/webclient_main").deleteDir()
-  file("www/index.html").delete()
-  file("www/webclient_main.js").delete()
-  file("www/webclient_main.js.map").delete()
-  file("www/webclient_main.meta.js").delete()
-  file("www/lib").deleteDir()
-}

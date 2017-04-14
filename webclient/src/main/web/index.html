@@ -3,49 +3,44 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title>ZZZAppNameZZZ</title>
+    <!--
+    Customize this policy to fit your own app's needs. For more guidance, see:
+        https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+    Some notes:
+        * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+        * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+        * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+            * Enable inline JS: add 'unsafe-inline' to default-src
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="lib/simpleicon/font/flaticon.css">
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
 
-    <link rel="stylesheet" href="lib/simpleicon/font/flaticon.css">
-    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css"/>
-    <link rel="stylesheet" href="lib/pickadate/default.css"/>
-    <link rel="stylesheet" href="lib/pickadate/default.date.css"/>
-    <link rel="stylesheet" href="css/app.css">
+    <title>ZZZAppNameZZZ</title>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <!--<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    -->
-    <![endif]-->
 
     <!-- Yested uses jQuery library a bit -->
-    <script src="lib/jquery-1.11.3.min.js"></script>
-    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
 
     <!-- This is a JS implementation of Kotlin libraries - extracted by Intellij IDEA (check box in module dependencies and build) -->
-    <script src="../../build/classes/main/lib/kotlin.js"></script>
+    <script type="text/javascript" src="../../build/classes/main/lib/kotlin.js"></script>
     <!-- cordova script (this is not used during development) -->
-    <!--<script src="cordova.js"></script>-->
+    <script type="text/javascript" src="cordova.js"></script>
     <!-- This is Yested library - extracted by Intellij IDEA (check box in module dependencies and build) -->
-    <script src="../../build/classes/main/lib/Yested.js"></script>
-
-    <script src="lib/bootstrap-tagsinput.min.js"></script>
-    <script src="lib/moment-with-locales.js"></script>
-    <script src="lib/bootstrap-datetimepicker.min.js"></script>
-    <script src="lib/numeral/numeral.js"></script>
-    <script src="lib/numeral/locales.js"></script>
-    <script src="lib/pickadate/legacy.js"></script>
-    <script src="lib/pickadate/picker.js"></script>
-    <script src="lib/pickadate/picker.date.js"></script>
+    <script type="text/javascript" src="../../build/classes/main/lib/Yested.js"></script>
 </head>
 
 <body role="document">
     <div id="page"></div>
 
-    <script src="../../build/classes/main/webclient_main.js"></script>
+    <script type="text/javascript" src="../../build/classes/main/webclient_main.js"></script>
 </body>
 </html>
