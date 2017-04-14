@@ -1,8 +1,11 @@
 package client.test
 
-import client.JavascriptProvider
+import client.util.JavascriptProvider
 import client.LongJS
 import client.ToDoJS
+import client.test.util.describe
+import client.test.util.it
+import client.test.util.mustBe
 import client.toNormal
 import common.*
 

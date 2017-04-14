@@ -1,6 +1,12 @@
 package client.test
 
 import client.*
+import client.test.util.describe
+import client.test.util.it
+import client.test.util.mustBe
+import client.test.util.mustNotBe
+import client.util.History
+import client.util.JavascriptProvider
 import common.*
 import java.util.*
 import kotlin.test.fail

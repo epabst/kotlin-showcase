@@ -1,6 +1,9 @@
-package client.test
+package client.test.util
 
-import client.JavascriptProvider
+import client.test.util.describe
+import client.test.util.mustBe
+import client.test.util.mustContain
+import client.util.JavascriptProvider
 import common.PlatformProvider
 import common.formatCurrency
 import common.formatCurrencyForInput

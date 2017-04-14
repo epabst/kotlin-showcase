@@ -1,8 +1,11 @@
-package client.test
+package client.test.util
 
 import client.IDJS
-import client.JavascriptProvider
+import client.util.JavascriptProvider
 import client.LocalStorageRepository
+import client.test.util.describe
+import client.test.util.it
+import client.test.util.mustBe
 import client.toNormal
 import common.*
 
