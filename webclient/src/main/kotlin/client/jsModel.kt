@@ -18,8 +18,11 @@ interface LongJS {
 
 private val HIGH_AMOUNT: Long = (Int.MAX_VALUE.toLong() + 1) * 2
 
-fun LongJS.toNormal(): Long {
-    if (high_ == undefined) {
+fun LongJS?.toNormal(): Long? {
+    if (this == null) {
+        return null
+    }
+    else if (high_ == undefined) {
         val number: Number = asDynamic()
         return number.toLong()
     }
@@ -28,7 +31,7 @@ fun LongJS.toNormal(): Long {
     }
 }
 
-fun String.toID(): ID = ID(JSON.parse<LongJS>(this).toNormal())
+fun String.toID(): ID? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
 
 fun ProviderDate.toMoment(): Moment = (this as MomentDate).moment
 
@@ -36,13 +39,13 @@ fun ProviderDate.toMoment(): Moment = (this as MomentDate).moment
     val millisecondsSinceUnixEpoch: LongJS
 }
 
-fun ProviderDateJS.toNormal(): ProviderDate = ProviderDate(millisecondsSinceUnixEpoch.toNormal())
+fun ProviderDateJS.toNormal(): ProviderDate? = millisecondsSinceUnixEpoch.toNormal()?.let { ProviderDate(it) }
 
 @native interface IDJS {
     val id: LongJS
 }
 
-fun IDJS.toNormal(): ID = ID(id.toNormal())
+fun IDJS.toNormal(): ID? = id.toNormal()?.let { ID(it) }
 
 @native interface ToDoJS {
     val name: String
@@ -53,5 +56,5 @@ fun IDJS.toNormal(): ID = ID(id.toNormal())
 }
 
 fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal(), id?.toNormal())
+    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal() ?: PlatformProvider.instance.now(), id?.toNormal())
 }
