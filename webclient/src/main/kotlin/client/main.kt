@@ -3,6 +3,7 @@ package client
 import client.util.*
 import common.PlatformProvider
 import common.ID
+import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.core.utils.*
@@ -17,8 +18,8 @@ val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
 object UI {
     val toDoId = Property<ID?>(null)
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
-    val toDoMasterScreen: HTMLDivElement by lazy { toDoMasterScreen(ToDoMasterModel()) }
-    val toDoDetailScreen: HTMLDivElement by lazy { toDoDetailScreen(ToDoDetailModel(toDo)) }
+    val toDoMasterScreen: HTMLDivElement by lazy { inContext("toDoMasterScreen") { toDoMasterScreen(ToDoMasterModel()) } }
+    val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDo)) } }
     val backHash = Property<String?>(null)
     val showUndo = true.toProperty()
     var windowLocation: Location = window.location
@@ -38,37 +39,40 @@ object UI {
  * Time: 6:25 AM
  */
 fun main(args: Array<String>) {
+    try {
+        inContext("initializeForCordova") { initializeForCordova() }
+        PlatformProvider.instance = JavascriptProvider
 
-    initializeForCordova()
-    PlatformProvider.instance = JavascriptProvider
+        //when we have constructed a DOM, we can take a parent element (via div.element)
+        //and append it as a child to "page" div in HTML page
+        page with {
+            inContext("buttonBar") { buttonBar(UI.backHash, UI.showUndo) }
+            val divContainer: HTMLDivElement = div()
 
-    //when we have constructed a DOM, we can take a parent element (via div.element)
-    //and append it as a child to "page" div in HTML page
-    page with {
-        buttonBar(UI.backHash, UI.showUndo)
-        val divContainer: HTMLDivElement = div()
+            var previousHash = ""
 
-        var previousHash = ""
-
-    	registerHashChangeListener { hash ->
-            console.info("new window.location.hash=$hash")
-            UI.showUndo.set(true)
-            when (hash[0]) {
-    			"#toDos", "#", "" -> {
-                    UI.backHash.set(null)
-                    divContainer.setChild(UI.toDoMasterScreen, Fade())
+            registerHashChangeListener { hash ->
+                inContext("hash=$hash") { console.info("new window.location.hash=$hash") }
+                UI.showUndo.set(true)
+                when (hash[0]) {
+                    "#toDos", "#", "" -> {
+                        UI.backHash.set(null)
+                        divContainer.setChild(UI.toDoMasterScreen, Fade())
+                    }
+                    "#toDo" -> {
+                        val toDoId = if (hash.size > 1) hash[1].toID() else null
+                        UI.backHash.set(ToDoMasterModel.toUrl())
+                        UI.toDoId.set(toDoId)
+                        divContainer.setChild(UI.toDoDetailScreen, Fade())
+                    }
                 }
-    			"#toDo" -> {
-                    val toDoId = if (hash.size > 1) hash[1].toID() else null
-                    UI.backHash.set(ToDoMasterModel.toUrl())
-                    UI.toDoId.set(toDoId)
-                    divContainer.setChild(UI.toDoDetailScreen, Fade())
+                if (hash.get(0) != previousHash) {
+                    window.scrollTo(0.0, 0.0)
                 }
-    		}
-            if (hash.get(0) != previousHash) {
-                window.scrollTo(0.0, 0.0)
+                previousHash = hash[0]
             }
-            previousHash = hash[0]
-    	}
+        }
+    } catch (e: Throwable) {
+        handleError(e)
     }
 }
