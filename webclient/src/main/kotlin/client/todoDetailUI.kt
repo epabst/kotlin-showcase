@@ -1,7 +1,7 @@
 package client
 
 import client.component.visible
-import client.util.toProviderDate
+import client.util.toRichDate
 import common.*
 import net.yested.ext.pickadate.dateInput
 import net.yested.core.html.*
@@ -26,7 +26,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
     fun save(): Boolean {
         if (validation.get().success) {
-            val updatedToDo = ToDo(name.get(), dueDate.get()?.toProviderDate(), notes.get(), id = toDo.get()?.id)
+            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDo.set(updatedToDo.copy(id = newId))
             UI.back()

@@ -12,6 +12,7 @@ import client.test.util.LocalStorageRepositoryTest
 
 fun main(args: Array<String>) {
     JavascriptProviderTest.suite()
+    RichDateTest.suite()
     JSModelTest.suite()
     LocalStorageRepositoryTest.suite()
     ToDoLocalStorageRepositoryTest.suite()

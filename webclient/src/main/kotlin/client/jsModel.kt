@@ -33,13 +33,14 @@ fun LongJS?.toNormal(): Long? {
 
 fun String.toID(): ID? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
 
-fun ProviderDate.toMoment(): Moment = (this as MomentDate).moment
+fun RichDate.toMoment(): Moment = (date as MomentDate).moment
 
-@native interface ProviderDateJS {
-    val millisecondsSinceUnixEpoch: LongJS
+@native interface RichDateJS {
+    val months: Int
+    val days: Int
 }
 
-fun ProviderDateJS.toNormal(): ProviderDate? = millisecondsSinceUnixEpoch.toNormal()?.let { ProviderDate(it) }
+fun RichDateJS.toNormal(): RichDate = RichDate(months, days)
 
 @native interface IDJS {
     val id: LongJS
@@ -49,12 +50,12 @@ fun IDJS.toNormal(): ID? = id.toNormal()?.let { ID(it) }
 
 @native interface ToDoJS {
     val name: String
-    val dueDate: ProviderDateJS?
+    val dueDate: RichDateJS?
     val note: String?
-    val createDate: ProviderDateJS
+    val createDate: RichDateJS
     val id: IDJS?
 }
 
 fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal() ?: PlatformProvider.instance.now(), id?.toNormal())
+    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal(), id?.toNormal())
 }
