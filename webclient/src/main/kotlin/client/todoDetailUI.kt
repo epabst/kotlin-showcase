@@ -72,7 +72,7 @@ fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
                     nbsp()
                     btsButton(onclick = { model.cancel() }) { appendText("Cancel") }
                     nbsp(3)
-                    btsButton(onclick = { model.delete() }, size = ButtonSize.Small, look = ButtonLook.Danger) {
+                    btsButton(onclick = { model.delete() }, size = ButtonSize.Default, look = ButtonLook.Danger) {
                         model.toDo.onNext { visible = it?.id != null }
                         appendText("Delete ToDo")
                     }

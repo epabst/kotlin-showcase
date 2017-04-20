@@ -19,7 +19,7 @@ import kotlin.dom.appendText
 fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(), showUndo: ReadOnlyProperty<Boolean> = true.toProperty()) {
     row { id = "buttonBar"
         col(Col.Width.Xs(3)) {
-            btsButton(size = ButtonSize.Small, look = ButtonLook.Default, onclick = { event -> UI.back() }) {
+            btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> UI.back() }) {
                 backHash.onNext { visible = it != null }
                 flaticon("arrow-pointing-to-left-1"); appendText("Back")
             }

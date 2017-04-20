@@ -65,7 +65,7 @@ object UndoComponent {
                     val (undoCnt, redoCnt, shwUndo) = triple
                     visible = shwUndo && (undoCnt != 0 || redoCnt != 0)
                 }
-                btsButton(size = ButtonSize.Small, look = ButtonLook.Default, onclick = { undo() }) {
+                btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
                     undoCount.onNext { disabled = it == 0 }
                     appendText("Undo")
                 }
@@ -78,8 +78,7 @@ object UndoComponent {
                     }
                 }
                 nbsp()
-                btsButton(size = ButtonSize.Small,
-                        look = ButtonLook.Default, onclick = { redo() }) {
+                btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { redo() }) {
                     redoCount.onNext { disabled = it == 0 }
                     appendText("Redo")
                 }
