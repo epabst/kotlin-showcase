@@ -36,16 +36,11 @@ fun Double.formatCurrency(): String = PlatformProvider.instance.formatCurrency(t
 
 fun Double.formatCurrencyForInput(): String = PlatformProvider.instance.formatCurrencyForInput(this)
 
-interface ProviderDate : Comparable<ProviderDate> {
+interface ProviderDate {
     val year: Int
     val month: Int
     val dayOfMonth: Int
     val millisecondsSinceUnixEpoch: Long
-
-    override fun compareTo(other: ProviderDate): Int =
-        millisecondsSinceUnixEpoch.compareTo(other.millisecondsSinceUnixEpoch)
 }
 
 fun ProviderDate(input: String): ProviderDate = PlatformProvider.instance.toDate(input)
-
-fun ProviderDate(input: Long): ProviderDate = PlatformProvider.instance.toDate(input)

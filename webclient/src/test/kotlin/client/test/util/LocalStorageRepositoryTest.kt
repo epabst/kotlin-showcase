@@ -57,6 +57,69 @@ object LocalStorageRepositoryTest {
                 LocalStorageRepositoryForTesting.remove(id1)
                 onRemovedCount.mustBe(1)
             }
+
+            it("should distinguish between empty and uninitialized") {
+                val localStorageKey = Math.random().toString()
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.isInitialized().mustBe(false)
+                val id = localRepository.save(null, EntityForTesting("hello"))
+                localRepository.isInitialized().mustBe(true)
+
+                localRepository.remove(id) // this should cause it to store an empty list into local storage.
+                localRepository.isInitialized().mustBe(true)
+
+                val localRepositoryCopy = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepositoryCopy.list().size.mustBe(0)
+                localRepositoryCopy.isInitialized().mustBe(true) // the empty list in local storage should be considered initialized.
+            }
+
+            it("should not notify listeners for no-op save") {
+                var onSavedCount = 0
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                        onSavedCount++
+                    }
+                    override fun onRemoved(item: EntityForTesting) {}
+                }
+                val localStorageKey = Math.random().toString()
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.addListener(listener)
+                onSavedCount.mustBe(0)
+
+                val originalEntity = EntityForTesting("A")
+                val id1 = localRepository.save(null, originalEntity)
+                onSavedCount.mustBe(1)
+
+                localRepository.save(originalEntity.withID(id1), EntityForTesting("A"))
+                onSavedCount.mustBe(1)
+
+                localRepository.save(originalEntity.withID(id1), EntityForTesting("A").withID(id1))
+                onSavedCount.mustBe(1)
+            }
+
+            it("should not notify listeners for no-op remove") {
+                var onRemovedCount = 0
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onRemoved(item: EntityForTesting) {
+                        onRemovedCount++
+                    }
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+                }
+                val localStorageKey = Math.random().toString()
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.addListener(listener)
+                onRemovedCount.mustBe(0)
+
+                val originalEntity = EntityForTesting("A")
+                val id1 = localRepository.save(null, originalEntity)
+
+                localRepository.remove(id1)
+                onRemovedCount.mustBe(1)
+                localRepository.remove(id1)
+                onRemovedCount.mustBe(1)
+                localRepository.remove(originalEntity.withID(id1))
+                onRemovedCount.mustBe(1)
+            }
         }
     }
 }
@@ -74,6 +137,6 @@ interface EntityForTestingJS {
 
 fun EntityForTestingJS.toNormal(): EntityForTesting = EntityForTesting(name, id?.toNormal())
 
-object LocalStorageRepositoryForTesting : LocalStorageRepository<EntityForTesting, EntityForTestingJS>("entityForTesting", { it.toNormal() }) {
-    override val defaultList: List<EntityForTesting> = emptyList()
+open class LocalStorageRepositoryForTesting(localStorageKey: String) : LocalStorageRepository<EntityForTesting, EntityForTestingJS>(localStorageKey, { it.toNormal() }) {
+    companion object : LocalStorageRepositoryForTesting("entityForTesting")
 }

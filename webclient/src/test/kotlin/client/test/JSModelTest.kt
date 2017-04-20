@@ -19,20 +19,18 @@ object JSModelTest {
     fun suite() {
         PlatformProvider.instance = JavascriptProvider
 
-        val today = PlatformProvider.instance.now()
-
         describe("ToDoJS") {
             it("should serialize/deserialize") {
                 val toDoId = ID(1234)
-                val originalToDo = ToDo("To-Do #1", today, "some notes", today, id = toDoId)
+                val originalToDo = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = toDoId)
                 val json = JSON.stringify(originalToDo)
                 val toDoJS: ToDoJS = JSON.parse<ToDoJS>(json)
                 toDoJS.toNormal().mustBe(originalToDo)
             }
 
             it("should serialize/deserialize as an Array") {
-                val toDo1 = ToDo("To-Do #1", today, "some notes", today, id = ID(1234))
-                val toDo2 = ToDo("To-Do #2", today, "other notes", today, id = ID(5678))
+                val toDo1 = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = ID(1234))
+                val toDo2 = ToDo("To-Do #2", RichDate.today(), "other notes", RichDate.today(), id = ID(5678))
                 val originalList = listOf(toDo1, toDo2)
                 val json = JSON.stringify(originalList)
                 val toDos2: Array<ToDoJS> = JSON.parse<Array<ToDoJS>>(json)

@@ -6,4 +6,4 @@ package common
  * Date: 6/9/16
  * Time: 6:01 AM
  */
-object ToDoInMemoryRepository : InMemoryRepository<ToDo>(defaultList = arrayListOf(ToDo("Write down some to-dos")))
+object ToDoInMemoryRepository : InMemoryRepository<ToDo>()

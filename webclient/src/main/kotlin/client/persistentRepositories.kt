@@ -20,45 +20,49 @@ object Factory {
     }
 }
 
-abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
-    protected abstract val defaultList: List<T>
+open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun generateID(): ID {
         return ID((Math.random() * Long.MAX_VALUE).toLong())
     }
 
-    private val list: ArrayList<T> by lazy {
-        val listString = localStorage.getItem(localStorageKey)
-        if (listString != null) {
-            try {
-//                println(listString)
-                val jsArray = JSON.parse<Array<JS>>(listString)
-                ArrayList(jsArray.map { toData(it) })
-            } catch (t: Throwable) {
-                println("Throwable: " + t)
-                ArrayList(defaultList.map { withID(it) })
-            }
-        }
-        else {
-            ArrayList(defaultList.map { withID(it) })
+    private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->
+        try {
+//            console.info(listString)
+            val jsArray = JSON.parse<Array<JS>>(listString)
+            jsArray.map { toData(it) }
+        } catch (t: Throwable) {
+            console.info(localStorageKey + ": " + listString)
+            console.error(t)
+            null
         }
     }
+
+    private val list: ArrayList<T> = listOrNull?.let { ArrayList(it) } ?: ArrayList()
+
+    fun isInitialized(): Boolean = listOrNull != null
 
     override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID {
-        val replacementWithID = putIntoList(list, replacement, original)
+        val originalID = original?.getID()
+        val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!
-        store()
-        listeners.forEach { it.onSaved(original, replacementWithID) }
+        if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
+            putIntoList(list, replacementWithID, originalID)
+            store()
+            listeners.forEach { it.onSaved(original, replacementWithID) }
+        }
         return newID
     }
 
     override fun remove(item: T) {
-        list.remove(item)
-        store()
-        listeners.forEach { it.onRemoved(item) }
+        val removed = list.remove(item)
+        if (removed) {
+            store()
+            listeners.forEach { it.onRemoved(item) }
+        }
     }
 
     override fun addListener(listener: RepositoryListener<T>) {
@@ -67,11 +71,16 @@ abstract class LocalStorageRepository<T : WithID<T>,JS>(private val localStorage
 
     private fun store() {
         localStorage.setItem(localStorageKey, JSON.stringify(list))
+        listOrNull = list
     }
 }
 
 open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() }) {
-    override val defaultList = ToDoInMemoryRepository.defaultList
-
-    companion object : ToDoLocalStorageRepository()
+    companion object : ToDoLocalStorageRepository() {
+        init {
+            if (!isInitialized()) {
+                save(null, ToDo("Write down some to-dos"))
+            }
+        }
+    }
 }

@@ -12,8 +12,14 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
+import kotlin.dom.addClass
 
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
+
+fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
+    page.addClass("hide-splash")
+    parentDiv.setChild(element, Fade())
+}
 
 object UI {
     val toDoId = Property<ID?>(null)
@@ -45,27 +51,29 @@ fun main(args: Array<String>) {
 
         //when we have constructed a DOM, we can take a parent element (via div.element)
         //and append it as a child to "page" div in HTML page
-        page with {
+        page with { addClass("container-fluid")
             inContext("buttonBar") { buttonBar(UI.backHash, UI.showUndo) }
             val divContainer: HTMLDivElement = div()
 
             var previousHash = ""
 
             registerHashChangeListener { hash ->
+                console.info("new window.location.hash=$hash")
                 inContext("hash=$hash") { console.info("new window.location.hash=$hash") }
-                UI.showUndo.set(true)
+                var showUndo = true
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
+                        setChildWithoutSplash(UI.toDoMasterScreen, divContainer)
                         UI.backHash.set(null)
-                        divContainer.setChild(UI.toDoMasterScreen, Fade())
                     }
                     "#toDo" -> {
+                        setChildWithoutSplash(UI.toDoDetailScreen, divContainer)
                         val toDoId = if (hash.size > 1) hash[1].toID() else null
                         UI.backHash.set(ToDoMasterModel.toUrl())
                         UI.toDoId.set(toDoId)
-                        divContainer.setChild(UI.toDoDetailScreen, Fade())
                     }
                 }
+                UI.showUndo.set(showUndo)
                 if (hash.get(0) != previousHash) {
                     window.scrollTo(0.0, 0.0)
                 }

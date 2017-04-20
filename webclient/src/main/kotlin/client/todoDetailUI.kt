@@ -1,7 +1,7 @@
 package client
 
 import client.component.visible
-import client.util.toProviderDate
+import client.util.toRichDate
 import common.*
 import net.yested.ext.pickadate.dateInput
 import net.yested.core.html.*
@@ -26,7 +26,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
     fun save(): Boolean {
         if (validation.get().success) {
-            val updatedToDo = ToDo(name.get(), dueDate.get()?.toProviderDate(), notes.get(), id = toDo.get()?.id)
+            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDo.set(updatedToDo.copy(id = newId))
             UI.back()
@@ -42,7 +42,9 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
     }
 
     fun delete() {
-        toDoRepository.remove(toDo.get()!!)
+        toDo.get()?.let { toDo ->
+            toDoRepository.remove(toDo)
+        }
         UI.back(2)
     }
 
@@ -53,7 +55,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
 fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
     return Div {
-        pageHeader { h3 { appendText("To-Do") } }
+        h2 { appendText("To-Do") }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
             btsFormItemSimple(state = model.validation.map { it.toState() }, label = "To-Do") {
                 textInput(model.name) { placeholder = "To-Do"; size = 40 }

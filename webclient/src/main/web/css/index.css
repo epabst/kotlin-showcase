@@ -17,15 +17,15 @@
   display: flex;
   flex-direction: row;
 }
+#page.hide-splash #splash {
+  display: none;
+}
 .commandDescription {
   flex: 1;
   overflow-x: hidden;
 }
 .flex1 {
   flex: 1;
-}
-.page-header {
-  margin-top: 20px;
 }
 .table-responsive>table>tbody>tr>td {
   vertical-align: middle;

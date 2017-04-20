@@ -1,5 +1,6 @@
 package client
 
+import client.component.visible
 import client.util.slideUpRow
 import common.*
 import net.yested.core.html.*
@@ -10,6 +11,7 @@ import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
+import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -51,38 +53,58 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
 
 fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
     return Div {
-        pageHeader { h3 { appendText("To-Do List") } }
-        div { className = "table-responsive"
-            table { className = "table table-striped table-hover table-condensed"
+        h2 { appendText("To-Do List") }
+        div { addClass("container-fluid")
+            className = "table-responsive"
+            table {
+                className = "table table-striped table-hover table-condensed"
                 thead {
                     tr {
-                        th { className = "text-left"
+                        th {
+                            className = "text-left"
                             sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.name }, sortNow = true) { appendText("ToDo") }
                         }
-                        th { className = "text-right"
+                        th {
+                            className = "text-right"
                             sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.dueDate }) {
                                 div { appendText("Due Date") }
                             }
                         }
-                        th { className = "text-right"
+                        th {
+                            className = "text-right"
                         }
                     }
                 }
                 tbody(model.dataProperties.sortedWith(model.currentSort)) { item ->
                     tr {
-                        td { div { className = "text-left name"
-                            editOnClick(item) { it.onNext { textContent = it.name } }
-                        } }
-                        td { div { className = "text-right"
-                            editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
-                        } }
-                        td { div { className = "text-right"
-                            btsButton(onclick = { model.delete(item.get(), it) }) {
-                                appendText("Delete")
+                        td {
+                            div {
+                                className = "text-left name"
+                                editOnClick(item) { it.onNext { textContent = it.name } }
                             }
-                        } }
+                        }
+                        td {
+                            div {
+                                className = "text-right"
+                                editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
+                            }
+                        }
+                        td {
+                            div {
+                                className = "text-right"
+                                btsButton(onclick = { model.delete(item.get(), it) }) {
+                                    appendText("Delete")
+                                }
+                            }
+                        }
                     }
                 }
+            }
+        }
+        row {
+            col(Col.Width.Xs(12)) {
+                model.data.onNext { visible = it?.isEmpty() ?: true }
+                appendText("There are no to-dos.")
             }
         }
         btsButton(onclick = { UI.windowLocation.hash = ToDoDetailModel.toUrl(null) }) {
@@ -96,4 +118,3 @@ private fun HTMLElement.editOnClick(toDo: ReadOnlyProperty<ToDo>, render: HTMLAn
         render(toDo)
     }
 }
-
