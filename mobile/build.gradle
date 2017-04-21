@@ -99,3 +99,19 @@ makeZip.doFirst {
   assert file("config.xml").exists()
 }
 makeZip.dependsOn(prepareMobile)
+
+task afterPrepare(type: Copy) {
+  from("platforms/android")
+  include("AndroidManifest.xml")
+  into("${buildDir}")
+  filter { String line -> line
+    .replaceAll("<uses-permission android:name=.+INTERNET.+/>", "")
+  }
+}
+afterPrepare.doLast {
+  copy {
+    from("${buildDir}");
+    include "AndroidManifest.xml";
+    into("platforms/android")
+  }
+}
