@@ -69,3 +69,15 @@ afterPrepare.doLast {
     into("platforms/android")
   }
 }
+task makeZip(type: Zip) {
+   from './'
+   exclude 'build/'
+   exclude 'publish-folder/'
+   exclude 'platforms/'
+   exclude 'plugins/'
+   exclude 'node_modules/'
+   exclude 'hooks/before_prepare/'
+   archiveName "PhoneGap.zip"
+   destinationDir(buildDir)
+}
+makeZip.dependsOn(prepareMobile)
