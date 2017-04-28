@@ -34,6 +34,14 @@ input.form-control[readonly].picker__input {
   background-color: inherit;
   opacity: inherit;
 }
+label.disabled {
+  color: #eee;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.container-fluid {
+  padding: 5px;
+}
 .form-control, .input-group .form-control {
   width: inherit;
 }
