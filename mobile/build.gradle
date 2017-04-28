@@ -54,21 +54,6 @@ task prepareMobile(type: Copy) {
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
 
-task afterPrepare(type: Copy) {
-  from("platforms/android")
-  include("AndroidManifest.xml")
-  into("${buildDir}")
-  filter { String line -> line
-    .replaceAll("<uses-permission android:name=.+INTERNET.+/>", "")
-  }
-}
-afterPrepare.doLast {
-  copy {
-    from("${buildDir}");
-    include "AndroidManifest.xml";
-    into("platforms/android")
-  }
-}
 task makeZip(type: Zip) {
    from './'
    exclude 'build/'
