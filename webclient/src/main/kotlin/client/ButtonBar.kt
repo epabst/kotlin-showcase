@@ -30,7 +30,7 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
                 }
             }
             col(Col.Width.Tn(8) and Col.Width.Xxs(9) and Col.Width.Xs(10) and Col.Width.Md(11)) {
-                h3 { className = "text-center"
+                h3 {
                     a {
                         headingHref.onNext { href = it ?: ""; headingHref.onNext { visible = it != null } }
                         heading.onNext { textContent = it }
