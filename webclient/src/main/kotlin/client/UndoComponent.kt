@@ -5,7 +5,6 @@ import common.Repository
 import common.RepositoryListener
 import common.WithID
 import net.yested.core.properties.*
-import net.yested.core.html.*
 import net.yested.core.utils.*
 import net.yested.ext.bootstrap3.*
 import org.w3c.dom.HTMLElement
@@ -57,31 +56,15 @@ object UndoComponent {
         }
     }
 
-    internal fun render(element: HTMLElement, showUndo: ReadOnlyProperty<Boolean>) {
+    internal fun render(element: HTMLElement) {
         element with {
-            div { id = "undoBar"; className = ButtonGroupSize.Small.toString()
-                showUndo.onNext { visible = it }
-                undoCount.zip(redoCount, showUndo).onNext { triple ->
-                    val (undoCnt, redoCnt, shwUndo) = triple
-                    visible = shwUndo && (undoCnt != 0 || redoCnt != 0)
+            btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
+                undoCount.zip(redoCount).onNext { pair ->
+                    val (undoCnt, rdoCount) = pair
+                    visible = (rdoCount != 0) || (undoCnt != 0)
                 }
-                btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
-                    undoCount.onNext { disabled = it == 0 }
-                    appendText("Undo")
-                }
-                nbsp()
-                span {
-                    className = "commandDescription"
-                    undoCommands.onNext { commands ->
-                        val undoCommand = commands.lastOrNull()
-                        setContent(undoCommand?.pastTenseDescription ?: "")
-                    }
-                }
-                nbsp()
-                btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { redo() }) {
-                    redoCount.onNext { disabled = it == 0 }
-                    appendText("Redo")
-                }
+                undoCount.onNext { disabled = it == 0 }
+                appendText("Undo")
             }
         }
     }
@@ -153,8 +136,8 @@ object UndoComponent {
     }
 }
 
-fun HTMLElement.undoComponent(showUndo: ReadOnlyProperty<Boolean> = true.toProperty()) {
-    UndoComponent.render(this, showUndo)
+fun HTMLElement.undoComponent() {
+    UndoComponent.render(this)
 }
 
 abstract class Command(val pastTenseDescription: String) {

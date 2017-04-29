@@ -16,7 +16,7 @@ import kotlin.dom.appendText
  * Date: 8/6/16
  * Time: 12:03 AM
  */
-fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(), showUndo: ReadOnlyProperty<Boolean> = true.toProperty()) {
+fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty()) {
     row { id = "buttonBar"
         col(Col.Width.Xs(3)) {
             btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> UI.back() }) {
@@ -25,8 +25,5 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
             }
         }
         col(Col.Width.Xs(1)) { div { className = "btn btn-lg"; nbsp() } }
-        col(Col.Width.Xs(8)) {
-            undoComponent(showUndo)
-        }
     }
 }

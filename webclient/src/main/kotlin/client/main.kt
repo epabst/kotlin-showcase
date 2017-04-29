@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
         //when we have constructed a DOM, we can take a parent element (via div.element)
         //and append it as a child to "page" div in HTML page
         page with { addClass("container-fluid")
-            inContext("buttonBar") { buttonBar(UI.backHash, UI.showUndo) }
+            inContext("buttonBar") { buttonBar(UI.backHash) }
             val divContainer: HTMLDivElement = div()
 
             var previousHash = ""

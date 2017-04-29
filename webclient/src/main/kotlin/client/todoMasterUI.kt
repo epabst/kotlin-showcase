@@ -1,5 +1,6 @@
 package client
 
+import client.component.undoComponent
 import client.component.visible
 import client.util.slideUpRow
 import common.*
@@ -107,8 +108,20 @@ fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
                 appendText("There are no to-dos.")
             }
         }
-        btsButton(onclick = { UI.windowLocation.hash = ToDoDetailModel.toUrl(null) }) {
-            appendText("Add")
+        br()
+        br()
+        navbar(NavbarCompletePosition.FixedBottom, containerWidth = ContainerWidth.Fluid) {
+            navbarContainer.row {
+                col(Col.Width.Tn(3) and Col.Width.Xs(3)) {
+                    btsButton(onclick = { UI.windowLocation.hash = ToDoDetailModel.toUrl(null) }) {
+                        appendText("Add")
+                    }
+                }
+                col(Col.Width.Tn(9) and Col.Width.Xs(9)) {
+                    addClass("text-right")
+                    undoComponent()
+                }
+            }
         }
     }
 }

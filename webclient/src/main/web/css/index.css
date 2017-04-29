@@ -2,15 +2,12 @@
   display: flex;
   flex-direction: column;
 }
-#undoBar {
-  border-style: groove;
-}
-#buttonBar, #undoBar {
+#buttonBar {
   display: flex;
   flex-direction: row;
   flex: 3;
 }
-#buttonBar span, #undoBar span {
+#buttonBar span {
   vertical-align: middle;
 }
 #form-inline {
