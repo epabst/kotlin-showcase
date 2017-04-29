@@ -4,6 +4,7 @@ import client.component.undoComponent
 import client.component.visible
 import client.util.slideUpRow
 import common.*
+import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.core.utils.*
@@ -54,7 +55,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
 
 fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
     return Div {
-        h2 { appendText("To-Do List") }
+        inContext("buttonBar") { buttonBar(UI.backHash, "To-Do List".toProperty()) }
         div { addClass("container-fluid")
             className = "table-responsive"
             table {

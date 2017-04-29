@@ -3,6 +3,7 @@ package client
 import client.component.visible
 import client.util.toRichDate
 import common.*
+import common.util.inContext
 import net.yested.ext.pickadate.dateInput
 import net.yested.core.html.*
 import net.yested.core.properties.*
@@ -55,7 +56,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
 fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
     return Div {
-        h2 { appendText("To-Do") }
+        inContext("buttonBar") { buttonBar(UI.backHash, "To-Do".toProperty()) }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
             btsFormItemSimple(state = model.validation.map { it.toState() }, label = "To-Do") {
                 textInput(model.name) { placeholder = "To-Do"; size = 40 }
