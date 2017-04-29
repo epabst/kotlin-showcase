@@ -21,14 +21,13 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
                           headingHref: ReadOnlyProperty<String?> = null.toProperty()) {
     row {
         id = "buttonBar"
-        col(Col.Width.Tn(3) and Col.Width.Xs(3)) {
+        col(Col.Width.Tn(4) and Col.Width.Xxs(3) and Col.Width.Xs(2) and Col.Width.Md(1)) {
             btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> UI.back() }) {
                 backHash.onNext { visible = it != null }
                 flaticon("arrow-pointing-to-left-1"); appendText("Back")
             }
         }
-        col(Col.Width.Tn(1) and Col.Width.Xs(1)) { div { className = "btn btn-lg"; nbsp() } }
-        col(Col.Width.Tn(8) and Col.Width.Xs(8)) {
+        col(Col.Width.Tn(8) and Col.Width.Xxs(9) and Col.Width.Xs(10) and Col.Width.Md(11)) {
             h2 {
                 a {
                     headingHref.onNext { href = it ?: ""; headingHref.onNext { visible = it != null } }
