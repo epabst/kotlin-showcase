@@ -46,13 +46,33 @@ task copyWebClientHtml(type: Copy) {
     .replace("webclient_main.", "js/index.") }
 }
 
-task prepareMobile(type: Copy) {
+task copyIcon(type: Copy) {
   from("resources")
   include("logo.png")
   into("www/img")
 }
+task copyConfigForGenIcon(type: Copy) {
+  from(".")
+  include("config.xml")
+  into("www")
+}
+task genIcon(type:Exec) {
+  workingDir '.'
+  commandLine 'cordova-gen-icon'
+}
+genIcon.doFirst {
+  if (!file("www/config.xml").exists()) throw new IllegalArgumentException("File www/config.xml didn't get added")
+}
+genIcon.dependsOn(copyIcon)
+genIcon.dependsOn(copyConfigForGenIcon)
+genIcon.doLast {
+  file("www/config.xml").delete()
+}
+
+task prepareMobile
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
+prepareMobile.dependsOn(genIcon)
 
 task makeZip(type: Zip) {
    from './'
