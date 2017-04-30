@@ -55,3 +55,10 @@ $ cordova platform rm android
 ```
 
 Then follow steps in the "Running mobile app" section above. 
+
+# Screen sizes
+To get an idea of what it will look like on a 12.9in iPad, 
+go to chrome and open up the developer tools,
+Zoom to 25% and resize the app window to 408x544 (or 544x408).  
+
+Zoom to 33%  538x718 or (718x538)
