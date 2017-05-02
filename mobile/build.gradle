@@ -55,6 +55,7 @@ task copyConfigForGenIcon(type: Copy) {
   from(".")
   include("config.xml")
   into("www")
+  filter { String line -> line.replaceAll("www/", "") }
 }
 task genIcon(type:Exec) {
   workingDir '.'
