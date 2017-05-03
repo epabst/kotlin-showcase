@@ -26,13 +26,9 @@ object UI {
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoMasterScreen: HTMLDivElement by lazy { inContext("toDoMasterScreen") { toDoMasterScreen(ToDoMasterModel()) } }
     val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDo)) } }
-    val backHash = Property<String?>(null)
     val showUndo = true.toProperty()
     var windowLocation: Location = window.location
     var windowHistory: History = BrowserHistory
-    fun back() {
-        windowHistory.backToHash(backHash.get())
-    }
     fun back(count: Int) {
         windowHistory.go(-count)
     }
@@ -52,7 +48,6 @@ fun main(args: Array<String>) {
         //when we have constructed a DOM, we can take a parent element (via div.element)
         //and append it as a child to "page" div in HTML page
         page with { addClass("container-fluid")
-            inContext("buttonBar") { buttonBar(UI.backHash) }
             val divContainer: HTMLDivElement = div()
 
             var previousHash = ""
@@ -60,20 +55,16 @@ fun main(args: Array<String>) {
             registerHashChangeListener { hash ->
                 console.info("new window.location.hash=$hash")
                 inContext("hash=$hash") { console.info("new window.location.hash=$hash") }
-                var showUndo = true
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
                         setChildWithoutSplash(UI.toDoMasterScreen, divContainer)
-                        UI.backHash.set(null)
                     }
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoDetailScreen, divContainer)
                         val toDoId = if (hash.size > 1) hash[1].toID() else null
-                        UI.backHash.set(ToDoMasterModel.toUrl())
                         UI.toDoId.set(toDoId)
                     }
                 }
-                UI.showUndo.set(showUndo)
                 if (hash.get(0) != previousHash) {
                     window.scrollTo(0.0, 0.0)
                 }

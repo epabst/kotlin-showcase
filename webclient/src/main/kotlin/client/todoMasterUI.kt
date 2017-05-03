@@ -55,7 +55,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
 
 fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
     return Div {
-        inContext("buttonBar") { buttonBar(UI.backHash, "To-Do List".toProperty()) }
+        inContext("buttonBar") { buttonBar(null.toProperty(), "To-Do List".toProperty()) }
         div { addClass("container-fluid")
             className = "table-responsive"
             table {

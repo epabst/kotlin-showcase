@@ -56,7 +56,8 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
 fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
     return Div {
-        inContext("buttonBar") { buttonBar(UI.backHash, "To-Do".toProperty()) }
+        val backHash = ToDoMasterModel.toUrl()
+        inContext("buttonBar") { buttonBar(backHash.toProperty(), "To-Do".toProperty()) }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
             btsFormItemSimple(state = model.validation.map { it.toState() }, label = "To-Do") {
                 textInput(model.name) { placeholder = "To-Do"; size = 40 }
