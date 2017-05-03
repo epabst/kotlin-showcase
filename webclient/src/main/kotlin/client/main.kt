@@ -1,5 +1,6 @@
 package client
 
+import client.UI.windowLocation
 import client.util.*
 import common.PlatformProvider
 import common.ID
@@ -9,6 +10,7 @@ import net.yested.core.properties.*
 import net.yested.core.utils.*
 import net.yested.ext.jquery.*
 import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.History
 import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
@@ -28,10 +30,7 @@ object UI {
     val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDo)) } }
     val showUndo = true.toProperty()
     var windowLocation: Location = window.location
-    var windowHistory: History = BrowserHistory
-    fun back(count: Int) {
-        windowHistory.go(-count)
-    }
+    var windowHistory: History = window.history
 }
 
 /**
@@ -52,9 +51,8 @@ fun main(args: Array<String>) {
 
             var previousHash = ""
 
-            registerHashChangeListener { hash ->
-                console.info("new window.location.hash=$hash")
-                inContext("hash=$hash") { console.info("new window.location.hash=$hash") }
+            windowLocation.splitHashProperty.onNext { hash ->
+                inContext("About to draw '$hash'") { console.info("About to draw '$hash'") }
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
                         setChildWithoutSplash(UI.toDoMasterScreen, divContainer)

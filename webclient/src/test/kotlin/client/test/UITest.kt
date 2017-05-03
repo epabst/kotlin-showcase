@@ -5,12 +5,12 @@ import client.test.util.describe
 import client.test.util.it
 import client.test.util.mustBe
 import client.test.util.mustNotBe
-import client.util.History
 import client.util.JavascriptProvider
 import common.*
 import java.util.*
 import kotlin.test.fail
 import net.yested.core.properties.*
+import org.w3c.dom.History
 import org.w3c.dom.Location
 
 /**
@@ -194,6 +194,7 @@ object LocationForTesting : Location {
 object HistoryForTesting : History {
     private val backwardHashes = mutableListOf<String>()
     private val forwardHashes = mutableListOf<String>()
+    private var _state: Any? = null
 
     override val length: Int get() = 44/*backwardHashes.size*/
 
@@ -219,5 +220,15 @@ object HistoryForTesting : History {
 
     fun addBackwardHash(hash: String) {
         backwardHashes.add(0, hash)
+    }
+
+    override val state: Any? get() = _state
+
+    override fun pushState(data: Any?, title: String, url: String?) {
+        noImpl
+    }
+
+    override fun replaceState(data: Any?, title: String, url: String?) {
+        this._state = data
     }
 }

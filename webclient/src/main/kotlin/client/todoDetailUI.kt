@@ -9,6 +9,7 @@ import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.core.utils.*
 import net.yested.ext.bootstrap3.*
+import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLDivElement
 import kotlin.dom.appendText
 
@@ -24,13 +25,14 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
     val validation = name.validate("Description is mandatory", { it.size > 0})
     val dueDate = toDo.mapAsDefault { it?.dueDate?.toMoment() }
     val notes = toDo.mapAsDefault { it?.note ?: "" }
+    val backHash = ToDoMasterModel.toUrl().toProperty()
 
     fun save(): Boolean {
         if (validation.get().success) {
             val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDo.set(updatedToDo.copy(id = newId))
-            UI.back()
+            UI.windowHistory.backToHash(backHash.get())
             return true
         } else {
             return false
@@ -39,14 +41,14 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
     fun cancel() {
         toDo.set(null)
-        UI.back()
+        UI.windowHistory.backToHash(backHash.get())
     }
 
     fun delete() {
         toDo.get()?.let { toDo ->
             toDoRepository.remove(toDo)
         }
-        UI.back(2)
+        UI.windowHistory.backToHash(ToDoMasterModel.toUrl())
     }
 
     companion object {
@@ -56,8 +58,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
 fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
     return Div {
-        val backHash = ToDoMasterModel.toUrl()
-        inContext("buttonBar") { buttonBar(backHash.toProperty(), "To-Do".toProperty()) }
+        inContext("buttonBar") { buttonBar(model.backHash, "To-Do".toProperty()) }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
             btsFormItemSimple(state = model.validation.map { it.toState() }, label = "To-Do") {
                 textInput(model.name) { placeholder = "To-Do"; size = 40 }

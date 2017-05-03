@@ -2,12 +2,12 @@ package client
 
 import client.component.flaticon
 import client.component.visible
-import client.util.backToHash
 import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.ext.bootstrap3.*
 import net.yested.ext.bootstrap3.ButtonLook
 import net.yested.ext.bootstrap3.ButtonSize
+import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLElement
 import kotlin.dom.appendText
 
