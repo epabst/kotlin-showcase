@@ -73,7 +73,6 @@ genIcon.doLast {
 task prepareMobile
 prepareMobile.dependsOn(copyWebClientExceptHtml)
 prepareMobile.dependsOn(copyWebClientHtml)
-prepareMobile.dependsOn(genIcon)
 prepareMobile.doLast {
   assert file("www/lib/kotlin.js").exists()
   assert file("www/lib/Yested.js").exists()
