@@ -10,6 +10,7 @@ import net.yested.ext.bootstrap3.ButtonSize
 import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLElement
 import kotlin.browser.window
+import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -24,14 +25,17 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
     navbar(NavbarCompletePosition.FixedTop, containerWidth = ContainerWidth.Fluid) {
         navbarContainer.id = "buttonBar"
         navbarContainer.row {
-            col(Col.Width.Tn(4) and Col.Width.Xxs(3) and Col.Width.Xs(2) and Col.Width.Md(1)) {
-                btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> window.history.backToHash(backHash.get()) }) {
-                    backHash.onNext { visible = it != null }
-                    flaticon("arrow-pointing-to-left-1"); appendText("Back")
+            col(Col.Width.Tn(12) and Col.Width.Xs(12)) {
+                span { id = "backButton"
+                    btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> window.history.backToHash(backHash.get()) }) {
+                        addClass("nowrap")
+                        backHash.onNext { visible = it != null }
+                        flaticon("arrow-pointing-to-left-1"); appendText("Back")
+                    }
+                    nbsp(2)
                 }
-            }
-            col(Col.Width.Tn(8) and Col.Width.Xxs(9) and Col.Width.Xs(10) and Col.Width.Md(11)) {
                 h3 {
+                    addClass("nowrap")
                     a {
                         headingHref.onNext { href = it ?: ""; headingHref.onNext { visible = it != null } }
                         heading.onNext { textContent = it }

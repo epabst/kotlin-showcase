@@ -5,6 +5,12 @@
 #buttonBar {
   white-space: nowrap;
 }
+#buttonBar .btn {
+  vertical-align: top;
+}
+body.platform-android #backButton {
+  display: none;
+}
 #form-inline {
   display: flex;
   flex-direction: row;
