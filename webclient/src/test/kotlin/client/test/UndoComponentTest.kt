@@ -14,8 +14,6 @@ import common.*
 object UndoComponentTest {
     fun suite() {
         PlatformProvider.instance = JavascriptProvider
-        UI.windowLocation = LocationForTesting
-        UI.windowHistory = HistoryForTesting
         val repository = LocalStorageRepositoryForTesting
         UndoComponent.watch(repository)
 

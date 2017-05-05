@@ -13,6 +13,7 @@ import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
+import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.appendText
 
@@ -114,7 +115,7 @@ fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
         navbar(NavbarCompletePosition.FixedBottom, containerWidth = ContainerWidth.Fluid) {
             navbarContainer.row {
                 col(Col.Width.Tn(3) and Col.Width.Xs(3)) {
-                    btsButton(onclick = { UI.windowLocation.hash = ToDoDetailModel.toUrl(null) }) {
+                    btsButton(onclick = { window.location.hash = ToDoDetailModel.toUrl(null) }) {
                         appendText("Add")
                     }
                 }

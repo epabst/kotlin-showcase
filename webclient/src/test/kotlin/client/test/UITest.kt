@@ -10,8 +10,7 @@ import common.*
 import java.util.*
 import kotlin.test.fail
 import net.yested.core.properties.*
-import org.w3c.dom.History
-import org.w3c.dom.Location
+import kotlin.browser.window
 
 /**
  * A test for UI such as [toDoMasterScreen].
@@ -22,8 +21,6 @@ import org.w3c.dom.Location
 object UITest {
     fun suite() {
         PlatformProvider.instance = JavascriptProvider
-        UI.windowLocation = LocationForTesting
-        UI.windowHistory = HistoryForTesting
         val today = RichDate.today()
         val toDoRepository = Factory.toDoRepository
         val testToDoIds = ArrayList<ID>()
@@ -40,22 +37,22 @@ object UITest {
             it("should delete a ToDo and be able to undo it") {
                 try {
                     val initialSize = toDoRepository.list().size
-                    UI.windowLocation.hash = ToDoDetailModel.toUrl(null)
+                    window.location.hash = ToDoDetailModel.toUrl(null)
 
-                    UI.windowLocation.hash = ToDoMasterModel.toUrl()
+                    window.location.hash = ToDoMasterModel.toUrl()
 
                     val toDo = (ToDo("Txt#1") as ToDo?).toProperty()
                     val toDoDetailModel = ToDoDetailModel(toDo)
-                    UI.windowLocation.hash = ToDoDetailModel.toUrl(null)
+                    window.location.hash = ToDoDetailModel.toUrl(null)
                     toDoDetailScreen(toDoDetailModel)
 
                     toDoDetailModel.save().mustBe(true)
-                    UI.windowLocation.hash.mustBe(ToDoMasterModel.toUrl())
+                    window.location.hash.mustBe(ToDoMasterModel.toUrl())
                     (toDoRepository.list().size - initialSize).mustBe(1)
 
                     val originalUndoSize = UndoComponent.undoCount.get()
 
-                    UI.windowLocation.hash = ToDoMasterModel.toUrl()
+                    window.location.hash = ToDoMasterModel.toUrl()
                     val toDoMasterModel = ToDoMasterModel()
                     toDoMasterScreen(toDoMasterModel)
 
@@ -180,55 +177,5 @@ object UITest {
                 UndoComponent.redoCount.get().mustBe(0)
             }
         }
-    }
-}
-
-object LocationForTesting : Location {
-    private var _hash: String = ""
-
-    override var hash: String
-        get() = _hash
-        set (value) { HistoryForTesting.addBackwardHash(_hash); _hash = value }
-}
-
-object HistoryForTesting : History {
-    private val backwardHashes = mutableListOf<String>()
-    private val forwardHashes = mutableListOf<String>()
-    private var _state: Any? = null
-
-    override val length: Int get() = 44/*backwardHashes.size*/
-
-    override fun back() {
-        forwardHashes.add(0, UI.windowLocation.hash)
-        val newHash = backwardHashes.removeAt(0)
-        UI.windowLocation.hash = newHash
-    }
-
-    override fun forward() {
-        backwardHashes.add(0, UI.windowLocation.hash)
-        val newHash = forwardHashes.removeAt(0)
-        UI.windowLocation.hash = newHash
-    }
-
-    override fun go(delta: Int) {
-        if (delta > 0) {
-            (1..delta).forEach { forward() }
-        } else {
-            (delta..(-1)).forEach { back() }
-        }
-    }
-
-    fun addBackwardHash(hash: String) {
-        backwardHashes.add(0, hash)
-    }
-
-    override val state: Any? get() = _state
-
-    override fun pushState(data: Any?, title: String, url: String?) {
-        noImpl
-    }
-
-    override fun replaceState(data: Any?, title: String, url: String?) {
-        this._state = data
     }
 }

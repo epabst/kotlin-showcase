@@ -1,6 +1,5 @@
 package client
 
-import client.UI.windowLocation
 import client.util.*
 import common.PlatformProvider
 import common.ID
@@ -10,8 +9,6 @@ import net.yested.core.properties.*
 import net.yested.core.utils.*
 import net.yested.ext.jquery.*
 import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.History
-import org.w3c.dom.Location
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
@@ -28,9 +25,6 @@ object UI {
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoMasterScreen: HTMLDivElement by lazy { inContext("toDoMasterScreen") { toDoMasterScreen(ToDoMasterModel()) } }
     val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDo)) } }
-    val showUndo = true.toProperty()
-    var windowLocation: Location = window.location
-    var windowHistory: History = window.history
 }
 
 /**
@@ -51,7 +45,7 @@ fun main(args: Array<String>) {
 
             var previousHash = ""
 
-            windowLocation.splitHashProperty.onNext { hash ->
+            window.location.splitHashProperty.onNext { hash ->
                 inContext("About to draw '$hash'") { console.info("About to draw '$hash'") }
                 when (hash[0]) {
                     "#toDos", "#", "" -> {
