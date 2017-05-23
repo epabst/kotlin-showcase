@@ -59,10 +59,7 @@ object UndoComponent {
     internal fun render(element: HTMLElement) {
         element with {
             btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
-                undoCount.zip(redoCount).onNext { pair ->
-                    val (undoCnt, rdoCount) = pair
-                    visible = (rdoCount != 0) || (undoCnt != 0)
-                }
+                undoCount.onNext { visible = it != 0 }
                 undoCount.onNext { disabled = it == 0 }
                 appendText("Undo")
             }
