@@ -2,7 +2,6 @@ package client
 
 import client.component.undoComponent
 import client.component.visible
-import client.util.slideUpRow
 import common.*
 import common.util.inContext
 import net.yested.core.html.*
@@ -45,7 +44,6 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
     }
 
     fun delete(todo: ToDo, event: Event) {
-        event.slideUpRow()
         repository.remove(todo)
     }
 
@@ -54,7 +52,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
     }
 }
 
-fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
+fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivElement {
     return Div {
         inContext("buttonBar") { buttonBar(null.toProperty(), "To-Do List".toProperty()) }
         div { addClass("container-fluid")
@@ -78,7 +76,7 @@ fun toDoMasterScreen(model: ToDoMasterModel): HTMLDivElement {
                         }
                     }
                 }
-                tbody(model.dataProperties.sortedWith(model.currentSort)) { item ->
+                tbody(model.dataProperties.sortedWith(model.currentSort), animate = animate) { item ->
                     tr {
                         td {
                             div {

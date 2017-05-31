@@ -54,6 +54,14 @@ fun String?.mustContain(expectedSubstring: String) {
     if (this == null || !contains(expectedSubstring)) {
         fail("expected string containing '$expectedSubstring' but actual was '${this}'")
     }
+    assert.equal(true, true)
+}
+
+fun String?.mustNotContain(unexpectedSubstring: String) {
+    if (this == null || contains(unexpectedSubstring)) {
+        fail("expected string not containing '$unexpectedSubstring' but actual was '${this}'")
+    }
+    assert.equal(true, true)
 }
 
 fun interceptAny(block: () -> Unit): Exception {
