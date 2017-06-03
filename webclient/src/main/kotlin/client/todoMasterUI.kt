@@ -2,6 +2,7 @@ package client
 
 import client.component.undoComponent
 import client.component.visible
+import client.util.mapEachReusing
 import common.*
 import common.util.inContext
 import net.yested.core.html.*
@@ -24,7 +25,7 @@ import kotlin.dom.appendText
  */
 class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
     val data = Property<List<ToDo>?>(repository.list())
-    val dataProperties = data.map { it?.map { it.toProperty() } }
+    val dataProperties = data.mapEachReusing { it.toProperty() }
     val currentSort = Property<SortSpecification<Property<ToDo>>?>(null)
 
     init {

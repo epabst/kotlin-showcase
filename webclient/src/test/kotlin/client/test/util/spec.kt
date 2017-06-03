@@ -57,6 +57,17 @@ fun String?.mustContain(expectedSubstring: String) {
     assert.equal(true, true)
 }
 
+fun String?.mustContainInOrder(vararg expectedSubstrings: String) {
+    expectedSubstrings.forEach {
+        if (this == null || !contains(it)) {
+            fail("expected string containing '$it' but actual was '${this}'")
+        }
+    }
+    val indices = expectedSubstrings.map { this?.indexOf(it) }.toList()
+    indices.mustBe(indices.sortedBy { it })
+    assert.equal(true, true)
+}
+
 fun String?.mustNotContain(unexpectedSubstring: String) {
     if (this == null || contains(unexpectedSubstring)) {
         fail("expected string not containing '$unexpectedSubstring' but actual was '${this}'")

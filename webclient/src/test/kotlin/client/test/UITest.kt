@@ -26,7 +26,8 @@ object UITest {
                 testToDoIds.add(replacementWithID.id!!)
             }
 
-            override fun onRemoved(item: ToDo) { }
+            override fun onRemoved(item: ToDo) {
+            }
         })
 //        toDoRepository.list.forEach { toDoRepository.remove(it) }
 
@@ -91,6 +92,20 @@ object UITest {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
             }
+
+            it("should re-sort when a to-do is updated") {
+                toDoRepository.save(null, ToDo("Txt#1"))
+                val id2 = toDoRepository.save(null, ToDo("Txt#2"))
+                toDoRepository.save(null, ToDo("Txt#3"))
+
+                val toDoMasterModel = ToDoMasterModel(toDoRepository)
+                val masterScreen = toDoMasterScreen(toDoMasterModel, animate = false)
+                masterScreen.textContent.mustContainInOrder("Txt#1", "Txt#2", "Txt#3")
+
+                val toDo2 = toDoRepository.find(id2)
+                toDoRepository.save(toDo2!!, toDo2.copy(dueDate = today))
+                masterScreen.textContent.mustContainInOrder("Txt#1", "Txt#3", "Txt#2")
+            }
         }
 
         describe("toDoDetailScreen") {
@@ -111,6 +126,34 @@ object UITest {
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
+            }
+
+            it("should reuse Property instances on the screen after adding and removing others") {
+                val toDo = (ToDo("Txt#1", today) as ToDo?).toProperty()
+                toDo.set(ToDo("Txt#2", today))
+
+                val id1 = toDoRepository.save(null, ToDo("Txt#1", today))
+                val id2 = toDoRepository.save(null, ToDo("Txt#2", today))
+
+                val masterModel = ToDoMasterModel(toDoRepository)
+                val dataProperty2 = masterModel.dataProperties.get()?.find { it.get().id == id2 }!!
+
+                val masterScreen = toDoMasterScreen(masterModel, animate = false)
+                masterScreen.textContent.mustContain("Txt#1")
+                masterScreen.textContent.mustContain("Txt#2")
+                masterScreen.textContent.mustNotContain("Txt#Was2")
+                masterScreen.textContent.mustNotContain("Txt#3")
+
+                toDoRepository.save(null, ToDo("Txt#3", today))
+                toDoRepository.remove(id1)
+                val toDo2 = toDoRepository.find(id2)!!
+                dataProperty2.set(toDo2.copy(name = "Txt#Was2"))
+                masterScreen.textContent.mustContain("Txt#Was2")
+                masterScreen.textContent.mustContain("Txt#3")
+                masterScreen.textContent.mustNotContain("Txt#2")
+                masterScreen.textContent.mustNotContain("Txt#1")
+
+                (masterModel.dataProperties.get()?.find { it.get().id == id2 } === dataProperty2).mustBe(true)
             }
 
             it("should not start a new to-do with a recently editted to-do") {
