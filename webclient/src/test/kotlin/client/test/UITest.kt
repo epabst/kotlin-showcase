@@ -52,7 +52,7 @@ object UITest {
 
                     window.location.hash = ToDoMasterModel.toUrl()
                     val toDoMasterModel = ToDoMasterModel()
-                    toDoMasterScreen(toDoMasterModel)
+                    toDoMasterScreen(toDoMasterModel, animate = false)
 
                     toDoDetailModel.delete()
 

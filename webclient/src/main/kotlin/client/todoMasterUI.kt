@@ -77,7 +77,7 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
                         }
                     }
                 }
-                tbody(model.dataProperties.sortedWith(model.currentSort), animate = animate) { item ->
+                tbody(model.dataProperties.sortedWith(model.currentSort), effect = if (animate) Collapse() else NoEffect) { item ->
                     tr {
                         td {
                             div {
