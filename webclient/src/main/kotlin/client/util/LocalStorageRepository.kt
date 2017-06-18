@@ -1,25 +1,15 @@
-package client
+package client.util
 
-import common.*
+import common.util.*
 import java.util.*
 import kotlin.browser.localStorage
 
 /**
- * Persistent Repositories.
+ * A [Repository] that uses [browser.localStorage].
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 6/9/16
  * Time: 6:19 AM
  */
-
-object Factory {
-    val toDoRepository: Repository<ToDo>
-        = if (true) ToDoLocalStorageRepository else ToDoInMemoryRepository
-
-    init {
-        UndoComponent.watch(toDoRepository)
-    }
-}
-
 open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
@@ -29,7 +19,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
 
     private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->
         try {
-//            console.info(listString)
+//            console.info(localStorageKey + ": " + listString)
             val jsArray = JSON.parse<Array<JS>>(listString)
             jsArray.map { toData(it) }
         } catch (t: Throwable) {
@@ -72,15 +62,5 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
     private fun store() {
         localStorage.setItem(localStorageKey, JSON.stringify(list))
         listOrNull = list
-    }
-}
-
-open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() }) {
-    companion object : ToDoLocalStorageRepository() {
-        init {
-            if (!isInitialized()) {
-                save(null, ToDo("Write down some to-dos"))
-            }
-        }
     }
 }

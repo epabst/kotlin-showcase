@@ -1,11 +1,9 @@
-package client.test
+package common.util
 
-import client.test.util.describe
-import client.test.util.it
-import client.test.util.mustBe
+import client.util.describe
+import client.util.it
+import client.util.mustBe
 import client.util.JavascriptProvider
-import common.PlatformProvider
-import common.RichDate
 
 /**
  * A test for [RichDate].

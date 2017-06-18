@@ -1,8 +1,8 @@
 package client.util
 
-import common.ProviderDate
-import common.RichDate
-import common.toRichDate
+import common.util.ProviderDate
+import common.util.RichDate
+import common.util.toRichDate
 import net.yested.ext.moment.Moment
 
 /**

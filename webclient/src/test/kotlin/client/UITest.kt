@@ -1,9 +1,10 @@
-package client.test
+package client
 
-import client.*
-import client.test.util.*
+import client.component.UndoComponent
+import client.util.*
 import client.util.JavascriptProvider
 import common.*
+import common.util.*
 import java.util.*
 import kotlin.test.fail
 import net.yested.core.properties.*

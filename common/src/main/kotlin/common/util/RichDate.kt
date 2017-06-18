@@ -1,4 +1,4 @@
-package common
+package common.util
 
 fun RichDate(date: ProviderDate): RichDate = RichDate(date.year, date.month, date.dayOfMonth)
 

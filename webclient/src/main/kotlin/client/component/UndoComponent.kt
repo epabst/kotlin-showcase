@@ -1,9 +1,8 @@
-package client
+package client.component
 
-import client.component.visible
-import common.Repository
-import common.RepositoryListener
-import common.WithID
+import common.util.Repository
+import common.util.RepositoryListener
+import common.util.WithID
 import net.yested.core.properties.*
 import net.yested.core.utils.*
 import net.yested.ext.bootstrap3.*

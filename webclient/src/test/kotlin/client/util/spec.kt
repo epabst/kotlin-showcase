@@ -1,4 +1,4 @@
-package client.test.util
+package client.util
 
 import QUnit.assert
 import QUnit.module

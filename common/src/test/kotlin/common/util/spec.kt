@@ -1,4 +1,4 @@
-package common
+package common.util
 
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert

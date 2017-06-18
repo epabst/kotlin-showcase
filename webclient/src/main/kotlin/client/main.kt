@@ -1,8 +1,8 @@
 package client
 
 import client.util.*
-import common.PlatformProvider
-import common.ID
+import common.util.PlatformProvider
+import common.util.ID
 import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*

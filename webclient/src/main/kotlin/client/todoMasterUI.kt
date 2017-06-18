@@ -4,6 +4,8 @@ import client.component.undoComponent
 import client.component.visible
 import client.util.mapEachReusing
 import common.*
+import common.util.Repository
+import common.util.RepositoryListener
 import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*

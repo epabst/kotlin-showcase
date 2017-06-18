@@ -1,13 +1,6 @@
-package client.test.util
+package client.util
 
-import client.test.util.describe
-import client.test.util.mustBe
-import client.test.util.mustContain
-import client.util.JavascriptProvider
-import common.PlatformProvider
-import common.formatCurrency
-import common.formatCurrencyForInput
-import common.parseCurrency
+import common.util.*
 
 /**
  * A test for [JavascriptProvider].

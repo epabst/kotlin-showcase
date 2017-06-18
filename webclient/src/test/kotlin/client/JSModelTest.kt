@@ -1,13 +1,9 @@
-package client.test
+package client
 
 import client.util.JavascriptProvider
-import client.LongJS
-import client.ToDoJS
-import client.test.util.describe
-import client.test.util.it
-import client.test.util.mustBe
-import client.toNormal
+import client.util.*
 import common.*
+import common.util.*
 
 /**
  * A test for [ToDoJS], etc.

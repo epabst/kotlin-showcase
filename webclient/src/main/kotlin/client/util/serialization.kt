@@ -1,19 +1,14 @@
-package client
+package client.util
 
-import client.util.IDJS
-import client.util.MomentDate
-import client.util.RichDateJS
-import client.util.toNormal
-import common.*
 import common.util.ID
 import common.util.RichDate
 import net.yested.ext.moment.Moment
 
 /**
- * JSON support for the core model classes.
+ * Serialization support for util classes.
  * @author Eric Pabst (epabst@gmail.com)
- * Date: 6/9/16
- * Time: 6:27 AM
+ * Date: 6/18/17
+ * Time: 1:41 AM
  */
 @native
 interface LongJS {
@@ -52,15 +47,3 @@ fun RichDateJS.toNormal(): RichDate = RichDate(months, days)
 }
 
 fun IDJS.toNormal(): ID? = id.toNormal()?.let { ID(it) }
-
-@native interface ToDoJS {
-    val name: String
-    val dueDate: RichDateJS?
-    val note: String?
-    val createDate: RichDateJS
-    val id: IDJS?
-}
-
-fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal(), id?.toNormal())
-}

@@ -1,7 +1,11 @@
-package client.test
+package client.suite
 
-import client.test.util.JavascriptProviderTest
-import client.test.util.LocalStorageRepositoryTest
+import client.JSModelTest
+import client.UITest
+import client.test.ToDoLocalStorageRepositoryTest
+import client.util.JavascriptProviderTest
+import client.util.LocalStorageRepositoryTest
+import common.util.RichDateTest
 
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.

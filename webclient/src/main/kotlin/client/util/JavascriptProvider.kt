@@ -1,8 +1,7 @@
 package client.util
 
-import client.util.MomentDate
-import common.PlatformProvider
-import common.ProviderDate
+import common.util.PlatformProvider
+import common.util.ProviderDate
 import net.yested.ext.moment.Moment
 
 @native private fun parseFloat(input: String): Double = noImpl

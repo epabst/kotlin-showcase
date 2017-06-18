@@ -1,9 +1,8 @@
-package client.test
+package client.component
 
-import client.*
-import client.test.util.*
+import client.util.*
 import client.util.JavascriptProvider
-import common.*
+import common.util.*
 
 /**
  * A test for [UndoComponent].

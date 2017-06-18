@@ -1,13 +1,6 @@
-package client.test.util
+package client.util
 
-import client.IDJS
-import client.util.JavascriptProvider
-import client.LocalStorageRepository
-import client.test.util.describe
-import client.test.util.it
-import client.test.util.mustBe
-import client.toNormal
-import common.*
+import common.util.*
 
 /**
  * A test for [LocalStorageRepository].

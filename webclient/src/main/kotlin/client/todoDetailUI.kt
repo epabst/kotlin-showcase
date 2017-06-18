@@ -3,6 +3,7 @@ package client
 import client.component.visible
 import client.util.toRichDate
 import common.*
+import common.util.ID
 import common.util.inContext
 import net.yested.ext.pickadate.dateInput
 import net.yested.core.html.*
@@ -11,6 +12,7 @@ import net.yested.core.utils.*
 import net.yested.ext.bootstrap3.*
 import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLDivElement
+import kotlin.browser.window
 import kotlin.dom.appendText
 
 /**
@@ -32,7 +34,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
             val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDo.set(updatedToDo.copy(id = newId))
-            UI.windowHistory.backToHash(backHash.get())
+            window.history.backToHash(backHash.get())
             return true
         } else {
             return false
@@ -41,14 +43,14 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
 
     fun cancel() {
         toDo.set(null)
-        UI.windowHistory.backToHash(backHash.get())
+        window.history.backToHash(backHash.get())
     }
 
     fun delete() {
         toDo.get()?.let { toDo ->
             toDoRepository.remove(toDo)
         }
-        UI.windowHistory.backToHash(ToDoMasterModel.toUrl())
+        window.history.backToHash(ToDoMasterModel.toUrl())
     }
 
     companion object {
