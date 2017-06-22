@@ -22,8 +22,8 @@ object UndoComponent {
     /** New commands are added at the end. */
     private val redoCommands: Property<List<Command>> = emptyList<Command>().toProperty()
 
-    val undoCount: ReadOnlyProperty<Int> = undoCommands.map { it.size }
-    val redoCount: ReadOnlyProperty<Int> = redoCommands.map { it.size }
+    val undoCount: Int get() = undoCommands.get().size
+    val redoCount: Int get() = redoCommands.get().size
 
     fun undo() {
         commandRecorder = NoOpCommandRecorder
@@ -58,8 +58,10 @@ object UndoComponent {
     internal fun render(element: HTMLElement) {
         element with {
             btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
-                undoCount.onNext { visible = it != 0 }
-                undoCount.onNext { disabled = it == 0 }
+                undoCommands.onNext {
+                    visible = it.isNotEmpty()
+                    disabled = it.isEmpty()
+                }
                 appendText("Undo")
             }
         }

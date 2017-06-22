@@ -49,7 +49,7 @@ object UITest {
                     window.location.hash.mustBe(ToDoMasterModel.toUrl())
                     (toDoRepository.list().size - initialSize).mustBe(1)
 
-                    val originalUndoSize = UndoComponent.undoCount.get()
+                    val originalUndoSize = UndoComponent.undoCount
 
                     window.location.hash = ToDoMasterModel.toUrl()
                     val toDoMasterModel = ToDoMasterModel()
@@ -58,7 +58,7 @@ object UITest {
                     toDoDetailModel.delete()
 
                     (toDoRepository.list().size - initialSize).mustBe(0)
-                    (UndoComponent.undoCount.get() - originalUndoSize).mustBe(1)
+                    (UndoComponent.undoCount - originalUndoSize).mustBe(1)
 
                     UndoComponent.undo()
                     (toDoRepository.list().size - initialSize).mustBe(1)
@@ -70,7 +70,7 @@ object UITest {
             it("should allow undo save of a to-do") {
                 try {
                     val originalSize = toDoRepository.list().size
-                    val originalUndoCount = UndoComponent.undoCount.get()
+                    val originalUndoCount = UndoComponent.undoCount
                     val toDo = (ToDo("Txt#1") as ToDo?).toProperty()
                     val toDoDetailModel = ToDoDetailModel(toDo)
                     toDoDetailScreen(toDoDetailModel)
@@ -84,9 +84,9 @@ object UITest {
                     toDoMasterScreen(maserModel)
                     ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
 
-                    UndoComponent.undoCount.get().mustBe(originalUndoCount + 2)
+                    UndoComponent.undoCount.mustBe(originalUndoCount + 2)
                     UndoComponent.undo()
-                    UndoComponent.undoCount.get().mustBe(originalUndoCount + 1)
+                    UndoComponent.undoCount.mustBe(originalUndoCount + 1)
                     (toDoRepository.list().size - originalSize).mustBe(1)
                     ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(1)
                 } finally {
@@ -183,7 +183,7 @@ object UITest {
 
         describe("UndoComponent") {
             it("should allow various sequences of undo/redo/commands") {
-                val originalUndoCount = UndoComponent.undoCount.get()
+                val originalUndoCount = UndoComponent.undoCount
                 val masterModel = ToDoMasterModel()
                 toDoMasterScreen(masterModel)
 
@@ -207,15 +207,15 @@ object UITest {
                 UndoComponent.undo()
                 (toDoRepository.list().size - originalSize).mustBe(0)
 
-                UndoComponent.undoCount.get().mustBe(originalUndoCount)
-                UndoComponent.redoCount.get().mustBe(2)
+                UndoComponent.undoCount.mustBe(originalUndoCount)
+                UndoComponent.redoCount.mustBe(2)
 
                 UndoComponent.redo()
                 UndoComponent.redo()
                 (toDoRepository.list().size - originalSize).mustBe(2)
 
-                (UndoComponent.undoCount.get() - originalUndoCount).mustBe(2)
-                UndoComponent.redoCount.get().mustBe(0)
+                (UndoComponent.undoCount - originalUndoCount).mustBe(2)
+                UndoComponent.redoCount.mustBe(0)
             }
         }
     }
