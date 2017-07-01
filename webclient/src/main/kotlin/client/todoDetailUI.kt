@@ -21,7 +21,8 @@ import kotlin.dom.appendText
  * Date: 6/7/16
  * Time: 6:37 AM
  */
-class ToDoDetailModel(val toDo: Property<ToDo?>) {
+class ToDoDetailModel(val toDoId: Property<ID?>) {
+    val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoRepository = Factory.toDoRepository
     val name = toDo.mapAsDefault { it?.name ?: "" }
     val validation = name.validate("Description is mandatory", { it.size > 0})
@@ -33,7 +34,7 @@ class ToDoDetailModel(val toDo: Property<ToDo?>) {
         if (validation.get().success) {
             val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
-            toDo.set(updatedToDo.copy(id = newId))
+            toDoId.set(newId)
             window.history.backToHash(backHash.get())
             return true
         } else {

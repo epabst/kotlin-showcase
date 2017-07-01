@@ -22,9 +22,8 @@ fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
 
 object UI {
     val toDoId = Property<ID?>(null)
-    val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoMasterScreen: HTMLDivElement by lazy { inContext("toDoMasterScreen") { toDoMasterScreen(ToDoMasterModel()) } }
-    val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDo)) } }
+    val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDoId)) } }
 }
 
 /**
@@ -47,20 +46,21 @@ fun main(args: Array<String>) {
 
             window.location.splitHashProperty.onNext { hash ->
                 inContext("About to draw '$hash'") { console.info("About to draw '$hash'") }
-                when (hash[0]) {
-                    "#toDos", "#", "" -> {
-                        setChildWithoutSplash(UI.toDoMasterScreen, divContainer)
-                    }
+                val firstHash = hash[0]
+                when (firstHash) {
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoDetailScreen, divContainer)
                         val toDoId = if (hash.size > 1) hash[1].toID() else null
                         UI.toDoId.set(toDoId)
                     }
+                    else -> {
+                        setChildWithoutSplash(UI.toDoMasterScreen, divContainer)
+                    }
                 }
-                if (hash.get(0) != previousHash) {
+                if (firstHash != previousHash) {
                     window.scrollTo(0.0, 0.0)
                 }
-                previousHash = hash[0]
+                previousHash = firstHash
             }
         }
     } catch (e: Throwable) {

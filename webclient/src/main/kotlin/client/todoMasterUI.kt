@@ -2,7 +2,7 @@ package client
 
 import client.component.undoComponent
 import client.component.visible
-import client.util.mapEachReusing
+import client.util.mapEachReusingByID
 import common.*
 import common.util.Repository
 import common.util.RepositoryListener
@@ -27,7 +27,7 @@ import kotlin.dom.appendText
  */
 class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
     val data = Property<List<ToDo>?>(repository.list())
-    val dataProperties = data.mapEachReusing { it.toProperty() }
+    val dataProperties = data.mapEachReusingByID { it.toProperty() }
     val currentSort = Property<SortSpecification<Property<ToDo>>?>(null)
 
     init {
@@ -37,6 +37,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
                     data.set(repository.list())
                 } else {
                     dataProperties.get()?.find { it.get().id == original.id }?.set(replacementWithID)
+                    data.set(repository.list())
                 }
             }
 
