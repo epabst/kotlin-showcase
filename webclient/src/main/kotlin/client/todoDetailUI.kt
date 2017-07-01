@@ -13,6 +13,7 @@ import net.yested.ext.bootstrap3.*
 import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLDivElement
 import kotlin.browser.window
+import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -72,16 +73,14 @@ fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
             btsFormItemSimple(state = Property(State.Default), label = "Notes") {
                 textInput(model.notes) { placeholder = "notes"; size = 60 }
             }
-            btsFormItem(state = Property(State.Default)) {
-                div { align = "center"
-                    btsButton(look = ButtonLook.Primary, onclick = { model.save() }) { type = "submit"; appendText("Save") }
-                    nbsp()
-                    btsButton(onclick = { model.cancel() }) { appendText("Cancel") }
-                    nbsp(3)
-                    btsButton(onclick = { model.delete() }, size = ButtonSize.Default, look = ButtonLook.Danger) {
-                        model.toDo.onNext { visible = it?.id != null }
-                        appendText("Delete ToDo")
-                    }
+            btsFormItemSimple(state = Property(State.Default), label = "") {
+                addClass("btn-toolbar")
+                btsButton(look = ButtonLook.Primary, onclick = { model.save() }) { appendText("Save") }
+                btsButton(onclick = { model.cancel() }) { appendText("Cancel") }
+                nbsp(4)
+                btsButton(onclick = { model.delete() }, look = ButtonLook.Danger) {
+                    model.toDo.onNext { visible = it?.id != null }
+                    appendText("Delete ToDo")
                 }
             }
         }
