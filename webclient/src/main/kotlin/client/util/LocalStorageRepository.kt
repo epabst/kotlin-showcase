@@ -1,8 +1,8 @@
 package client.util
 
 import common.util.*
-import java.util.*
 import kotlin.browser.localStorage
+import kotlin.js.Math
 
 /**
  * A [Repository] that uses [browser.localStorage].

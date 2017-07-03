@@ -14,7 +14,6 @@ import net.yested.ext.bootstrap3.*
 import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.events.Event
 import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.appendText
@@ -47,7 +46,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
         })
     }
 
-    fun delete(todo: ToDo, event: Event) {
+    fun delete(todo: ToDo) {
         repository.remove(todo)
     }
 
@@ -97,7 +96,7 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
                         td {
                             div {
                                 className = "text-right"
-                                btsButton(onclick = { model.delete(item.get(), it) }) {
+                                btsButton(onclick = { model.delete(item.get()) }) {
                                     appendText("Delete")
                                 }
                             }

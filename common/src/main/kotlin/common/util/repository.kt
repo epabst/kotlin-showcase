@@ -1,7 +1,5 @@
 package common.util
 
-import java.util.*
-
 /**
  * Persistence Repositories.
  * @author Eric Pabst (epabst@gmail.com)

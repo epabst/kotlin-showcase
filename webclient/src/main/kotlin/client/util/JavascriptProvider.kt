@@ -4,13 +4,13 @@ import common.util.PlatformProvider
 import common.util.ProviderDate
 import net.yested.ext.moment.Moment
 
-@native private fun parseFloat(input: String): Double = noImpl
+external private fun parseFloat(input: String): Double = definedExternally
 // This is here because Double.isNaN() doesn't work in KotlinJS
-@native private fun isNaN(input: Double): Boolean = noImpl
+external private fun isNaN(input: Double): Boolean = definedExternally
 
 //Numeral
-@native private fun numeral(input: Double): Numeral = noImpl
-@native interface Numeral { fun format(format: String): String }
+external private fun numeral(input: Double): Numeral = definedExternally
+external interface Numeral { fun format(format: String): String }
 
 /**
  * A PlatformProvider backed by Javascript libraries.

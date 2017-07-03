@@ -27,7 +27,7 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
         navbarContainer.row {
             col(Col.Width.Tn(12) and Col.Width.Xs(12)) {
                 span { id = "backButton"
-                    btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { event -> window.history.backToHash(backHash.get()) }) {
+                    btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { _ -> window.history.backToHash(backHash.get()) }) {
                         addClass("nowrap")
                         backHash.onNext { visible = it != null }
                         flaticon("arrow-pointing-to-left-1"); appendText("Back")

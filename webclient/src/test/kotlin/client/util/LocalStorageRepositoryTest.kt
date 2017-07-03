@@ -1,6 +1,7 @@
 package client.util
 
 import common.util.*
+import kotlin.js.Math
 
 /**
  * A test for [LocalStorageRepository].

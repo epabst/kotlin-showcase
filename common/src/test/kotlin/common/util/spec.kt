@@ -24,11 +24,16 @@ fun String?.mustContain(expectedSubstring: String) {
     MatcherAssert.assertThat(this, CoreMatchers.containsString(expectedSubstring))
 }
 
-fun <E : Exception> intercept(block: () -> Unit): E {
+fun <E : Exception> intercept(exceptionClass: Class<E>, block: () -> Unit): E {
     try {
         block()
         fail("expected exception")
-    } catch (exception: E) {
-        return exception
+    } catch (exception: Exception) {
+        if (exceptionClass.isInstance(exception)) {
+            @Suppress("UNCHECKED_CAST")
+            return exception as E
+        } else {
+            throw exception
+        }
     }
 }

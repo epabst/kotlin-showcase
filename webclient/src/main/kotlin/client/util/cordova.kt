@@ -10,21 +10,21 @@ import kotlin.browser.window
  * Time: 4:04 PM
  */
 
-@native val Window.cordova: Cordova? by lazy { null }
+val Window.cordova: Cordova? get() = asDynamic().cordova
 
-@native interface Cordova { val plugins: CordovaPlugins? }
+external interface Cordova { val plugins: CordovaPlugins? }
 
-@native interface CordovaPlugins { val Keyboard: CordovaKeyboard? }
+external interface CordovaPlugins { val Keyboard: CordovaKeyboard? }
 
-@native interface CordovaKeyboard {
+external interface CordovaKeyboard {
 	fun hideKeyboardAccessoryBar(hide: Boolean)
 
 	fun disableScroll(disable: Boolean)
 }
 
-@native val Window.StatusBar: StatusBar? by lazy { null }
+val Window.StatusBar: StatusBar? get() = asDynamic().StatusBar
 
-@native interface StatusBar { fun styleDefault() }
+external interface StatusBar { fun styleDefault() }
 
 fun initializeForCordova() {
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

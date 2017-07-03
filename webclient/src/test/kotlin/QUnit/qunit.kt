@@ -1,8 +1,5 @@
 package QUnit
 
-import java.util.*
-import kotlin.properties.Delegates
-
 /**
  * The QUnit API.
  * @author Eric Pabst (epabst@gmail.com)
@@ -15,28 +12,26 @@ fun module(name: String, nested: () -> Unit) {
     //todo figure out why the nested function can't be passed in to QUnit natively so that nested modules show up right
     // without having to emulate it here.
     moduleStack.add(name)
-    qUnitModule(moduleStack.joinToString(" "))
+    QUnit.qUnitModule(moduleStack.joinToString(" "))
     nested()
     moduleStack.removeAt(moduleStack.size - 1)
-    qUnitModule(moduleStack.joinToString(" "))
+    QUnit.qUnitModule(moduleStack.joinToString(" "))
 }
 
-@native("QUnit.module")
-private fun qUnitModule(name: String) { noImpl }
+external interface QUnitX {
+    @JsName("module") fun qUnitModule(name: String)
+    fun test(name: String, nested: () -> Unit)
+    val assert: Assert
+}
 
-@native("QUnit.test")
-fun test(name: String, nested: () -> Unit) { noImpl }
+@JsName("QUnit") external val QUnit: QUnitX = definedExternally
 
-@native("QUnit.assert")
-val assert: Assert by Delegates.notNull()
-
-@native
-interface Assert {
+external interface Assert {
     fun <T> equal(actual: T, expected: T): Unit
     fun <T> notEqual(actual: T, unexpected: T): Unit
     fun <T> propEqual(actual: T, expected: T): Unit
     fun <T> notPropEqual(actual: T, unexpected: T): Unit
     fun ok(actual: Boolean): Unit
     fun notOk(actual: Boolean): Unit
-    fun throws(f: () -> Any, expectedException: Throwable, message: String = "should have thrown exception")
+    fun throws(f: () -> Any, expectedException: Throwable, message: String)
 }

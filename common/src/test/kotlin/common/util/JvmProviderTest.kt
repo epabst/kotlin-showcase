@@ -21,11 +21,11 @@ class JvmProviderTest : Spek({
             "$1".parseCurrency().mustBe(1.0)
             "($1.00)".parseCurrency().mustBe(-1.0)
             "($1)".parseCurrency().mustBe(-1.0)
-            intercept<IllegalArgumentException> { "garbage".parseCurrency() }.message.mustContain("garbage")
-            intercept<IllegalArgumentException> { "(1.00)".parseCurrency() }.message.mustContain("(1.00)")
-            intercept<IllegalArgumentException> { "(1)".parseCurrency() }
-            intercept<IllegalArgumentException> { "-$1.00".parseCurrency() }
-            intercept<IllegalArgumentException> { "-$1".parseCurrency() }
+            intercept(IllegalArgumentException::class.java) { "garbage".parseCurrency() }.message.mustContain("garbage")
+            intercept(IllegalArgumentException::class.java) { "(1.00)".parseCurrency() }.message.mustContain("(1.00)")
+            intercept(IllegalArgumentException::class.java) { "(1)".parseCurrency() }
+            intercept(IllegalArgumentException::class.java) { "-$1.00".parseCurrency() }
+            intercept(IllegalArgumentException::class.java) { "-$1".parseCurrency() }
         }
     }
 

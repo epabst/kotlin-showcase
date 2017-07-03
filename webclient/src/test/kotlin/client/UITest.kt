@@ -5,7 +5,6 @@ import client.util.*
 import client.util.JavascriptProvider
 import common.*
 import common.util.*
-import java.util.*
 import kotlin.test.fail
 import net.yested.core.properties.*
 import net.yested.ext.jquery.destinationBack

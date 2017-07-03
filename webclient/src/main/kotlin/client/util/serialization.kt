@@ -10,8 +10,7 @@ import net.yested.ext.moment.Moment
  * Date: 6/18/17
  * Time: 1:41 AM
  */
-@native
-interface LongJS {
+external interface LongJS {
     val high_: Int
     val low_: Int
 }
@@ -35,14 +34,14 @@ fun String.toID(): ID? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
 
 fun RichDate.toMoment(): Moment = (date as MomentDate).moment
 
-@native interface RichDateJS {
+external interface RichDateJS {
     val months: Int
     val days: Int
 }
 
 fun RichDateJS.toNormal(): RichDate = RichDate(months, days)
 
-@native interface IDJS {
+external interface IDJS {
     val id: LongJS
 }
 

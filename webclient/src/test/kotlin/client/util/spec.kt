@@ -1,9 +1,6 @@
 package client.util
 
-import QUnit.assert
-import QUnit.module
-import QUnit.test
-import java.util.*
+import QUnit.*
 import kotlin.test.fail
 
 /**
@@ -17,7 +14,7 @@ fun <T> T.mustBe(expected: T) {
     if (!equal) {
         fail("expected '$expected' but actual was '$this'")
     }
-    assert.equal(equal, true)
+    QUnit.assert.equal(equal, true)
 }
 
 fun <T> T.mustNotBe(expected: T) {
@@ -25,7 +22,7 @@ fun <T> T.mustNotBe(expected: T) {
     if (equal) {
         fail("did not expect '$expected' but it was equal: '$this'")
     }
-    assert.notEqual(equal, true)
+    QUnit.assert.notEqual(equal, true)
 }
 
 private fun <T> T.equalTo(expected: T): Boolean {
@@ -54,7 +51,7 @@ fun String?.mustContain(expectedSubstring: String) {
     if (this == null || !contains(expectedSubstring)) {
         fail("expected string containing '$expectedSubstring' but actual was '${this}'")
     }
-    assert.equal(true, true)
+    QUnit.assert.equal(true, true)
 }
 
 fun String?.mustContainInOrder(vararg expectedSubstrings: String) {
@@ -65,14 +62,14 @@ fun String?.mustContainInOrder(vararg expectedSubstrings: String) {
     }
     val indices = expectedSubstrings.map { this?.indexOf(it) }.toList()
     indices.mustBe(indices.sortedBy { it })
-    assert.equal(true, true)
+    QUnit.assert.equal(true, true)
 }
 
 fun String?.mustNotContain(unexpectedSubstring: String) {
     if (this == null || contains(unexpectedSubstring)) {
         fail("expected string not containing '$unexpectedSubstring' but actual was '${this}'")
     }
-    assert.equal(true, true)
+    QUnit.assert.equal(true, true)
 }
 
 fun interceptAny(block: () -> Unit): Exception {
@@ -86,7 +83,7 @@ fun interceptAny(block: () -> Unit): Exception {
 }
 
 fun it(behavior: String, f: () -> Unit) {
-    test(behavior, f)
+    QUnit.test(behavior, f)
 }
 
 fun describe(name: String, f: () -> Unit) {
