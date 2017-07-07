@@ -42,7 +42,7 @@ task copyWebClientHtml(type: Copy) {
   into("www")
   filter { String line -> line
     .replaceAll("<!--CORDOVA (.*?)-->", "\$1")
-    .replace("../../build/classes/main/", "")
+    .replace("../../../build/classes/main/", "")
     .replace("webclient.", "js/index.") }
 }
 
