@@ -30,7 +30,7 @@ sourceSets {
 }
 
 compileKotlin2Js {
-  kotlinOptions.outputFile = "webclient/build/classes/main/webclient_main.js"
+  kotlinOptions.outputFile = "webclient/build/classes/main/webclient.js"
   kotlinOptions.sourceMap = true
 }.dependsOn(linkCommonSource)
 

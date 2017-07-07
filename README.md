@@ -15,9 +15,9 @@ Search for "ZZZ" and replace it with the information for your custom app.
 # How to Prepare to Build webclient
 
 * Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
-* The webclient_main module requires exporting some Kotlin libraries to Javascript.
+* The webclient module requires exporting some Kotlin libraries to Javascript.
 In IntelliJ, open the settings.gradle file in the top-level directory,
-with the "separate module per source set" option.  
+without selecting the "separate module per source set" option.
 Note: After this, the module output paths should be something like webclient/build/classes/main and webclient/build/classes/test.
 * To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
  
@@ -26,16 +26,16 @@ Note: After this, the module output paths should be something like webclient/bui
 First run "./gradlew build" in this top-level directory.
 This will copy the common module's source code into the webclient/build/gen/kotlin directory. 
 
-Then compile the webclient_main module in IntelliJ (e.g. right-click on the webclient/src/main directory and click "Build Module 'webclient_main'").
+Then compile the webclient module in IntelliJ (e.g. right-click on the webclient directory and click "Build Module 'webclient'").
 It will generate some .js files in webclient/build/classes/main.
 
-# How to Run webclient from IntelliJ
+# How to Run webclient from IntelliJ (v. 2017.1)
 
 In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Browser".  Voila!
 
-# How to Run webclient tests from IntelliJ
+# How to Run webclient tests from IntelliJ (v. 2017.1)
 
-Compile the webclient_test module in IntelliJ (e.g. right-click on the webclient_test module and click "Compile").
+Compile the webclient module in IntelliJ (e.g. right-click on the webclient module and click "Build Module 'webclient'").
 It will generate some files in webclient/build/classes/test.
 
 In IntelliJ, right-click on webclient/src/test/web/runner.html and "Open in Browser".
