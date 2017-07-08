@@ -109,7 +109,7 @@ object UndoComponentTest {
 
             val newId2 = repository.save(null, EntityForTesting("Bob"))
 
-            UndoComponent.undoable("batch") {
+            UndoComponent.undoable("batch", "undo batch") {
                 repository.save(originalValueWithId, EntityForTesting("Harry"))
                 repository.remove(newId2)
             }
@@ -154,7 +154,7 @@ object UndoComponentTest {
                 }
             })
 
-            UndoComponent.undoable("Ordered Operations") {
+            UndoComponent.undoable("Ordered Operations", "Undo Ordered Operations") {
                 repository.save(EntityForTesting("Adam"))
                 repository.save(EntityForTesting("Eve"))
             }

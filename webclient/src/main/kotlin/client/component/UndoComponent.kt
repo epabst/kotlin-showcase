@@ -72,9 +72,9 @@ object UndoComponent {
      * Without doing this, each repository action (save or remove)
      * will each be individually undoable.
      */
-    fun <T> undoable(pastTenseDescription: String, function: () -> T): T {
+    fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
         if (commandRecorder == NormalCommandRecorder) {
-            val undoableGroup = UndoableGroup(pastTenseDescription)
+            val undoableGroup = UndoableGroup(pastTenseDescription, undoPastTenseDescription)
             commandRecorder = undoableGroup
             try {
                 val result = function()
@@ -98,16 +98,16 @@ object UndoComponent {
     fun <T : WithID<T>> watch(repository: Repository<T>) {
         repository.addListener(object : RepositoryListener<T> {
             override fun onSaved(original: T?, replacementWithID: T) {
-                commandRecorder.addUndoCommandIfAppropriate(object : Command("Saved $replacementWithID") {
+                val isUpdate = original != null && original.getID() != null
+                commandRecorder.addUndoCommandIfAppropriate(object : Command(if (isUpdate) "Reverted $original" else "Deleted $replacementWithID") {
                     override fun executeAndGetOpposite(): Command {
-                        val isUpdate = original != null && original.getID() != null
                         if (isUpdate) {
                             repository.save(replacementWithID, original!!)
                         } else {
                             repository.remove(replacementWithID)
                         }
                         val undoCommand = this
-                        return object : Command(if (isUpdate) "Reverted $original" else "Redeleted $replacementWithID") {
+                        return object : Command(if (isUpdate) "Updated $original" else "Added $replacementWithID") {
                             override fun executeAndGetOpposite(): Command {
                                 repository.save(original, replacementWithID)
                                 return undoCommand
@@ -118,11 +118,11 @@ object UndoComponent {
             }
 
             override fun onRemoved(item: T) {
-                commandRecorder.addUndoCommandIfAppropriate(object : Command("Deleted $item") {
+                commandRecorder.addUndoCommandIfAppropriate(object : Command("Restored $item") {
                     override fun executeAndGetOpposite(): Command {
                         repository.save(null, item)
                         val undoCommand = this
-                        return object : Command("Restored $item") {
+                        return object : Command("Deleted $item") {
                             override fun executeAndGetOpposite(): Command {
                                 repository.remove(item)
                                 return undoCommand
@@ -162,7 +162,7 @@ private object NoOpCommandRecorder : CommandRecorder {
 }
 
 /** A group of commands that are undone as a single unit. */
-private class UndoableGroup(pastTenseDescription: String) : Command(pastTenseDescription), CommandRecorder {
+private class UndoableGroup(private val redoPastTenseDescription: String, undoPastTenseDescription: String) : Command(undoPastTenseDescription), CommandRecorder {
     private val undoCommands: MutableList<Command> = mutableListOf()
 
     override fun addUndoCommandIfAppropriate(undoCommand: Command) {
@@ -173,7 +173,7 @@ private class UndoableGroup(pastTenseDescription: String) : Command(pastTenseDes
     override fun executeAndGetOpposite(): Command {
         val redoCommands = undoCommands.map { it.executeAndGetOpposite() }.reversed()
         val undoCommand = this
-        return object : Command("Reversed $pastTenseDescription") {
+        return object : Command(redoPastTenseDescription) {
             override fun executeAndGetOpposite(): Command {
                 redoCommands.forEach { it.executeAndGetOpposite() }
                 return undoCommand
