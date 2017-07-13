@@ -166,6 +166,28 @@ class UndoComponentTest {
     }
 
     @Test
+    fun itShouldHandleUpdatingTheSameEntityTwice() {
+        val originalValue = EntityForTesting("George")
+        val newId = repository.save(null, originalValue)
+        val originalValueWithId = originalValue.withID(newId)
+
+        UndoComponent.undoable("did batch", "undid batch") {
+            val updatedValue = originalValueWithId.copy("Bob")
+            repository.save(originalValueWithId, updatedValue)
+            repository.save(updatedValue, updatedValue.copy("Harry"))
+        }
+
+        repository.find(newId)?.name.mustBe("Harry")
+
+        UndoComponent.undo()
+        repository.find(newId)?.name.mustBe("George")
+
+        UndoComponent.redo()
+        repository.find(newId)?.name.mustBe("Harry")
+    }
+
+
+    @Test
     fun itShouldIgnoreANoOpUndoable() {
         val originalUndoCount = UndoComponent.undoCount
 
