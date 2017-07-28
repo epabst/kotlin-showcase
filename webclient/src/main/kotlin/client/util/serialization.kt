@@ -2,6 +2,7 @@ package client.util
 
 import common.util.ID
 import common.util.RichDate
+import common.util.WithID
 import net.yested.ext.moment.Moment
 
 /**
@@ -30,7 +31,7 @@ fun LongJS?.toNormal(): Long? {
     }
 }
 
-fun String.toID(): ID? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
+fun <E : WithID<E>> String.toID(): ID<E>? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
 
 fun RichDate.toMoment(): Moment = (date as MomentDate).moment
 
@@ -45,4 +46,4 @@ external interface IDJS {
     val id: LongJS
 }
 
-fun IDJS.toNormal(): ID? = id.toNormal()?.let { ID(it) }
+fun <E : WithID<E>> IDJS.toNormal(): ID<E>? = id.toNormal()?.let { ID(it) }

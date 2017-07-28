@@ -21,7 +21,7 @@ object UITest {
         PlatformProvider.instance = JavascriptProvider
         val today = RichDate.today()
         val toDoRepository = Factory.toDoRepository
-        val testToDoIds = ArrayList<ID>()
+        val testToDoIds = ArrayList<ID<ToDo>>()
         toDoRepository.addListener(object : RepositoryListener<ToDo> {
             override fun onSaved(original: ToDo?, replacementWithID: ToDo) {
                 testToDoIds.add(replacementWithID.id!!)
@@ -111,7 +111,7 @@ object UITest {
         describe("toDoDetailScreen") {
             it("should start (mostly) empty for each new to-do") {
                 try {
-                    val todoId: Property<ID?> = null.toProperty()
+                    val todoId: Property<ID<ToDo>?> = null.toProperty()
                     val toDoDetailModel = ToDoDetailModel(todoId)
                     toDoDetailScreen(toDoDetailModel)
                     toDoDetailModel.name.set("TestToDo1")
@@ -163,7 +163,7 @@ object UITest {
                     val toDoId = toDoRepository.save(null, toDo)
                     testToDoIds.add(toDoId)
 
-                    val toDoIdBeingEditted = toDoId.toProperty<ID?>()
+                    val toDoIdBeingEditted = toDoId.toProperty<ID<ToDo>?>()
                     val toDoDetailModel = ToDoDetailModel(toDoIdBeingEditted)
                     toDoDetailScreen(toDoDetailModel)
                     toDoDetailModel.name.get().mustBe("Txt#1")

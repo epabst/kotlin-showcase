@@ -7,25 +7,26 @@ package common.util
  * Time: 6:01 AM
  */
 
-data class ID(val id: Long) {
-    override fun equals(other: Any?): Boolean = if (other is ID) id == other.id else false
+@Suppress("unused") // Although T isn't used here it provides type-safety between IDs of different types.
+data class ID<T : WithID<T>>(val id: Long) {
+    override fun equals(other: Any?): Boolean = if (other is ID<*>) id == other.id else false
     override fun hashCode(): Int = (id % Int.MAX_VALUE).toInt()
-    override fun toString(): String = id.toLong().toString()
+    override fun toString(): String = id.toString()
 }
 
 interface WithID<T : WithID<T>> {
-    fun getID(): ID?
+    fun getID(): ID<T>?
 
-    fun withID(id: ID): T
+    fun withID(id: ID<T>): T
 }
 
 class IdGenerator {
     private var next: Long = 1
 
-    fun generateID(): ID {
+    fun generateID(): Long {
         val result = next
         next = result + 1
-        return ID(result)
+        return result
     }
 }
 
@@ -39,22 +40,22 @@ interface Repository<T : WithID<T>> {
     fun list(): List<T>
 
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
-    fun save(original: T?, replacement: T): ID
+    fun save(original: T?, replacement: T): ID<T>
 
     fun remove(item: T)
 
-    fun remove(id: ID) {
+    fun remove(id: ID<T>) {
         val item = find(id)
         if (item != null) {
             remove(item)
         }
     }
 
-    fun find(id: ID): T? = list().find { it.getID() == id }
+    fun find(id: ID<T>): T? = list().find { it.getID() == id }
 
-    fun generateID(): ID
+    fun generateID(): ID<T>
 
-    fun withID(replacement: T, id: ID = generateID()): T {
+    fun withID(replacement: T, id: ID<T> = generateID()): T {
         if (replacement.getID() != null) {
             return replacement
         } else {
@@ -65,19 +66,19 @@ interface Repository<T : WithID<T>> {
     fun addListener(listener: RepositoryListener<T>)
 }
 
-interface RepositoryListener<T> {
+interface RepositoryListener<in T> {
     fun onSaved(original: T?, replacementWithID: T)
 
     fun onRemoved(item: T)
 }
 
-internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID?, replacement: T): T {
-    val newID: ID = originalID ?: generateID()
+internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID<T>?, replacement: T): T {
+    val newID: ID<T> = originalID ?: generateID()
     val replacementWithID = withID(replacement, newID)
     return replacementWithID
 }
 
-internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementWithID: T, originalID: ID?) {
+internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementWithID: T, originalID: ID<T>?) {
     val index = if (originalID != null) mutableList.indexOfFirst { it.getID() == originalID } else -1
     if (index >= 0) {
         mutableList[index] = replacementWithID
@@ -86,14 +87,14 @@ internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementW
     }
 }
 
-open class InMemoryRepository<T : WithID<T>>() : Repository<T> {
+open class InMemoryRepository<T : WithID<T>> : Repository<T> {
     private var idGenerator = IdGenerator()
     private val list: ArrayList<T> = ArrayList()
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun list(): List<T> = list.toList()
 
-    override fun save(original: T?, replacement: T): ID {
+    override fun save(original: T?, replacement: T): ID<T> {
         val originalID = original?.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
         if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
@@ -103,7 +104,7 @@ open class InMemoryRepository<T : WithID<T>>() : Repository<T> {
         return replacementWithID.getID()!!
     }
 
-    override fun generateID(): ID = idGenerator.generateID()
+    override fun generateID(): ID<T> = ID(idGenerator.generateID())
 
     override fun remove(item: T) {
         val removed = list.remove(item)

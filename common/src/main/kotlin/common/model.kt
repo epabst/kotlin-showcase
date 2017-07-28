@@ -11,10 +11,10 @@ import common.util.WithID
  * Date: 6/9/16
  * Time: 6:27 AM
  */
-data class ToDo(val name: String, val dueDate: RichDate? = null, val note: String? = null, val createDate: RichDate = today(), val id: ID? = null) : WithID<ToDo> {
-    override fun getID(): ID? = id
+data class ToDo(val name: String, val dueDate: RichDate? = null, val note: String? = null, val createDate: RichDate = today(), val id: ID<ToDo>? = null) : WithID<ToDo> {
+    override fun getID(): ID<ToDo>? = id
 
-    override fun withID(id: ID): ToDo = copy(id = id)
+    override fun withID(id: ID<ToDo>): ToDo = copy(id = id)
 
     /** Used by [UndoComponent.watch]. */
     override fun toString(): String = "'$name'"

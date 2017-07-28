@@ -29,10 +29,10 @@ fun <T,OUT> ReadOnlyProperty<List<T>?>.mapEachReusing(transform: (T)->OUT): Prop
  * @see mapAsDefault for more information about the return type
  */
 fun <ENTITY : WithID<ENTITY>,OUT> ReadOnlyProperty<List<ENTITY>?>.mapEachReusingByID(transform: (ENTITY)->OUT): Property<List<OUT>?> {
-    val mapByID: MutableMap<ID,OUT> = mutableMapOf()
+    val mapByID: MutableMap<ID<ENTITY>,OUT> = mutableMapOf()
     return mapAsDefault { it?.map { item -> mapByID.mapWithCacheByID(item, transform) } }
 }
 
-fun <ENTITY: WithID<*>, OUT> MutableMap<ID,OUT>.mapWithCacheByID(entity: ENTITY, transform: (ENTITY) -> OUT): OUT {
+fun <ENTITY: WithID<ENTITY>, OUT> MutableMap<ID<ENTITY>,OUT>.mapWithCacheByID(entity: ENTITY, transform: (ENTITY) -> OUT): OUT {
     return entity.getID()?.let { id -> getOrPut(id) { transform(entity) } } ?: transform(entity)
 }

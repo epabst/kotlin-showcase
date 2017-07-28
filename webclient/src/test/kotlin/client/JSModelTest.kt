@@ -17,7 +17,7 @@ object JSModelTest {
 
         describe("ToDoJS") {
             it("should serialize/deserialize") {
-                val toDoId = ID(1234)
+                val toDoId = ID<ToDo>(1234)
                 val originalToDo = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = toDoId)
                 val json = JSON.stringify(originalToDo)
                 val toDoJS: ToDoJS = JSON.parse<ToDoJS>(json)

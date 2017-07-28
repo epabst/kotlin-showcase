@@ -13,7 +13,7 @@ import kotlin.js.Math
 open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey: String, toData: (JS) -> T) : Repository<T> {
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
-    override fun generateID(): ID {
+    override fun generateID(): ID<T> {
         return ID((Math.random() * Long.MAX_VALUE).toLong())
     }
 
@@ -35,7 +35,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
 
     override fun list(): List<T> = list.toList()
 
-    override fun save(original: T?, replacement: T): ID {
+    override fun save(original: T?, replacement: T): ID<T> {
         val originalID = original?.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!

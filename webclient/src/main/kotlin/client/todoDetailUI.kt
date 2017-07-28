@@ -22,7 +22,7 @@ import kotlin.dom.appendText
  * Date: 6/7/16
  * Time: 6:37 AM
  */
-class ToDoDetailModel(val toDoId: Property<ID?>) {
+class ToDoDetailModel(val toDoId: Property<ID<ToDo>?>) {
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoRepository = Factory.toDoRepository
     val name = toDo.mapAsDefault { it?.name ?: "" }
@@ -56,7 +56,7 @@ class ToDoDetailModel(val toDoId: Property<ID?>) {
     }
 
     companion object {
-        fun toUrl(toDoId: ID?): String = "#toDo" + if (toDoId != null) "_" + toDoId else ""
+        fun toUrl(toDoId: ID<ToDo>?): String = "#toDo" + if (toDoId != null) "_" + toDoId else ""
     }
 }
 

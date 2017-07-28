@@ -1,6 +1,7 @@
 package client
 
 import client.util.*
+import common.ToDo
 import common.util.PlatformProvider
 import common.util.ID
 import common.util.inContext
@@ -21,13 +22,13 @@ fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
 }
 
 object UI {
-    val toDoId = Property<ID?>(null)
+    val toDoId = Property<ID<ToDo>?>(null)
     val toDoMasterScreen: HTMLDivElement by lazy { inContext("toDoMasterScreen") { toDoMasterScreen(ToDoMasterModel()) } }
     val toDoDetailScreen: HTMLDivElement by lazy { inContext("toDoDetailScreen") { toDoDetailScreen(ToDoDetailModel(toDoId)) } }
 }
 
 /**
- * The main entrypoint of the app.
+ * The main entry-point of the app.
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 5/17/16
  * Time: 6:25 AM
@@ -50,7 +51,7 @@ fun main(args: Array<String>) {
                 when (firstHash) {
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoDetailScreen, divContainer)
-                        val toDoId = if (hash.size > 1) hash[1].toID() else null
+                        val toDoId: ID<ToDo>? = if (hash.size > 1) hash[1].toID() else null
                         UI.toDoId.set(toDoId)
                     }
                     else -> {

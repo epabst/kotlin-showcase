@@ -118,10 +118,10 @@ object LocalStorageRepositoryTest {
     }
 }
 
-data class EntityForTesting(val name: String, val id: ID? = null) : WithID<EntityForTesting> {
-    override fun getID(): ID? = id
+data class EntityForTesting(val name: String, val id: ID<EntityForTesting>? = null) : WithID<EntityForTesting> {
+    override fun getID(): ID<EntityForTesting>? = id
 
-    override fun withID(id: ID): EntityForTesting = copy(id = id)
+    override fun withID(id: ID<EntityForTesting>): EntityForTesting = copy(id = id)
 }
 
 interface EntityForTestingJS {
