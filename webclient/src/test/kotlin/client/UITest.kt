@@ -157,14 +157,14 @@ object UITest {
                 (masterModel.dataProperties.get()?.find { it.get().id == id2 } === dataProperty2).mustBe(true)
             }
 
-            it("should not start a new to-do with a recently editted to-do") {
+            it("should not start a new to-do with a recently edited to-do") {
                 try {
                     val toDo = ToDo("Txt#1")
                     val toDoId = toDoRepository.save(null, toDo)
                     testToDoIds.add(toDoId)
 
-                    val toDoIdBeingEditted = toDoId.toProperty<ID<ToDo>?>()
-                    val toDoDetailModel = ToDoDetailModel(toDoIdBeingEditted)
+                    val toDoIdBeingEdited = toDoId.toProperty<ID<ToDo>?>()
+                    val toDoDetailModel = ToDoDetailModel(toDoIdBeingEdited)
                     toDoDetailScreen(toDoDetailModel)
                     toDoDetailModel.name.get().mustBe("Txt#1")
                     toDoDetailModel.dueDate.get().mustBe(null)
@@ -172,7 +172,7 @@ object UITest {
                     toDoDetailModel.name.set("TestTxt1")
                     toDoDetailModel.dueDate.set(today.toMoment())
 
-                    toDoIdBeingEditted.set(null)
+                    toDoIdBeingEdited.set(null)
                     toDoDetailModel.name.get().mustBe("")
                     toDoDetailModel.dueDate.get().mustBe(null)
                 } finally {
