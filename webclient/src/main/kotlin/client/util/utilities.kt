@@ -36,3 +36,7 @@ fun <ENTITY : WithID<ENTITY>,OUT> ReadOnlyProperty<List<ENTITY>?>.mapEachReusing
 fun <ENTITY: WithID<ENTITY>, OUT> MutableMap<ID<ENTITY>,OUT>.mapWithCacheByID(entity: ENTITY, transform: (ENTITY) -> OUT): OUT {
     return entity.getID()?.let { id -> getOrPut(id) { transform(entity) } } ?: transform(entity)
 }
+
+fun String?.emptyToNull(): String? {
+    return if (this == null || this.isEmpty()) null else this
+}

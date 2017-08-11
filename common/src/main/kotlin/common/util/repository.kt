@@ -39,6 +39,8 @@ class IdGenerator {
 interface Repository<T : WithID<T>> {
     fun list(): List<T>
 
+    fun list(criteria: RepositoryCriteria<T>): List<T> = list().filter { criteria.invoke(it) }
+
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
     fun save(original: T?, replacement: T): ID<T>
 
@@ -64,6 +66,14 @@ interface Repository<T : WithID<T>> {
     }
 
     fun addListener(listener: RepositoryListener<T>)
+}
+
+interface RepositoryCriteria<T : WithID<T>> {
+    fun invoke(entity: T): Boolean
+
+    override operator fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
 }
 
 interface RepositoryListener<in T> {
