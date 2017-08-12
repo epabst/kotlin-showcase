@@ -76,6 +76,15 @@ interface RepositoryCriteria<T : WithID<T>> {
     override fun hashCode(): Int
 }
 
+private class AllItems<T : WithID<T>> : RepositoryCriteria<T> {
+    override fun invoke(entity: T): Boolean = true
+    override fun equals(other: Any?): Boolean = other is AllItems<*>
+
+    override fun hashCode(): Int = 93993
+}
+
+fun <T : WithID<T>> allItems(): RepositoryCriteria<T> = AllItems()
+
 interface RepositoryListener<in T> {
     fun onSaved(original: T?, replacementWithID: T)
 
