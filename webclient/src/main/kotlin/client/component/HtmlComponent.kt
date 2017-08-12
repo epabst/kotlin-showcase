@@ -1,5 +1,6 @@
 package client.component
 
+import net.yested.ext.bootstrap3.ColumnDefinition
 import org.w3c.dom.HTMLElement
 import kotlin.dom.addClass
 import kotlin.dom.hasClass
@@ -21,4 +22,10 @@ var HTMLElement.visible: Boolean
                 addClass("hidden")
             }
         }
+    }
+
+var HTMLElement.responsiveWidth: ColumnDefinition
+    get() = error("not implemented")
+    set(value) {
+        addClass(value.css)
     }

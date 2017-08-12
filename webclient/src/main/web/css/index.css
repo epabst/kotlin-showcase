@@ -74,6 +74,11 @@ label {
 .input-group.date {
   white-space: nowrap;
 }
+.table-responsive>table.table>tbody>tr>td {
+  white-space: normal;
+  overflow-x: hidden;
+  border-top: 0;
+}
 .input-group .form-control.date {
   width: initial;
 }
@@ -96,33 +101,20 @@ label {
 }
 .buttonPlaceholder {
   display: inline-block;
-  width: 35px;
 }
 .nowrap {
   white-space: nowrap;
   display: inline-block;
 }
-@media screen and (max-width: 35em) {
-  .table-responsive>table>tbody>tr {
-    display: flex;
-    flex-wrap: wrap;
-    border-top: 1px solid #ddd;
-  }
-  .table-responsive>table>thead {
-    display: none;
-  }
+.table-responsive>table.table>tbody>tr>td {
+  border-top: 0;
+}
+.table-responsive>table>tbody>tr {
+  border-top: 1px solid #ddd;
+}
+@media screen and (max-width: 479px) {
   .table-responsive>table>tbody>tr>td {
-    position: relative;
-    flex: 1 0 25%;
-    padding: 0.4em;
     display: inline-block;
-    border-top: 0;
-  }
-  div>div.name>a, td>div.name {
-    display: inline-block;
-    width: 9em;
-    white-space: normal;
-    overflow-x: hidden;
   }
   input.text {
     width: 100%;

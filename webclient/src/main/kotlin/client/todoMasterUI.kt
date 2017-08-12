@@ -1,5 +1,6 @@
 package client
 
+import client.component.responsiveWidth
 import client.component.undoComponent
 import client.component.visible
 import client.util.mapEachReusingByID
@@ -63,37 +64,49 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
             table {
                 className = "table table-striped table-hover table-condensed"
                 thead {
+                    addClass("hidden-xxs hidden-tn")
                     tr {
                         th {
-                            className = "text-left"
+                            Col.Width.Sm(8) and Col.Width.Xs(8)
+                            addClass("text-left")
                             sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.name }, sortNow = true) { appendText("ToDo") }
                         }
                         th {
-                            className = "text-right"
+                            Col.Width.Sm(2) and Col.Width.Xs(2)
+                            addClass("text-right")
                             sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.dueDate }) {
                                 div { appendText("Due Date") }
                             }
                         }
                         th {
-                            className = "text-right"
+                            Col.Width.Sm(2) and Col.Width.Xs(2)
+                            addClass("text-right")
                         }
                     }
                 }
                 tbody(model.dataProperties.sortedWith(model.currentSort), effect = if (animate) Collapse() else NoEffect) { item ->
                     tr {
                         td {
+                            responsiveWidth = Col.Width.Sm(8) and Col.Width.Xs(7) and Col.Width.Xxs(9) and Col.Width.Tn(12)
                             div {
                                 className = "text-left name"
                                 editOnClick(item) { it.onNext { textContent = it.name } }
                             }
-                        }
-                        td {
                             div {
-                                className = "text-right"
+                                className = "text-left hidden-lg hidden-md hidden-sm hidden-xs"
                                 editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
                             }
                         }
                         td {
+                            responsiveWidth = Col.Width.Sm(2) and Col.Width.Xs(3)
+                            addClass("hidden-xxs hidden-tn")
+                            div {
+                                addClass("text-right")
+                                editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
+                            }
+                        }
+                        td {
+                            responsiveWidth = Col.Width.Sm(2) and Col.Width.Xs(2) and Col.Width.Xxs(3) and Col.Width.Tn(12)
                             div {
                                 className = "text-right"
                                 btsButton(onclick = { model.delete(item.get()) }) {
@@ -115,12 +128,12 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
         br()
         navbar(NavbarCompletePosition.FixedBottom, containerWidth = ContainerWidth.Fluid) {
             navbarContainer.row {
-                col(Col.Width.Tn(3) and Col.Width.Xs(3)) {
+                col(Col.Width.Xs(3) and Col.Width.Tn(3)) {
                     btsButton(onclick = { window.location.hash = ToDoDetailModel.toUrl(null) }) {
                         appendText("Add")
                     }
                 }
-                col(Col.Width.Tn(9) and Col.Width.Xs(9)) {
+                col(Col.Width.Xs(9) and Col.Width.Tn(9)) {
                     addClass("text-right")
                     undoComponent()
                 }
