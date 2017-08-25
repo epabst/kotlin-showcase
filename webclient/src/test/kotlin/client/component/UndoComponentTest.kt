@@ -138,5 +138,28 @@ object UndoComponentTest {
             repository.find(newId2).mustBe(null)
             (UndoComponent.undoCount - originalUndoCount).mustBe(3)
         }
+
+        it("should undo commands in reverse order and redo in original order") {
+            repository.addListener(object : RepositoryListener<EntityForTesting> {
+                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                    if (replacementWithID.name == "Adam") {
+                        repository.list().find { it.name == "Eve" }.mustBe(null)
+                    }
+                }
+
+                override fun onRemoved(item: EntityForTesting) {
+                    if (item.name == "Eve") {
+                        repository.list().find { it.name == "Adam" }.mustNotBe(null)
+                    }
+                }
+            })
+
+            UndoComponent.undoable("Ordered Operations") {
+                repository.save(EntityForTesting("Adam"))
+                repository.save(EntityForTesting("Eve"))
+            }
+            UndoComponent.undo()
+            UndoComponent.redo()
+        }
     }
 }

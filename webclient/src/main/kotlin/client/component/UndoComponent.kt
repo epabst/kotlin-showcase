@@ -72,19 +72,20 @@ object UndoComponent {
      * Without doing this, each repository action (save or remove)
      * will each be individually undoable.
      */
-    fun undoable(pastTenseDescription: String, function: () -> Unit?) {
+    fun <T> undoable(pastTenseDescription: String, function: () -> T): T {
         if (commandRecorder == NormalCommandRecorder) {
             val undoableGroup = UndoableGroup(pastTenseDescription)
             commandRecorder = undoableGroup
             try {
-                function()
+                val result = function()
                 addUndoCommand(undoableGroup)
+                return result
             } finally {
                 commandRecorder = NormalCommandRecorder
             }
         } else {
             // there is already a special commandRecorder, so just run the function
-            function()
+            return function()
         }
     }
 
@@ -165,12 +166,12 @@ private class UndoableGroup(pastTenseDescription: String) : Command(pastTenseDes
     private val undoCommands: MutableList<Command> = mutableListOf()
 
     override fun addUndoCommandIfAppropriate(undoCommand: Command) {
-        undoCommands.add(undoCommand)
+        undoCommands.add(0, undoCommand)
     }
 
     /** Run all undoCommands and return the redo. */
     override fun executeAndGetOpposite(): Command {
-        val redoCommands = undoCommands.map { it.executeAndGetOpposite() }
+        val redoCommands = undoCommands.map { it.executeAndGetOpposite() }.reversed()
         val undoCommand = this
         return object : Command("Reversed $pastTenseDescription") {
             override fun executeAndGetOpposite(): Command {
