@@ -37,6 +37,24 @@ fun <ENTITY: WithID<ENTITY>, OUT> MutableMap<ID<ENTITY>,OUT>.mapWithCacheByID(en
     return entity.getID()?.let { id -> getOrPut(id) { transform(entity) } } ?: transform(entity)
 }
 
+fun <T> Property<Set<T>>.toggleItem(item: T) {
+    modify {
+        if (it.contains(item)) {
+            it - item
+        } else {
+            it + item
+        }
+    }
+}
+
+fun <T> ReadOnlyProperty<Collection<T>>.contains(item: T?): ReadOnlyProperty<Boolean> {
+    return map { it.contains(item) }
+}
+
+fun <T> ReadOnlyProperty<Collection<T>>.contains(itemProperty: ReadOnlyProperty<T?>): ReadOnlyProperty<Boolean> {
+    return mapWith(itemProperty) { collection, item -> collection.contains(item) }
+}
+
 fun String?.emptyToNull(): String? {
     return if (this == null || this.isEmpty()) null else this
 }
