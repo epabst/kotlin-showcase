@@ -44,6 +44,12 @@ interface Repository<T : WithID<T>> {
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
     fun save(original: T?, replacement: T): ID<T>
 
+    /** @return entity.getID() or else [generateID]. */
+    fun save(entity: T): ID<T> {
+        val original = entity.getID()?.let { find(it) }
+        return save(original, entity)
+    }
+
     fun remove(item: T)
 
     fun remove(id: ID<T>) {
