@@ -5,6 +5,7 @@ import client.UITest
 import client.test.ToDoLocalStorageRepositoryTest
 import client.util.JavascriptProviderTest
 import client.util.LocalStorageRepositoryTest
+import client.util.RepositoryCacheTest
 import common.util.RichDateTest
 
 /**
@@ -19,6 +20,7 @@ fun main(args: Array<String>) {
     RichDateTest.suite()
     JSModelTest.suite()
     LocalStorageRepositoryTest.suite()
+    RepositoryCacheTest.suite()
     ToDoLocalStorageRepositoryTest.suite()
     UITest.suite()
 //    UndoComponentTest.suite()
