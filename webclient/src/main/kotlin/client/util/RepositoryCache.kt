@@ -42,7 +42,11 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
             override fun onRemoved(item: T) {
                 item.getID()?.let { cache.remove(it) }
                 listCache.entries.forEach { (query, listProperty) ->
-                    listProperty.modifyList { it.remove(query.selector.invoke(item)) }
+                    if (query.criteria.invoke(item)) {
+                        listProperty.modifyList {
+                            it.remove(query.selector.invoke(item))
+                        }
+                    }
                 }
             }
         })
@@ -84,17 +88,17 @@ interface FieldSelector<T : WithID<T>,F> {
 }
 
 class IdFieldSelector<T : WithID<T>> : FieldSelector<T,ID<T>> {
-    private val hashCode = "IdFieldSelector".hashCode()
     override fun invoke(entity: T): ID<T> = entity.getID()!!
     override fun equals(other: Any?): Boolean = other is IdFieldSelector<*>
-    override fun hashCode(): Int = hashCode
+    override fun hashCode(): Int = toString().hashCode()
+    override fun toString(): String = "IdFieldSelector"
 }
 
 class SelfSelector<T : WithID<T>> : FieldSelector<T,T> {
-    private val hashCode = "SelfSelector".hashCode()
     override fun invoke(entity: T): T = entity
     override fun equals(other: Any?): Boolean = other is SelfSelector<*>
-    override fun hashCode(): Int = hashCode
+    override fun hashCode(): Int = toString().hashCode()
+    override fun toString(): String = "SelfSelector"
 }
 
 internal data class RepositoryQuery<T : WithID<T>,F>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
