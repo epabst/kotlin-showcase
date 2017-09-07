@@ -47,6 +47,13 @@ private fun <T> T.equalTo(expected: T): Boolean {
     }
 }
 
+fun <T> Collection<T>.mustContain(expectedItem: T) {
+    if (!contains(expectedItem)) {
+        fail("expected collection containing '$expectedItem' but actual was '${this}'")
+    }
+    QUnit.assert.equal(true, true)
+}
+
 fun String?.mustContain(expectedSubstring: String) {
     if (this == null || !contains(expectedSubstring)) {
         fail("expected string containing '$expectedSubstring' but actual was '${this}'")
