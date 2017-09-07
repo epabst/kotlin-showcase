@@ -78,15 +78,15 @@ object UITest {
                     toDoDetailModel.save().mustBe(true)
 
                     (toDoRepository.list().size - originalSize).mustBe(2)
-                    val maserModel = ToDosModel(toDoRepository)
-                    toDosScreen(maserModel)
-                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
+                    val optionsModel = ToDosModel(toDoRepository)
+                    toDosScreen(optionsModel)
+                    ((optionsModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
 
                     UndoComponent.undoCount.mustBe(originalUndoCount + 2)
                     UndoComponent.undo()
                     UndoComponent.undoCount.mustBe(originalUndoCount + 1)
                     (toDoRepository.list().size - originalSize).mustBe(1)
-                    ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(1)
+                    ((optionsModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(1)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
