@@ -39,10 +39,11 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
         val originalID = original?.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!
-        if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
+        val originalWithID = original?.withID(newID)
+        if (originalWithID != replacementWithID) {
             putIntoList(list, replacementWithID, originalID)
             store()
-            listeners.forEach { it.onSaved(original, replacementWithID) }
+            listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
         }
         return newID
     }
