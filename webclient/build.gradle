@@ -48,10 +48,19 @@ sourceSets {
   test.kotlin.srcDirs += 'src/main/kotlin'
 }
 
+task extractJsLibs(type: Copy) {
+  from { // use of closure defers evaluation until execution time
+    configurations.compile.collect { zipTree(it) }
+  }
+  include '*.js'
+  into 'build/classes/main/lib'
+}
+
 compileKotlin2Js {
   kotlinOptions.outputFile = "webclient/build/classes/main/webclient.js"
   kotlinOptions.sourceMap = true
-}.dependsOn(linkCommonSource)
+}.dependsOn(linkCommonSource, extractJsLibs)
+
 
 compileTestKotlin2Js {
   kotlinOptions.outputFile = "webclient/build/classes/test/webclient_test.js"

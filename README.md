@@ -15,19 +15,11 @@ Search for "ZZZ" and replace it with the information for your custom app.
 # How to Prepare to Build webclient
 
 * Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
-* The webclient module requires exporting some Kotlin libraries to Javascript.
-In IntelliJ, open the settings.gradle file in the top-level directory,
-without selecting the "separate module per source set" option.
-Note: After this, the module output paths should be something like webclient/build/classes/main and webclient/build/classes/test.
 * To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
  
 # How to Build webclient
 
 First run "./gradlew build" in this top-level directory.
-This will copy the common module's source code into the webclient/build/gen/kotlin directory. 
-
-Then compile the webclient module in IntelliJ (e.g. right-click on the webclient directory and click "Build Module 'webclient'").
-It will generate some .js files in webclient/build/classes/main.
 
 # How to Run webclient from IntelliJ (v. 2017.1)
 
@@ -35,10 +27,14 @@ In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Brows
 
 # How to Run webclient tests from IntelliJ (v. 2017.1)
 
-Compile the webclient module in IntelliJ (e.g. right-click on the webclient module and click "Build Module 'webclient'").
-It will generate some files in webclient/build/classes/test.
-
 In IntelliJ, right-click on webclient/src/test/web/runner.html and "Open in Browser".
+
+# How to compile changes from IntelliJ (v. 2017.1)
+
+In IntelliJ, open the settings.gradle file in the top-level directory,
+without selecting the "separate module per source set" option.
+
+Set the module output paths to webclient/build/classes/main and webclient/build/classes/test.
 
 # How to Build mobile
 
