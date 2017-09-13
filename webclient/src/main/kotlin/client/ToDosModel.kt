@@ -25,7 +25,7 @@ import kotlin.dom.appendText
  * Date: 6/7/16
  * Time: 6:37 AM
  */
-class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
+class ToDosModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
     val data = Property<List<ToDo>?>(repository.list())
     val dataProperties = data.mapEachReusingByID { it.toProperty() }
     val currentSort = Property<SortSpecification<Property<ToDo>>?>(null)
@@ -56,7 +56,7 @@ class ToDoMasterModel(val repository: Repository<ToDo> = Factory.toDoRepository)
     }
 }
 
-fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivElement {
+fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
     return Div {
         inContext("buttonBar") { buttonBar(null.toProperty(), "To-Do List".toProperty()) }
         div { addClass("container-fluid")
@@ -129,7 +129,7 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
         navbar(NavbarCompletePosition.FixedBottom, containerWidth = ContainerWidth.Fluid) {
             navbarContainer.row {
                 col(Col.Width.Xs(3) and Col.Width.Tn(3)) {
-                    btsButton(onclick = { window.location.hash = ToDoDetailModel.toUrl(null) }) {
+                    btsButton(onclick = { window.location.hash = ToDoModel.toUrl(null) }) {
                         appendText("Add")
                     }
                 }
@@ -143,7 +143,7 @@ fun toDoMasterScreen(model: ToDoMasterModel, animate: Boolean = true): HTMLDivEl
 }
 
 private fun HTMLElement.editOnClick(toDo: ReadOnlyProperty<ToDo>, render: HTMLAnchorElement.(ReadOnlyProperty<ToDo>) -> Unit) {
-    a { toDo.onNext { href = ToDoDetailModel.toUrl(it.id) }
+    a { toDo.onNext { href = ToDoModel.toUrl(it.id) }
         render(toDo)
     }
 }

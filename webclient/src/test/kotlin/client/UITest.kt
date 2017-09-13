@@ -11,7 +11,7 @@ import net.yested.ext.jquery.destinationBack
 import kotlin.browser.window
 
 /**
- * A test for UI such as [toDoMasterScreen].
+ * A test for UI such as [toDosScreen].
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 8/11/16
  * Time: 3:47 PM
@@ -36,22 +36,22 @@ object UITest {
             it("should delete a ToDo and be able to undo it") {
                 try {
                     val initialSize = toDoRepository.list().size
-                    window.location.hash = ToDoMasterModel.toUrl()
+                    window.location.hash = ToDosModel.toUrl()
 
-                    val toDoDetailModel = ToDoDetailModel(null.toProperty())
+                    val toDoDetailModel = ToDoModel(null.toProperty())
                     toDoDetailModel.toDo.set(ToDo("Txt#1"))
-                    window.location.hash = ToDoDetailModel.toUrl(null)
-                    toDoDetailScreen(toDoDetailModel)
+                    window.location.hash = ToDoModel.toUrl(null)
+                    toDoScreen(toDoDetailModel)
 
                     toDoDetailModel.save().mustBe(true)
-                    assertWentBackTo(ToDoMasterModel.toUrl())
+                    assertWentBackTo(ToDosModel.toUrl())
                     (toDoRepository.list().size - initialSize).mustBe(1)
 
                     val originalUndoSize = UndoComponent.undoCount
 
-                    window.location.hash = ToDoMasterModel.toUrl()
-                    val toDoMasterModel = ToDoMasterModel()
-                    toDoMasterScreen(toDoMasterModel, animate = false)
+                    window.location.hash = ToDosModel.toUrl()
+                    val toDoMasterModel = ToDosModel()
+                    toDosScreen(toDoMasterModel, animate = false)
 
                     toDoDetailModel.delete()
 
@@ -69,17 +69,17 @@ object UITest {
                 try {
                     val originalSize = toDoRepository.list().size
                     val originalUndoCount = UndoComponent.undoCount
-                    val toDoDetailModel = ToDoDetailModel(null.toProperty())
+                    val toDoDetailModel = ToDoModel(null.toProperty())
                     toDoDetailModel.toDo.set(ToDo("Txt#1"))
-                    toDoDetailScreen(toDoDetailModel)
+                    toDoScreen(toDoDetailModel)
                     toDoDetailModel.save().mustBe(true)
 
                     toDoDetailModel.toDo.set(ToDo("Txt#2"))
                     toDoDetailModel.save().mustBe(true)
 
                     (toDoRepository.list().size - originalSize).mustBe(2)
-                    val maserModel = ToDoMasterModel(toDoRepository)
-                    toDoMasterScreen(maserModel)
+                    val maserModel = ToDosModel(toDoRepository)
+                    toDosScreen(maserModel)
                     ((maserModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
 
                     UndoComponent.undoCount.mustBe(originalUndoCount + 2)
@@ -98,8 +98,8 @@ object UITest {
                 val id2 = toDoRepository.save(null, ToDo("Txt#2"))
                 toDoRepository.save(null, ToDo("Txt#3"))
 
-                val toDoMasterModel = ToDoMasterModel(toDoRepository)
-                val masterScreen = toDoMasterScreen(toDoMasterModel, animate = false)
+                val toDoMasterModel = ToDosModel(toDoRepository)
+                val masterScreen = toDosScreen(toDoMasterModel, animate = false)
                 masterScreen.textContent.mustContainInOrder("Txt#1", "Txt#2", "Txt#3")
 
                 val toDo2 = toDoRepository.find(id2)
@@ -108,12 +108,12 @@ object UITest {
             }
         }
 
-        describe("toDoDetailScreen") {
+        describe("toDoScreen") {
             it("should start (mostly) empty for each new to-do") {
                 try {
                     val todoId: Property<ID<ToDo>?> = null.toProperty()
-                    val toDoDetailModel = ToDoDetailModel(todoId)
-                    toDoDetailScreen(toDoDetailModel)
+                    val toDoDetailModel = ToDoModel(todoId)
+                    toDoScreen(toDoDetailModel)
                     toDoDetailModel.name.set("TestToDo1")
                     toDoDetailModel.dueDate.set(today.toMoment())
                     toDoDetailModel.save().mustBe(true)
@@ -136,10 +136,10 @@ object UITest {
                 val id1 = toDoRepository.save(null, ToDo("Txt#1", today))
                 val id2 = toDoRepository.save(null, ToDo("Txt#2", today))
 
-                val masterModel = ToDoMasterModel(toDoRepository)
+                val masterModel = ToDosModel(toDoRepository)
                 val dataProperty2 = masterModel.dataProperties.get()?.find { it.get().id == id2 }!!
 
-                val masterScreen = toDoMasterScreen(masterModel, animate = false)
+                val masterScreen = toDosScreen(masterModel, animate = false)
                 masterScreen.textContent.mustContain("Txt#1")
                 masterScreen.textContent.mustContain("Txt#2")
                 masterScreen.textContent.mustNotContain("Txt#Was2")
@@ -164,8 +164,8 @@ object UITest {
                     testToDoIds.add(toDoId)
 
                     val toDoIdBeingEdited = toDoId.toProperty<ID<ToDo>?>()
-                    val toDoDetailModel = ToDoDetailModel(toDoIdBeingEdited)
-                    toDoDetailScreen(toDoDetailModel)
+                    val toDoDetailModel = ToDoModel(toDoIdBeingEdited)
+                    toDoScreen(toDoDetailModel)
                     toDoDetailModel.name.get().mustBe("Txt#1")
                     toDoDetailModel.dueDate.get().mustBe(null)
 
@@ -184,13 +184,13 @@ object UITest {
         describe("UndoComponent") {
             it("should allow various sequences of undo/redo/commands") {
                 val originalUndoCount = UndoComponent.undoCount
-                val masterModel = ToDoMasterModel()
-                toDoMasterScreen(masterModel)
+                val masterModel = ToDosModel()
+                toDosScreen(masterModel)
 
                 val originalSize = toDoRepository.list().size
-                val detailModel = ToDoDetailModel(null.toProperty())
+                val detailModel = ToDoModel(null.toProperty())
                 detailModel.toDo.set(ToDo("Txt#1"))
-                toDoDetailScreen(detailModel)
+                toDoScreen(detailModel)
                 detailModel.save().mustBe(true)
 
                 detailModel.toDo.set(ToDo("Txt#2"))

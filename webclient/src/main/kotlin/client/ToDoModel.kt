@@ -22,14 +22,14 @@ import kotlin.dom.appendText
  * Date: 6/7/16
  * Time: 6:37 AM
  */
-class ToDoDetailModel(val toDoId: Property<ID<ToDo>?>) {
+class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoRepository = Factory.toDoRepository
     val name = toDo.mapAsDefault { it?.name ?: "" }
     val validation = name.validate("Description is mandatory", { it.size > 0})
     val dueDate = toDo.mapAsDefault { it?.dueDate?.toMoment() }
     val notes = toDo.mapAsDefault { it?.note ?: "" }
-    val backHash = ToDoMasterModel.toUrl().toProperty()
+    val backHash = ToDosModel.toUrl().toProperty()
 
     fun save(): Boolean {
         if (validation.get().success) {
@@ -52,7 +52,7 @@ class ToDoDetailModel(val toDoId: Property<ID<ToDo>?>) {
         toDo.get()?.let { toDo ->
             toDoRepository.remove(toDo)
         }
-        window.history.backToHash(ToDoMasterModel.toUrl())
+        window.history.backToHash(ToDosModel.toUrl())
     }
 
     companion object {
@@ -60,7 +60,7 @@ class ToDoDetailModel(val toDoId: Property<ID<ToDo>?>) {
     }
 }
 
-fun toDoDetailScreen(model: ToDoDetailModel): HTMLDivElement {
+fun toDoScreen(model: ToDoModel): HTMLDivElement {
     return Div {
         inContext("buttonBar") { buttonBar(model.backHash, "To-Do".toProperty()) }
         btsFormHorizontal(labelWidth = Col.Width.Sm(4), inputWidth = Col.Width.Sm(8)) {
