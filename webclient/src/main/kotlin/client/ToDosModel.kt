@@ -69,12 +69,12 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                         th {
                             Col.Width.Sm(8) and Col.Width.Xs(8)
                             addClass("text-left")
-                            sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.name }, sortNow = true) { appendText("ToDo") }
+                            sortControlWithArrow(model.currentSort, compareBy<Property<ToDo>> { it.get().name }, sortNow = true) { appendText("ToDo") }
                         }
                         th {
                             Col.Width.Sm(2) and Col.Width.Xs(2)
                             addClass("text-right")
-                            sortControlWithArrow(model.currentSort, compareByProperty<ToDo> { it.dueDate }) {
+                            sortControlWithArrow(model.currentSort, compareBy<Property<ToDo>> { it.get().dueDate }) {
                                 div { appendText("Due Date") }
                             }
                         }
