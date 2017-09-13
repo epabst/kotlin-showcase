@@ -1,5 +1,7 @@
 .idea/
+.gradle/
 .settings/
+.shelf/
 bin/
 *.log
 proguard/
