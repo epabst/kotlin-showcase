@@ -5,11 +5,13 @@ import java.nio.file.Paths
 
 apply plugin: "kotlin2js"
 
-task cleanupLinkCommonSource(type: Exec) {
+task cleanupLinkCommonSource {
   if (Os.isFamily(Os.FAMILY_WINDOWS) && Files.exists(Paths.get('webclient/src/main/kotlin/common'), LinkOption.NOFOLLOW_LINKS)) {
-    commandLine "cmd", "/C", "rmdir", "${rootDir}\\webclient\\src\\main\\kotlin\\common"
-  } else {
-    commandLine "cmd", "/C", "echo nothing to do"
+    doLast {
+      exec {
+        commandLine "cmd", "/C", "rmdir", "${rootDir}\\webclient\\src\\main\\kotlin\\common"
+      }
+    }
   }
 }
 
@@ -33,13 +35,17 @@ task cleanupLinkCommonSource(type: Exec) {
 //      However, I do have to be careful to change the original files and not the copies.
 // 4. Symlink the common directory to make IntelliJ allow two modules to share the same source.
 //      Result:  This worked well.
-task linkCommonSource(type: Exec) {
-  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-    commandLine "cmd", "/C", "mklink /D ${rootDir}\\webclient\\src\\main\\kotlin\\common ${rootDir}\\common\\src\\main\\kotlin\\common"
-    ignoreExitValue true
-  } else {
-    ant.symlink(action: "delete", link: "webclient/src/main/kotlin/common")
-    ant.symlink(resource: "../../../../common/src/main/kotlin/common", link: "webclient/src/main/kotlin/common")
+task linkCommonSource {
+  doLast {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+      exec {
+        commandLine "cmd", "/C", "mklink /D ${rootDir}\\webclient\\src\\main\\kotlin\\common ${rootDir}\\common\\src\\main\\kotlin\\common"
+        ignoreExitValue true
+      }
+    } else {
+      ant.symlink(action: "delete", link: "webclient/src/main/kotlin/common")
+      ant.symlink(resource: "../../../../common/src/main/kotlin/common", link: "webclient/src/main/kotlin/common")
+    }
   }
 }
 linkCommonSource.dependsOn(cleanupLinkCommonSource)
