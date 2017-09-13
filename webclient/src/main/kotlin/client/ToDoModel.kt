@@ -56,7 +56,7 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
     }
 
     companion object {
-        fun toUrl(toDoId: ID<ToDo>?): String = "#toDo" + if (toDoId != null) "_" + toDoId else ""
+        fun toUrl(toDoId: ID<ToDo>?): String = "#toDo" + if (toDoId != null) "/" + toDoId else ""
     }
 }
 
