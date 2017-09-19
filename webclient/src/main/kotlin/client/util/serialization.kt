@@ -31,7 +31,7 @@ fun LongJS?.toNormal(): Long? {
     }
 }
 
-fun <E : WithID<E>> String.toID(): ID<E>? = JSON.parse<LongJS>(this).toNormal()?.let { ID(it) }
+fun <E : WithID<E>> String.toID(): ID<E>? = ID(this)
 
 fun RichDate.toMoment(): Moment = (date as MomentDate).moment
 
@@ -43,7 +43,8 @@ external interface RichDateJS {
 fun RichDateJS.toNormal(): RichDate = RichDate(months, days)
 
 external interface IDJS {
-    val id: LongJS
+    val id: LongJS?
+    val _id: String?
 }
 
-fun <E : WithID<E>> IDJS.toNormal(): ID<E>? = id.toNormal()?.let { ID(it) }
+fun <E : WithID<E>> IDJS.toNormal(): ID<E>? = (id.toNormal()?.toString() ?: _id) ?.let { ID(it) }
