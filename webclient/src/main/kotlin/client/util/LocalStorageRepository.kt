@@ -15,7 +15,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun generateID(): ID<T> {
-        return ID((Math.random() * Long.MAX_VALUE).toLong())
+        return ID((Math.random() * Long.MAX_VALUE).toString())
     }
 
     private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->

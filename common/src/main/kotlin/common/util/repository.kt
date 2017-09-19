@@ -8,11 +8,13 @@ package common.util
  */
 
 @Suppress("unused") // Although T isn't used here it provides type-safety between IDs of different types.
-data class ID<T : WithID<T>>(val id: Long) {
-    override fun equals(other: Any?): Boolean = if (other is ID<*>) id == other.id else false
-    override fun hashCode(): Int = (id % Int.MAX_VALUE).toInt()
-    override fun toString(): String = id.toString()
+data class ID<T : WithID<T>>(val _id: String) {
+    override fun equals(other: Any?): Boolean = if (other is ID<*>) _id == other._id else false
+    override fun hashCode(): Int = _id.hashCode()
+    override fun toString(): String = _id
 }
+
+fun <T : WithID<T>> ID(id: Long): ID<T> = ID(id.toString())
 
 interface WithID<T : WithID<T>> {
     fun getID(): ID<T>?
@@ -137,7 +139,7 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
         return newID
     }
 
-    override fun generateID(): ID<T> = ID(idGenerator.generateID())
+    override fun generateID(): ID<T> = ID(idGenerator.generateID().toString())
 
     override fun remove(id: ID<T>) {
         val index = list.indexOfFirst { it.getID() == id }

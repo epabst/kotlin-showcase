@@ -54,7 +54,7 @@ fun main(args: Array<String>) {
                 when (firstHash) {
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoScreen, divContainer)
-                        val toDoId: ID<ToDo>? = if (hash.size > 1) hash[1].toID() else null
+                        val toDoId: ID<ToDo>? = if (hash.size > 1) ID(hash[1]) else null
                         UI.toDoId.set(toDoId)
                     }
                     else -> {
