@@ -36,10 +36,10 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
     override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID<T> {
-        val originalID = original?.getID()
+        val originalID = original?.getID() ?: replacement.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!
-        val originalWithID = original?.withID(newID)
+        val originalWithID = originalID?.let { original?.withID(it) }
         if (originalWithID != replacementWithID) {
             putIntoList(list, replacementWithID, originalID)
             store()

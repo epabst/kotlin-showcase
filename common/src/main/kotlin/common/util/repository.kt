@@ -120,13 +120,15 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
     override fun list(): List<T> = list.toList()
 
     override fun save(original: T?, replacement: T): ID<T> {
-        val originalID = original?.getID()
+        val originalID = original?.getID() ?: replacement.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
-        if (original?.withID(replacementWithID.getID()!!) != replacementWithID) {
+        val newID = replacementWithID.getID()!!
+        val originalWithID = originalID?.let { original?.withID(it) }
+        if (originalWithID != replacementWithID) {
             putIntoList(list, replacementWithID, originalID)
-            listeners.forEach { it.onSaved(original, replacementWithID) }
+            listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
         }
-        return replacementWithID.getID()!!
+        return newID
     }
 
     override fun generateID(): ID<T> = ID(idGenerator.generateID())

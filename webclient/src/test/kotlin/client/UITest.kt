@@ -73,9 +73,14 @@ object UITest {
                     toDoModel.toDo.set(ToDo("Txt#1"))
                     toDoScreen(toDoModel)
                     toDoModel.save().mustBe(true)
+                    val toDoId1 = toDoModel.toDoId.get()
+                    toDoId1.mustNotBe(null)
 
                     toDoModel.toDo.set(ToDo("Txt#2"))
                     toDoModel.save().mustBe(true)
+                    val toDoId2 = toDoModel.toDoId.get()
+                    toDoId2.mustNotBe(toDoId1)
+                    toDoId2.mustNotBe(null)
 
                     (toDoRepository.list().size - originalSize).mustBe(2)
                     val optionsModel = ToDosModel(toDoRepository)
