@@ -1,9 +1,8 @@
 package client
 
+import client.util.*
 import client.util.IDJS
-import client.util.MomentDate
 import client.util.RichDateJS
-import client.util.toNormal
 import common.*
 import common.util.ID
 import common.util.RichDate
@@ -62,5 +61,5 @@ external interface ToDoJS {
 }
 
 fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDate?.toNormal(), note, createDate.toNormal(), id?.toNormal())
+    return ToDo(name, dueDate?.toNormal(), note.emptyToNull(), createDate.toNormal(), id?.toNormal())
 }

@@ -1,6 +1,7 @@
 package client
 
 import client.component.visible
+import client.util.emptyToNull
 import client.util.toRichDate
 import common.*
 import common.util.ID
@@ -33,7 +34,7 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
 
     fun save(): Boolean {
         if (validation.get().success) {
-            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get(), id = toDo.get()?.id)
+            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get().emptyToNull(), id = toDo.get()?.id)
             val newId = toDoRepository.save(toDo.get(), updatedToDo)
             toDoId.set(newId)
             window.history.backToHash(backHash.get())
