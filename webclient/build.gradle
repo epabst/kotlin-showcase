@@ -68,10 +68,18 @@ compileKotlin2Js {
 }.dependsOn(linkCommonSource, extractJsLibs)
 
 
+task extractTestJsLibs(type: Copy) {
+  from { // use of closure defers evaluation until execution time
+    configurations.testCompile.collect { zipTree(it) }
+  }
+  include '*.js'
+  into 'build/classes/test/lib'
+}
+
 compileTestKotlin2Js {
   kotlinOptions.outputFile = "webclient/build/classes/test/webclient_test.js"
   kotlinOptions.sourceMap = true
-}
+}.dependsOn(extractTestJsLibs)
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
