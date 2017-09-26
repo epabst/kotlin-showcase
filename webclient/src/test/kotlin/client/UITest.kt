@@ -32,28 +32,28 @@ object UITest {
         })
 //        toDoRepository.list.forEach { toDoRepository.remove(it) }
 
-        describe("ToDoMasterScreen") {
+        describe("toDosScreen") {
             it("should delete a ToDo and be able to undo it") {
                 try {
                     val initialSize = toDoRepository.list().size
                     window.location.hash = ToDosModel.toUrl()
 
-                    val toDoDetailModel = ToDoModel(null.toProperty())
-                    toDoDetailModel.toDo.set(ToDo("Txt#1"))
+                    val toDoModel = ToDoModel(null.toProperty())
+                    toDoModel.toDo.set(ToDo("Txt#1"))
                     window.location.hash = ToDoModel.toUrl(null)
-                    toDoScreen(toDoDetailModel)
+                    toDoScreen(toDoModel)
 
-                    toDoDetailModel.save().mustBe(true)
+                    toDoModel.save().mustBe(true)
                     assertWentBackTo(ToDosModel.toUrl())
                     (toDoRepository.list().size - initialSize).mustBe(1)
 
                     val originalUndoSize = UndoComponent.undoCount
 
                     window.location.hash = ToDosModel.toUrl()
-                    val toDoMasterModel = ToDosModel()
-                    toDosScreen(toDoMasterModel, animate = false)
+                    val toDosModel = ToDosModel()
+                    toDosScreen(toDosModel, animate = false)
 
-                    toDoDetailModel.delete()
+                    toDoModel.delete()
 
                     (toDoRepository.list().size - initialSize).mustBe(0)
                     (UndoComponent.undoCount - originalUndoSize).mustBe(1)
@@ -69,13 +69,13 @@ object UITest {
                 try {
                     val originalSize = toDoRepository.list().size
                     val originalUndoCount = UndoComponent.undoCount
-                    val toDoDetailModel = ToDoModel(null.toProperty())
-                    toDoDetailModel.toDo.set(ToDo("Txt#1"))
-                    toDoScreen(toDoDetailModel)
-                    toDoDetailModel.save().mustBe(true)
+                    val toDoModel = ToDoModel(null.toProperty())
+                    toDoModel.toDo.set(ToDo("Txt#1"))
+                    toDoScreen(toDoModel)
+                    toDoModel.save().mustBe(true)
 
-                    toDoDetailModel.toDo.set(ToDo("Txt#2"))
-                    toDoDetailModel.save().mustBe(true)
+                    toDoModel.toDo.set(ToDo("Txt#2"))
+                    toDoModel.save().mustBe(true)
 
                     (toDoRepository.list().size - originalSize).mustBe(2)
                     val optionsModel = ToDosModel(toDoRepository)
@@ -98,8 +98,8 @@ object UITest {
                 val id2 = toDoRepository.save(null, ToDo("Txt#2"))
                 toDoRepository.save(null, ToDo("Txt#3"))
 
-                val toDoMasterModel = ToDosModel(toDoRepository)
-                val masterScreen = toDosScreen(toDoMasterModel, animate = false)
+                val toDosModel = ToDosModel(toDoRepository)
+                val masterScreen = toDosScreen(toDosModel, animate = false)
                 masterScreen.textContent.mustContainInOrder("Txt#1", "Txt#2", "Txt#3")
 
                 val toDo2 = toDoRepository.find(id2)
@@ -112,17 +112,17 @@ object UITest {
             it("should start (mostly) empty for each new to-do") {
                 try {
                     val todoId: Property<ID<ToDo>?> = null.toProperty()
-                    val toDoDetailModel = ToDoModel(todoId)
-                    toDoScreen(toDoDetailModel)
-                    toDoDetailModel.name.set("TestToDo1")
-                    toDoDetailModel.dueDate.set(today.toMoment())
-                    toDoDetailModel.save().mustBe(true)
+                    val toDoModel = ToDoModel(todoId)
+                    toDoScreen(toDoModel)
+                    toDoModel.name.set("TestToDo1")
+                    toDoModel.dueDate.set(today.toMoment())
+                    toDoModel.save().mustBe(true)
                     todoId.get().mustNotBe(null)
                     testToDoIds.add(todoId.get()!!)
 
                     todoId.set(null)
-                    toDoDetailModel.name.get().mustBe("")
-                    toDoDetailModel.dueDate.get().mustBe(null)
+                    toDoModel.name.get().mustBe("")
+                    toDoModel.dueDate.get().mustBe(null)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
@@ -164,17 +164,17 @@ object UITest {
                     testToDoIds.add(toDoId)
 
                     val toDoIdBeingEdited = toDoId.toProperty<ID<ToDo>?>()
-                    val toDoDetailModel = ToDoModel(toDoIdBeingEdited)
-                    toDoScreen(toDoDetailModel)
-                    toDoDetailModel.name.get().mustBe("Txt#1")
-                    toDoDetailModel.dueDate.get().mustBe(null)
+                    val toDoModel = ToDoModel(toDoIdBeingEdited)
+                    toDoScreen(toDoModel)
+                    toDoModel.name.get().mustBe("Txt#1")
+                    toDoModel.dueDate.get().mustBe(null)
 
-                    toDoDetailModel.name.set("TestTxt1")
-                    toDoDetailModel.dueDate.set(today.toMoment())
+                    toDoModel.name.set("TestTxt1")
+                    toDoModel.dueDate.set(today.toMoment())
 
                     toDoIdBeingEdited.set(null)
-                    toDoDetailModel.name.get().mustBe("")
-                    toDoDetailModel.dueDate.get().mustBe(null)
+                    toDoModel.name.get().mustBe("")
+                    toDoModel.dueDate.get().mustBe(null)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
