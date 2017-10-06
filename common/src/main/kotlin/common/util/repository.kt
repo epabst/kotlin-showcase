@@ -54,13 +54,15 @@ interface Repository<T : WithID<T>> {
         return entity.withID(save(entity))
     }
 
-    fun remove(item: T)
-
     fun remove(id: ID<T>) {
         val item = find(id)
         if (item != null) {
             remove(item)
         }
+    }
+
+    fun remove(item: T) {
+        item.getID()?.let { remove(it) }
     }
 
     fun find(id: ID<T>): T? = list().find { it.getID() == id }
@@ -137,9 +139,10 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
 
     override fun generateID(): ID<T> = ID(idGenerator.generateID())
 
-    override fun remove(item: T) {
-        val removed = list.remove(item)
-        if (removed) {
+    override fun remove(id: ID<T>) {
+        val index = list.indexOfFirst { it.getID() == id }
+        if (index >= 0) {
+            val item = list.removeAt(index)
             listeners.forEach { it.onRemoved(item) }
         }
     }

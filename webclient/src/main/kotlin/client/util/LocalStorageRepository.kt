@@ -42,17 +42,18 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
         val originalWithID = originalID?.let { original?.withID(it) }
         if (originalWithID != replacementWithID) {
             putIntoList(list, replacementWithID, originalID)
-            store()
             listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
+            store()
         }
         return newID
     }
 
-    override fun remove(item: T) {
-        val removed = list.remove(item)
-        if (removed) {
-            store()
+    override fun remove(id: ID<T>) {
+        val index = list.indexOfFirst { it.getID() == id }
+        if (index >= 0) {
+            val item = list.removeAt(index)
             listeners.forEach { it.onRemoved(item) }
+            store()
         }
     }
 
