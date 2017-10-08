@@ -1,7 +1,7 @@
 package client.util
 
 import common.util.*
-import kotlin.js.Math
+import kotlin.browser.localStorage
 
 /**
  * A test for [LocalStorageRepository].
@@ -53,7 +53,8 @@ object LocalStorageRepositoryTest {
             }
 
             it("should distinguish between empty and uninitialized") {
-                val localStorageKey = Math.random().toString()
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
                 val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
                 localRepository.isInitialized().mustBe(false)
                 val id = localRepository.save(null, EntityForTesting("hello"))
@@ -74,7 +75,8 @@ object LocalStorageRepositoryTest {
                     }
                     override fun onRemoved(item: EntityForTesting) {}
                 }
-                val localStorageKey = Math.random().toString()
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
                 val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
                 localRepository.addListener(listener)
 
@@ -93,7 +95,8 @@ object LocalStorageRepositoryTest {
                     }
                     override fun onRemoved(item: EntityForTesting) {}
                 }
-                val localStorageKey = Math.random().toString()
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
                 val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
                 localRepository.addListener(listener)
                 onSavedCount.mustBe(0)
@@ -117,7 +120,8 @@ object LocalStorageRepositoryTest {
                     }
                     override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
                 }
-                val localStorageKey = Math.random().toString()
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
                 val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
                 localRepository.addListener(listener)
                 onRemovedCount.mustBe(0)
