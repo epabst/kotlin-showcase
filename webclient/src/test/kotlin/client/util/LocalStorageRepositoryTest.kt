@@ -1,7 +1,9 @@
 package client.util
 
+import client.component.UndoComponent
 import common.util.*
 import kotlin.browser.localStorage
+import kotlin.test.fail
 
 /**
  * A test for [LocalStorageRepository].
@@ -136,6 +138,105 @@ object LocalStorageRepositoryTest {
                 localRepository.remove(originalEntity.withID(id1))
                 onRemovedCount.mustBe(1)
             }
+
+            it("should not store if listener fails for save") {
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onRemoved(item: EntityForTesting) {
+                    }
+
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                        throw IntentionalException()
+                    }
+                }
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.addListener(listener)
+
+                val originalEntity = EntityForTesting("A")
+                try {
+                    localRepository.save(null, originalEntity)
+                    fail("expected failure")
+                } catch (e: IntentionalException) {
+                    //expected
+                    LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(0)
+                }
+            }
+
+            it("should not store if listener fails for remove") {
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onRemoved(item: EntityForTesting) {
+                        throw IntentionalException()
+                    }
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                    }
+                }
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepository.addListener(listener)
+
+                val id = localRepository.save(EntityForTesting("A"))
+                try {
+                    localRepository.remove(id)
+                    fail("expected failure")
+                } catch (e: IntentionalException) {
+                    //expected
+                    LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(1)
+                }
+            }
+
+            it("should include listener operations in undo for save") {
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                UndoComponent.watch(localRepository)
+
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onRemoved(item: EntityForTesting) {
+                    }
+
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                        if (replacementWithID.name == "Sith Lord") {
+                            localRepository.save(EntityForTesting("Apprentice"))
+                        }
+                    }
+                }
+                localRepository.addListener(listener)
+
+                localRepository.save(EntityForTesting("Sith Lord"))
+                localRepository.list().size.mustBe(2)
+
+                UndoComponent.undo()
+                localRepository.list().size.mustBe(0)
+            }
+
+            it("should include listener operations in undo for remove") {
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                UndoComponent.watch(localRepository)
+                val sithLordId = localRepository.save(EntityForTesting("Sith Lord"))
+                val apprenticeId = localRepository.save(EntityForTesting("Apprentice"))
+
+                val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
+                    override fun onRemoved(item: EntityForTesting) {
+                        if (item.name == "Sith Lord") {
+                            localRepository.remove(apprenticeId)
+                        }
+                    }
+
+                    override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                    }
+                }
+                localRepository.addListener(listener)
+
+                localRepository.remove(sithLordId)
+                localRepository.list().size.mustBe(0)
+
+                UndoComponent.undo()
+                localRepository.list().size.mustBe(2)
+            }
         }
     }
 }
@@ -156,3 +257,5 @@ fun EntityForTestingJS.toNormal(): EntityForTesting = EntityForTesting(name, id?
 open class LocalStorageRepositoryForTesting(localStorageKey: String) : LocalStorageRepository<EntityForTesting, EntityForTestingJS>(localStorageKey, { it.toNormal() }) {
     companion object : LocalStorageRepositoryForTesting("entityForTesting")
 }
+
+class IntentionalException : RuntimeException("intentional")

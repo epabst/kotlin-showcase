@@ -1,5 +1,6 @@
 package client.util
 
+import client.component.UndoComponent
 import common.util.*
 import kotlin.browser.localStorage
 import kotlin.js.Math
@@ -41,9 +42,13 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
         val newID = replacementWithID.getID()!!
         val originalWithID = originalID?.let { original?.withID(it) }
         if (originalWithID != replacementWithID) {
-            putIntoList(list, replacementWithID, originalID)
-            listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
-            store()
+            UndoComponent.undoable(
+                    if (originalID == null) "Added $replacementWithID" else "Updated $replacementWithID",
+                    if (originalID == null) "Deleted $replacementWithID" else "Reverted $originalWithID") {
+                putIntoList(list, replacementWithID, originalID)
+                listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
+                store()
+            }
         }
         return newID
     }
@@ -51,9 +56,12 @@ open class LocalStorageRepository<T : WithID<T>,JS>(private val localStorageKey:
     override fun remove(id: ID<T>) {
         val index = list.indexOfFirst { it.getID() == id }
         if (index >= 0) {
-            val item = list.removeAt(index)
-            listeners.forEach { it.onRemoved(item) }
-            store()
+            val item = list.get(index)
+            UndoComponent.undoable("Deleted $item", "Restored $item") {
+                list.removeAt(index)
+                listeners.forEach { it.onRemoved(item) }
+                store()
+            }
         }
     }
 
