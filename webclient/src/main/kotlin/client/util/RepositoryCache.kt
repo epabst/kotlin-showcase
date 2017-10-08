@@ -10,7 +10,7 @@ import net.yested.core.properties.*
  * Time: 7:08 AM
  */
 class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
-    private val cache = mutableMapOf<ID<T>, Property<T>?>()
+    private val cache = mutableMapOf<ID<T>, Property<T?>>()
     private val listCache = mutableMapOf<RepositoryQuery<T,*>,Property<List<*>>>()
 
     init {
@@ -40,7 +40,7 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
             }
 
             override fun onRemoved(item: T) {
-                item.getID()?.let { cache.remove(it) }
+                item.getID()?.let { cache[it]?.set(null) }
                 listCache.entries.forEach { (query, listProperty) ->
                     if (query.criteria.invoke(item)) {
                         listProperty.modifyList {
@@ -52,9 +52,9 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
         })
     }
 
-    fun find(id: ID<T>): ReadOnlyProperty<T>? {
+    fun find(id: ID<T>): ReadOnlyProperty<T?> {
         return cache.getOrPut(id) {
-            repository.find(id)?.toProperty()
+            repository.find(id).toProperty()
         }
     }
 
@@ -73,7 +73,7 @@ fun <T : WithID<T>> repositoryCache(repository: Repository<T>): RepositoryCache<
     return repositoryCaches.getOrPut(repository) { RepositoryCache(repository) } as RepositoryCache<T>
 }
 
-fun <T : WithID<T>> Repository<T>.findProperty(id: ID<T>): ReadOnlyProperty<T>? {
+fun <T : WithID<T>> Repository<T>.findProperty(id: ID<T>): ReadOnlyProperty<T?> {
     return repositoryCache(this).find(id)
 }
 

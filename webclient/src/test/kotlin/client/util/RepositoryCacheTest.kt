@@ -1,5 +1,6 @@
 package client.util
 
+import client.component.UndoComponent
 import common.util.*
 
 /**
@@ -42,6 +43,23 @@ object RepositoryCacheTest {
 
                     val id2 = repository.save(EntityForTesting("A"))
                     property.get()?.id.mustBe(id2)
+                }
+            }
+
+            describe("findProperty") {
+                it("should work when deleting an entity and then undoing") {
+                    val repository = InMemoryRepository<EntityForTesting>()
+                    UndoComponent.watch(repository)
+                    val id1 = repository.save(EntityForTesting("A"))
+
+                    val property = repository.findProperty(id1)
+                    property.get()?.id.mustBe(id1)
+
+                    repository.remove(id1)
+                    property.get().mustBe(null)
+
+                    UndoComponent.undo()
+                    property.get()?.id.mustBe(id1)
                 }
             }
         }
