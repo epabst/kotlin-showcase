@@ -34,7 +34,7 @@ In IntelliJ, right-click on webclient/src/test/web/runner.html and "Open in Brow
 In IntelliJ, open the settings.gradle file in the top-level directory,
 without selecting the "separate module per source set" option.
 
-Set the module output paths to webclient/build/classes/main and webclient/build/classes/test.
+Set the module output paths to webclient/out/production/classes and webclient/out/test/classes.
 
 # How to Build mobile
 

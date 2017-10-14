@@ -59,11 +59,11 @@ task extractJsLibs(type: Copy) {
     configurations.compile.collect { zipTree(it) }
   }
   include '*.js'
-  into 'build/classes/main/lib'
+  into 'out/production/classes/lib'
 }
 
 compileKotlin2Js {
-  kotlinOptions.outputFile = "webclient/build/classes/main/webclient.js"
+  kotlinOptions.outputFile = "webclient/out/production/classes/webclient.js"
   kotlinOptions.sourceMap = true
 }.dependsOn(linkCommonSource, extractJsLibs)
 
@@ -73,11 +73,11 @@ task extractTestJsLibs(type: Copy) {
     configurations.testCompile.collect { zipTree(it) }
   }
   include '*.js'
-  into 'build/classes/test/lib'
+  into 'out/test/classes/lib'
 }
 
 compileTestKotlin2Js {
-  kotlinOptions.outputFile = "webclient/build/classes/test/webclient_test.js"
+  kotlinOptions.outputFile = "webclient/out/test/classes/webclient_test.js"
   kotlinOptions.sourceMap = true
 }.dependsOn(extractTestJsLibs)
 
