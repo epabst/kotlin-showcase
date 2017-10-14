@@ -50,6 +50,10 @@ interface Repository<T : WithID<T>> {
         return save(original, entity)
     }
 
+    fun saveAndGet(entity: T): T {
+        return entity.withID(save(entity))
+    }
+
     fun remove(item: T)
 
     fun remove(id: ID<T>) {

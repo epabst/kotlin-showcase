@@ -35,7 +35,7 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
     fun save(): Boolean {
         if (validation.get().success) {
             val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get().emptyToNull(), id = toDo.get()?.id)
-            val newId = toDoRepository.save(toDo.get(), updatedToDo)
+            val newId = toDoRepository.save(updatedToDo)
             toDoId.set(newId)
             window.history.backToHash(backHash.get())
             return true

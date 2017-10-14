@@ -25,7 +25,7 @@ open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("to
     companion object : ToDoLocalStorageRepository() {
         init {
             if (!isInitialized()) {
-                save(null, ToDo("Write down some to-dos"))
+                save(ToDo("Write down some to-dos"))
             }
         }
     }
