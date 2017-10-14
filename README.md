@@ -27,7 +27,8 @@ In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Brows
 
 # How to Run webclient tests from IntelliJ (v. 2017.1)
 
-In IntelliJ, right-click on webclient/src/test/web/runner.html and "Open in Browser".
+In IntelliJ, richt-click on webclient and "Rebuild".
+Then, right-click on webclient/src/test/web/runner.html and "Open in Browser".
 
 # How to compile changes from IntelliJ (v. 2017.1)
 
