@@ -9,7 +9,7 @@ external private fun parseFloat(input: String): Double = definedExternally
 external private fun isNaN(input: Double): Boolean = definedExternally
 
 //Numeral
-external private fun numeral(input: Double): Numeral = definedExternally
+external @JsModule("numeral") @JsNonModule private fun numeral(input: Double): Numeral = definedExternally
 external interface Numeral { fun format(format: String): String }
 
 /**

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "../gradlew test"
+  },
+  "jest": {
+    "setupFiles": ["jest-localstorage-mock"],
+    "testRegex": "_test\\.js$"
+  }
+}

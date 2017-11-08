@@ -1,8 +1,14 @@
 package client.util
 
+import kotlin.browser.window
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.fail
+
+val setupMocks = run {
+    val mockAlert: (String) -> Unit = { println("ALERT: $it") }
+    window.asDynamic().alert = mockAlert
+}
 
 /**
  * Kotlin extensions to QUnit.

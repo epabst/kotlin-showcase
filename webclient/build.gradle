@@ -1,6 +1,16 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+    }
+}
+
 apply plugin: "kotlin2js"
+apply plugin: 'com.moowork.node'
 
 clean.doLast {
   file("out").deleteDir()
@@ -67,6 +77,10 @@ task extractJsLibs(type: Copy) {
   into 'out/production/classes/lib'
 }
 
+[compileKotlin2Js, compileTestKotlin2Js]*.configure {
+  kotlinOptions.moduleKind = "commonjs"
+}
+
 compileKotlin2Js {
   kotlinOptions.outputFile = "webclient/out/production/classes/webclient.js"
   kotlinOptions.sourceMap = true
@@ -129,3 +143,30 @@ dependencies {
   compile "net.yested:Yested:1.0-SNAPSHOT"
   testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 }
+
+/**** Unit tests. ****/
+task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
+   from compileKotlin2Js.destinationDir
+
+   configurations.testCompile.each {
+       from zipTree(it.absolutePath).matching { include '*.js' }
+   }
+
+   into 'node_modules'
+}
+
+node {
+  download = true
+}
+
+task installJest(type: NpmTask) {
+    args = ['install', 'jest', 'jquery', 'bootstrap', 'popper.js', 'moment', 'pickadate', 'firebase', 'jest-localstorage-mock', 'numeral']
+}
+
+task runJest(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installJest]) {
+    script = file('node_modules/jest/bin/jest.js')
+    args = [compileTestKotlin2Js.outputFile]
+}
+
+test.dependsOn runJest
+/**** End Unit tests. ****/
