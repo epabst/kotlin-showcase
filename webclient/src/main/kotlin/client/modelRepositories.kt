@@ -15,6 +15,7 @@ import common.util.*
 object Factory {
     val toDoRepository: Repository<ToDo>
         = if (true) ToDoLocalStorageRepository else ToDoInMemoryRepository
+    val allRepositories = listOf(toDoRepository)
 
     init {
         UndoComponent.watch(toDoRepository)

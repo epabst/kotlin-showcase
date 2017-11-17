@@ -22,11 +22,15 @@
     <platform name="android">
         <preference name="android-targetSdkVersion" value="23" />
         <preference name="android-minSdkVersion" value="14" />
+        <preference name="AndroidExtraFilesystems" value="files-external" />
         <allow-intent href="market:*" />
     </platform>
     <platform name="ios">
+        <preference name="iosExtraFilesystems" value="library" />
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
     <plugin name="cordova-plugin-statusbar" spec="~2.2.2" />
+    <plugin name="cordova-plugin-file" spec="~4.3.3" />
+    <plugin name="io.phasr.cordova.plugin.itunesfilesharing" spec="~0.0.1" />
 </widget>
