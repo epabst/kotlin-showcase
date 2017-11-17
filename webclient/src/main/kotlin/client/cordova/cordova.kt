@@ -1,4 +1,4 @@
-package client.util
+package client.cordova
 
 import org.w3c.dom.Window
 import kotlin.browser.window

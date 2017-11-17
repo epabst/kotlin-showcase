@@ -1,10 +1,11 @@
 package client
 
+import client.component.FileBackupComponent.backupButton
 import client.component.responsiveWidth
 import client.component.undoComponent
 import client.component.visible
 import client.util.mapEachReusingByID
-import common.*
+import common.ToDo
 import common.util.Repository
 import common.util.RepositoryListener
 import common.util.inContext
@@ -126,16 +127,28 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
         }
         br()
         br()
+        br()
+        br()
+        br()
         navbar(NavbarCompletePosition.FixedBottom, containerWidth = ContainerWidth.Fluid) {
             navbarContainer.row {
-                col(Col.Width.Xs(3) and Col.Width.Tn(3)) {
+                col(Col.Width.Tn(5) and Col.Width.Xxs(3) and Col.Width.Xs(3) and Col.Width.Sm(5)) {
+                    undoComponent()
+                }
+                col(Col.Width.Tn(7) and Col.Width.Xxs(9) and Col.Width.Xs(9)) {
+                    addClass("text-right hidden-sm hidden-md hidden-lg")
+                    backupButton()
                     btsButton(onclick = { window.location.hash = ToDoModel.toUrl(null) }) {
                         appendText("Add")
+                        span { addClass("hidden-tn"); nbsp(); appendText("To-Do") }
                     }
                 }
-                col(Col.Width.Xs(9) and Col.Width.Tn(9)) {
-                    addClass("text-right")
-                    undoComponent()
+                col(Col.Width.Sm(7)) {
+                    addClass("text-right hidden-tn hidden-xxs hidden-xs")
+                    backupButton()
+                    btsButton(onclick = { window.location.hash = ToDoModel.toUrl(null) }) {
+                        appendText("Add To-Do")
+                    }
                 }
             }
         }
