@@ -6,14 +6,19 @@ import java.nio.file.Paths
 apply plugin: "kotlin2js"
 
 task cleanupLinkCommonSource {
-  if (Os.isFamily(Os.FAMILY_WINDOWS) && Files.exists(Paths.get('webclient/src/main/kotlin/common'), LinkOption.NOFOLLOW_LINKS)) {
+  if (file("${rootDir}/webclient/src/main/kotlin/common").exists()) {
     doLast {
-      exec {
-        commandLine "cmd", "/C", "rmdir", "${rootDir}\\webclient\\src\\main\\kotlin\\common"
+      if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        exec {
+          commandLine "cmd", "/C", "rmdir", "${rootDir}\\webclient\\src\\main\\kotlin\\common"
+        }
+      } else {
+        ant.symlink(action: "delete", link: "${rootDir}/webclient/src/main/kotlin/common")
       }
     }
   }
 }
+clean.dependsOn(cleanupLinkCommonSource)
 
 // linkCommonSource is here to solve the problem that I need the common module to be compiled to the JVM for unit tests
 // and for the backend, and compiled to Javascript for the webclient and mobile modules.
@@ -36,6 +41,7 @@ task cleanupLinkCommonSource {
 // 4. Symlink the common directory to make IntelliJ allow two modules to share the same source.
 //      Result:  This worked well.
 task linkCommonSource {
+  outputs.upToDateWhen { _ -> file("${rootDir}/webclient/src/main/kotlin/common").exists() }
   doLast {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
       exec {
@@ -43,12 +49,10 @@ task linkCommonSource {
         ignoreExitValue true
       }
     } else {
-      ant.symlink(action: "delete", link: "webclient/src/main/kotlin/common")
-      ant.symlink(resource: "../../../../common/src/main/kotlin/common", link: "webclient/src/main/kotlin/common")
+      ant.symlink(resource: "${rootDir}/common/src/main/kotlin/common", link: "${rootDir}/webclient/src/main/kotlin/common")
     }
   }
 }
-linkCommonSource.dependsOn(cleanupLinkCommonSource)
 
 sourceSets {
   test.kotlin.srcDirs += 'src/main/kotlin'
