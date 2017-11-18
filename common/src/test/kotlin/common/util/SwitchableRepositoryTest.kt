@@ -1,6 +1,6 @@
 package common.util
 
-import org.jetbrains.spek.api.Spek
+import org.junit.Test
 
 /**
  * A test for [SwitchableRepository]
@@ -8,10 +8,13 @@ import org.jetbrains.spek.api.Spek
  * Date: 2/7/2018
  * Time: 5:18 AM
  */
-class SwitchableRepositoryTest : Spek({
-    PlatformProvider.instance = JvmProvider
+class SwitchableRepositoryTest {
+    init {
+        PlatformProvider.instance = JvmProvider
+    }
 
-    it("should notify listeners of data changes due to switching delegate Repository") {
+    @Test
+    fun itShouldNotifyListenersOfDataChangesDueToSwitchingDelegateRepository() {
         val listener1 = CountingListener<EntityForTesting>()
         val repository1 = InMemoryRepositoryForTesting()
         val repository2 = InMemoryRepositoryForTesting()
@@ -30,7 +33,8 @@ class SwitchableRepositoryTest : Spek({
         listener1.onSavedCount.mustBe(3)
     }
 
-    it("should not notify listeners delegate Repositories when switching delegate Repository") {
+    @Test
+    fun itShouldNotNotifyListenersDelegateRepositoriesWhenSwitchingDelegateRepository() {
         val listener1 = CountingListener<EntityForTesting>()
         val listener2 = CountingListener<EntityForTesting>()
         val repository1 = InMemoryRepositoryForTesting()
@@ -59,7 +63,8 @@ class SwitchableRepositoryTest : Spek({
         listener2.onRemovedCount.mustBe(0)
     }
 
-    it("should not notify a listener once the listener has been removed") {
+    @Test
+    fun itShouldNotNotifyAListenerOnceTheListenerHasBeenRemoved() {
         val listener = CountingListener<EntityForTesting>()
         val repository1 = InMemoryRepositoryForTesting()
 
@@ -79,7 +84,8 @@ class SwitchableRepositoryTest : Spek({
         listener.onRemovedCount.mustBe(1)
     }
 
-    it("should not notify listeners when setting delegate to the same value") {
+    @Test
+    fun itShouldNotNotifyListenersWhenSettingDelegateToTheSameValue() {
         val listener1 = CountingListener<EntityForTesting>()
         val repository1 = InMemoryRepositoryForTesting()
         
@@ -95,7 +101,8 @@ class SwitchableRepositoryTest : Spek({
         listener1.onSavedCount.mustBe(1)
     }
 
-    it("should have list use current Repository") {
+    @Test
+    fun itShouldHaveListUseCurrentRepository() {
         val repository1 = InMemoryRepositoryForTesting()
         val repository2 = InMemoryRepositoryForTesting()
         repository2.save(EntityForTesting("George"))
@@ -108,7 +115,8 @@ class SwitchableRepositoryTest : Spek({
         switchableRepository.list().size.mustBe(2)
     }
 
-    it("should find using find (rather than list)") {
+    @Test
+    fun itShouldFindUsingFindRatherThanList() {
         val repository1 = object : InMemoryRepositoryForTesting() {
             override fun find(id: ID<EntityForTesting>): EntityForTesting? {
                 return EntityForTesting("Xander")
@@ -118,7 +126,8 @@ class SwitchableRepositoryTest : Spek({
         switchableRepository.find(repository1.generateID()).mustNotBe(null)
     }
 
-    it("should wrap switching of the repository in an undoable") {
+    @Test
+    fun itShouldWrapSwitchingOfTheRepositoryInAnUndoable() {
         val repository1 = InMemoryRepositoryForTesting()
         val repository2 = InMemoryRepositoryForTesting()
         repository1.save(EntityForTesting("A"))
@@ -135,7 +144,7 @@ class SwitchableRepositoryTest : Spek({
         undoProvider.undoableCount.mustBe(0)
         undoProvider.notUndoableCount.mustBe(1)
     }
-})
+}
 
 class CountingUndoProvider : UndoProvider {
     var undoableCount: Int = 0

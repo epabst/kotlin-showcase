@@ -1,6 +1,7 @@
 package client.util
 
-import QUnit.*
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.fail
 
 /**
@@ -14,7 +15,7 @@ fun <T> T.mustBe(expected: T) {
     if (!equal) {
         fail("expected '$expected' but actual was '$this'")
     }
-    QUnit.assert.equal(equal, true)
+    assertEquals(equal, true)
 }
 
 fun <T> T.mustNotBe(expected: T) {
@@ -22,7 +23,7 @@ fun <T> T.mustNotBe(expected: T) {
     if (equal) {
         fail("did not expect '$expected' but it was equal: '$this'")
     }
-    QUnit.assert.notEqual(equal, true)
+    assertNotEquals(equal, true)
 }
 
 private fun <T> T.equalTo(expected: T): Boolean {
@@ -51,14 +52,14 @@ fun <T> Collection<T>.mustContain(expectedItem: T) {
     if (!contains(expectedItem)) {
         fail("expected collection containing '$expectedItem' but actual was '${this}'")
     }
-    QUnit.assert.equal(true, true)
+    assertEquals(true, true)
 }
 
 fun String?.mustContain(expectedSubstring: String) {
     if (this == null || !contains(expectedSubstring)) {
         fail("expected string containing '$expectedSubstring' but actual was '${this}'")
     }
-    QUnit.assert.equal(true, true)
+    assertEquals(true, true)
 }
 
 fun String?.mustContainInOrder(vararg expectedSubstrings: String) {
@@ -69,14 +70,13 @@ fun String?.mustContainInOrder(vararg expectedSubstrings: String) {
     }
     val indices = expectedSubstrings.map { this?.indexOf(it) }.toList()
     indices.mustBe(indices.sortedBy { it })
-    QUnit.assert.equal(true, true)
 }
 
 fun String?.mustNotContain(unexpectedSubstring: String) {
     if (this == null || contains(unexpectedSubstring)) {
         fail("expected string not containing '$unexpectedSubstring' but actual was '${this}'")
     }
-    QUnit.assert.equal(true, true)
+    assertEquals(true, true)
 }
 
 fun interceptAny(block: () -> Unit): Exception {
@@ -87,12 +87,4 @@ fun interceptAny(block: () -> Unit): Exception {
         exception.mustNotBe(null)
         return exception
     }
-}
-
-fun it(behavior: String, f: () -> Unit) {
-    QUnit.test(behavior, f)
-}
-
-fun describe(name: String, f: () -> Unit) {
-    module(name, f)
 }

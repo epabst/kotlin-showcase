@@ -1,6 +1,7 @@
 package common.util
 
-import org.jetbrains.spek.api.Spek
+import org.junit.Test
+import kotlin.test.assertFailsWith
 
 /**
  * A test for [JvmProvider].
@@ -8,38 +9,37 @@ import org.jetbrains.spek.api.Spek
  * Date: 6/30/16
  * Time: 9:12 PM
  */
-class JvmProviderTest : Spek({
-    PlatformProvider.instance = JvmProvider
-
-    describe("parseCurrency") {
-        it("must parse various number formats") {
-            "1.00".parseCurrency().mustBe(1.0)
-            "1".parseCurrency().mustBe(1.0)
-            "-1.00".parseCurrency().mustBe(-1.0)
-            "-1".parseCurrency().mustBe(-1.0)
-            "$1.00".parseCurrency().mustBe(1.0)
-            "$1".parseCurrency().mustBe(1.0)
-            "($1.00)".parseCurrency().mustBe(-1.0)
-            "($1)".parseCurrency().mustBe(-1.0)
-            intercept(IllegalArgumentException::class.java) { "garbage".parseCurrency() }.message.mustContain("garbage")
-            intercept(IllegalArgumentException::class.java) { "(1.00)".parseCurrency() }.message.mustContain("(1.00)")
-            intercept(IllegalArgumentException::class.java) { "(1)".parseCurrency() }
-            intercept(IllegalArgumentException::class.java) { "-$1.00".parseCurrency() }
-            intercept(IllegalArgumentException::class.java) { "-$1".parseCurrency() }
-        }
+class JvmProviderTest {
+    init {
+        PlatformProvider.instance = JvmProvider
     }
 
-    describe("formatCurrency") {
-        it("must format correctly") {
-            1234.2.formatCurrency().mustBe("1,234.20")
-            1234.22324.formatCurrency().mustBe("1,234.22")
-        }
+    @Test
+    fun parseCurrencyMustParseVariousNumberFormats() {
+        "1.00".parseCurrency().mustBe(1.0)
+        "1".parseCurrency().mustBe(1.0)
+        "-1.00".parseCurrency().mustBe(-1.0)
+        "-1".parseCurrency().mustBe(-1.0)
+        "$1.00".parseCurrency().mustBe(1.0)
+        "$1".parseCurrency().mustBe(1.0)
+        "($1.00)".parseCurrency().mustBe(-1.0)
+        "($1)".parseCurrency().mustBe(-1.0)
+        assertFailsWith(IllegalArgumentException::class) { "garbage".parseCurrency() }.message.mustContain("garbage")
+        assertFailsWith(IllegalArgumentException::class) { "(1.00)".parseCurrency() }.message.mustContain("(1.00)")
+        assertFailsWith(IllegalArgumentException::class) { "(1)".parseCurrency() }
+        assertFailsWith(IllegalArgumentException::class) { "-$1.00".parseCurrency() }
+        assertFailsWith(IllegalArgumentException::class) { "-$1".parseCurrency() }
     }
 
-    describe("formatCurrencyForInput") {
-        it("must format correctly") {
-            1234.2.formatCurrencyForInput().mustBe("1234.20")
-            1234.22324.formatCurrencyForInput().mustBe("1234.22")
-        }
+    @Test
+    fun formatCurrencyMustFormatCorrectly() {
+        1234.2.formatCurrency().mustBe("1,234.20")
+        1234.22324.formatCurrency().mustBe("1,234.22")
     }
-})
+
+    @Test
+    fun formatCurrencyForInputMustFormatCorrectly() {
+        1234.2.formatCurrencyForInput().mustBe("1234.20")
+        1234.22324.formatCurrencyForInput().mustBe("1234.22")
+    }
+}

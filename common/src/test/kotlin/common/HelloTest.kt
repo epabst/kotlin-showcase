@@ -1,6 +1,6 @@
 package common
 
-import org.jetbrains.spek.api.Spek
+import org.junit.Test
 import kotlin.test.assertEquals
 
 /**
@@ -9,12 +9,14 @@ import kotlin.test.assertEquals
  * Date: 6/21/16
  * Time: 11:28 PM
  */
-class HelloTest : Spek({
-    it("should say hello using a name") {
+class HelloTest {
+    @Test
+    fun itShouldSayHelloUsingAName() {
         assertEquals("Hello Bob", Hello.hello("Bob"))
     }
 
-    it("should say hello to the world by default") {
+    @Test
+    fun itShouldSayHelloToTheWorldByDefault() {
         assertEquals("Hello World", Hello.hello())
     }
-})
+}

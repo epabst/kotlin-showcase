@@ -2,6 +2,7 @@ package client.util
 
 import client.component.UndoComponent
 import common.util.*
+import kotlin.test.Test
 
 /**
  * A test for [RepositoryCache].
@@ -9,60 +10,56 @@ import common.util.*
  * Date: 8/29/17
  * Time: 11:17 PM
  */
-object RepositoryCacheTest {
-    fun suite() {
+@Suppress("unused")
+class RepositoryCacheTest {
+    init {
         PlatformProvider.instance = JavascriptProvider
+    }
 
-        describe("RepositoryCache") {
-            describe("idListProperty") {
-                it("should work when deleting or re-adding an entity") {
-                    val repository = InMemoryRepository<EntityForTesting>()
-                    val id1 = repository.save(EntityForTesting("A"))
+    @Test
+    fun idListProperty_shouldWorkWhenDeletingOrReaddingAnEntity() {
+        val repository = InMemoryRepository<EntityForTesting>()
+        val id1 = repository.save(EntityForTesting("A"))
 
-                    val property = repository.idListProperty(EntityForTestingByName("A"))
-                    property.get().mustBe(listOf(id1))
+        val property = repository.idListProperty(EntityForTestingByName("A"))
+        property.get().mustBe(listOf(id1))
 
-                    repository.remove(id1)
-                    property.get().mustBe(emptyList())
+        repository.remove(id1)
+        property.get().mustBe(emptyList())
 
-                    val id2 = repository.save(EntityForTesting("A"))
-                    property.get().mustBe(listOf(id2))
-                }
-            }
+        val id2 = repository.save(EntityForTesting("A"))
+        property.get().mustBe(listOf(id2))
+    }
 
-            describe("findFirstOrNullProperty") {
-                it("should work when deleting or re-adding an entity") {
-                    val repository = InMemoryRepository<EntityForTesting>()
-                    val id1 = repository.save(EntityForTesting("A"))
+    @Test
+    fun findFirstOrNullProperty_shouldWorkWhenDeletingOrReaddingAnEntity() {
+        val repository = InMemoryRepository<EntityForTesting>()
+        val id1 = repository.save(EntityForTesting("A"))
 
-                    val property = repository.findFirstOrNullProperty(EntityForTestingByName("A"))
-                    property.get()?.id.mustBe(id1)
+        val property = repository.findFirstOrNullProperty(EntityForTestingByName("A"))
+        property.get()?.id.mustBe(id1)
 
-                    repository.remove(id1)
-                    property.get().mustBe(null)
+        repository.remove(id1)
+        property.get().mustBe(null)
 
-                    val id2 = repository.save(EntityForTesting("A"))
-                    property.get()?.id.mustBe(id2)
-                }
-            }
+        val id2 = repository.save(EntityForTesting("A"))
+        property.get()?.id.mustBe(id2)
+    }
 
-            describe("findProperty") {
-                it("should work when deleting an entity and then undoing") {
-                    val repository = InMemoryRepository<EntityForTesting>()
-                    UndoComponent.watch(repository)
-                    val id1 = repository.save(EntityForTesting("A"))
+    @Test
+    fun findProperty_shouldWorkWhenDeletingAnEntityAndThenUndoing() {
+        val repository = InMemoryRepository<EntityForTesting>()
+        UndoComponent.watch(repository)
+        val id1 = repository.save(EntityForTesting("A"))
 
-                    val property = repository.findProperty(id1)
-                    property.get()?.id.mustBe(id1)
+        val property = repository.findProperty(id1)
+        property.get()?.id.mustBe(id1)
 
-                    repository.remove(id1)
-                    property.get().mustBe(null)
+        repository.remove(id1)
+        property.get().mustBe(null)
 
-                    UndoComponent.undo()
-                    property.get()?.id.mustBe(id1)
-                }
-            }
-        }
+        UndoComponent.undo()
+        property.get()?.id.mustBe(id1)
     }
 }
 

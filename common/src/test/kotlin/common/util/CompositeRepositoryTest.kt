@@ -1,6 +1,6 @@
 package common.util
 
-import org.jetbrains.spek.api.Spek
+import org.junit.Test
 
 /**
  * A test for [CompositeRepository]
@@ -8,10 +8,13 @@ import org.jetbrains.spek.api.Spek
  * Date: 3/19/2018
  * Time: 3:36 PM
  */
-class CompositeRepositoryTest : Spek({
-    PlatformProvider.instance = JvmProvider
+class CompositeRepositoryTest {
+    init {
+        PlatformProvider.instance = JvmProvider
+    }
 
-    it("should delegate to the correct Repository") {
+    @Test
+    fun itShouldDelegateToTheCorrectRepository() {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
         val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
@@ -26,7 +29,8 @@ class CompositeRepositoryTest : Spek({
         compositeRepository.find(georgeId).mustNotBe(null)
     }
 
-    it("should have list include all Repositories") {
+    @Test
+    fun itShouldHaveListIncludeAllRepositories() {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
         val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
@@ -37,7 +41,8 @@ class CompositeRepositoryTest : Spek({
         compositeRepository.list().size.mustBe(2)
     }
 
-    it("should find using find (rather than list)") {
+    @Test
+    fun itShouldFindUsingFindRatherThanList() {
         val repositoryA = object : InMemoryRepository<EntityForTesting>() {
             override fun find(id: ID<EntityForTesting>): EntityForTesting? {
                 return null
@@ -54,7 +59,8 @@ class CompositeRepositoryTest : Spek({
         compositeRepository.find(repositoryN.generateID()).mustNotBe(null)
     }
 
-    it("should notify listeners") {
+    @Test
+    fun itShouldNotifyListeners() {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
@@ -71,7 +77,8 @@ class CompositeRepositoryTest : Spek({
         listener.onRemovedCount.mustBe(1)
     }
 
-    it("should notify listeners when item added to child Repository") {
+    @Test
+    fun itShouldNotifyListenersWhenItemAddedToChildRepository() {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
@@ -88,7 +95,8 @@ class CompositeRepositoryTest : Spek({
         listener.onRemovedCount.mustBe(1)
     }
 
-    it("should handle save that moves it to another Repository") {
+    @Test
+    fun itShouldHandleSaveThatMovesItToAnotherRepository() {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
 
@@ -105,7 +113,8 @@ class CompositeRepositoryTest : Spek({
         repositoryN.find(id1).mustNotBe(null)
     }
 
-    it("should not call categorizer for removeAll") {
+    @Test
+    fun itShouldNotCallCategorizerForRemoveAll() {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
         val id = repositoryN.save(EntityForTesting("N"))
@@ -118,7 +127,8 @@ class CompositeRepositoryTest : Spek({
         repositoryN.find(id).mustBe(null)
     }
 
-    it("should not notify listeners of remove due to moving to another Repository") {
+    @Test
+    fun itShouldNotNotifyListenersOfRemoveDueToMovingToAnotherRepository() {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
@@ -137,7 +147,8 @@ class CompositeRepositoryTest : Spek({
         listener.onRemovedCount.mustBe(0)
     }
 
-    it("should wrap in a single undoable the removing and adding when moving to another Repository") {
+    @Test
+    fun itShouldWrapInASingleUndoableTheRemovingAndAddingWhenMovingToAnotherRepository() {
         var undoableCount = 0
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
@@ -169,4 +180,4 @@ class CompositeRepositoryTest : Spek({
         compositeRepository.save(entityA.copy(name = "N"))
         undoableCount.mustBe(1)
     }
-})
+}

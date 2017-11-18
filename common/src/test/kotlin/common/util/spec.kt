@@ -4,7 +4,6 @@ import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-import kotlin.test.fail
 
 /**
  * Kotlin extensions to QUnit.
@@ -22,18 +21,4 @@ fun <T> T.mustNotBe(expected: T) {
 
 fun String?.mustContain(expectedSubstring: String) {
     MatcherAssert.assertThat(this, CoreMatchers.containsString(expectedSubstring))
-}
-
-fun <E : Exception> intercept(exceptionClass: Class<E>, block: () -> Unit): E {
-    try {
-        block()
-        fail("expected exception")
-    } catch (exception: Exception) {
-        if (exceptionClass.isInstance(exception)) {
-            @Suppress("UNCHECKED_CAST")
-            return exception as E
-        } else {
-            throw exception
-        }
-    }
 }
