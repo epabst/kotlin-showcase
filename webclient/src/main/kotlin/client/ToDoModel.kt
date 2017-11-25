@@ -27,7 +27,7 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
     val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoRepository = Factory.toDoRepository
     val name = toDo.mapAsDefault { it?.name ?: "" }
-    val validation = name.validate("Description is mandatory", { it.size > 0})
+    val validation = name.validate("Description is mandatory", { it.length > 0})
     val dueDate = toDo.mapAsDefault { it?.dueDate?.toMoment() }
     val notes = toDo.mapAsDefault { it?.note ?: "" }
     val backHash = ToDosModel.toUrl().toProperty()
