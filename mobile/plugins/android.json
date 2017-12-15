@@ -13,7 +13,16 @@
     },
     "dependent_plugins": {
         "cordova-plugin-compat": {
-          "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
+            "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
+        },
+        "cordova-plugin-x-toast": {
+            "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
         }
     }
 }
