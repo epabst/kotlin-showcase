@@ -32,5 +32,4 @@
     </platform>
     <plugin name="cordova-plugin-statusbar" spec="~2.2.2" />
     <plugin name="cordova-plugin-file" spec="~4.3.3" />
-    <plugin name="io.phasr.cordova.plugin.itunesfilesharing" spec="~0.0.1" />
 </widget>
