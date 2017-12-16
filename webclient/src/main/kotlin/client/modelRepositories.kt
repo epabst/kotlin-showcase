@@ -1,9 +1,11 @@
 package client
 
+import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.util.LocalStorageRepository
 import common.*
 import common.util.*
+import net.yested.ext.jquery.yestedJQuery
 
 /**
  * Persistent Repositories.
@@ -26,7 +28,9 @@ open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("to
     companion object : ToDoLocalStorageRepository() {
         init {
             if (!isInitialized()) {
-                save(ToDo("Write down some to-dos"))
+                yestedJQuery.get<dynamic>("initial-data.json") { initialData ->
+                    FileBackupComponent.initializeDataFromJson(initialData)
+                }
             }
         }
     }
