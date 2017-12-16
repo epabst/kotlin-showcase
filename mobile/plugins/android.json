@@ -8,12 +8,12 @@
     },
     "installed_plugins": {
         "cordova-plugin-file": {
-            "PACKAGE_NAME": "pabstsoftware.futurebalance"
+            "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
         }
     },
     "dependent_plugins": {
         "cordova-plugin-compat": {
-            "PACKAGE_NAME": "pabstsoftware.futurebalance"
+          "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
         }
     }
 }
