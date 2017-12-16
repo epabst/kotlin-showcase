@@ -56,15 +56,13 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
     fun replaceAll(entityJsonArray: Array<JS>) {
         val parsedEntities = emptyList<T>().toMutableList()
         entityJsonArray.mapTo(parsedEntities, toData)
-        UndoComponent.undoable("Restore ${parsedEntities.size} entities", "Reverted ${parsedEntities.size} entities") {
-            val priorEntities = listForLocalStorage.toList()
-            listForLocalStorage.clear()
-            listForLocalStorage.addAll(parsedEntities)
-            listOrNull = listForLocalStorage
-            listeners.forEach { listener -> priorEntities.forEach { listener.onRemoved(it) } }
-            listeners.forEach { listener -> parsedEntities.forEach { listener.onSaved(null, it) } }
-            store()
-        }
+        val priorEntities = listForLocalStorage.toList()
+        listForLocalStorage.clear()
+        listForLocalStorage.addAll(parsedEntities)
+        listOrNull = listForLocalStorage
+        listeners.forEach { listener -> priorEntities.forEach { listener.onRemoved(it) } }
+        listeners.forEach { listener -> parsedEntities.forEach { listener.onSaved(null, it) } }
+        store()
     }
 
     override fun remove(id: ID<T>) {

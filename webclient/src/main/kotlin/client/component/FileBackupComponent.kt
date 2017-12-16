@@ -37,6 +37,19 @@ object FileBackupComponent {
         return JSON.stringify(json(*backupItems))
     }
 
+    fun initializeData(initialDataString: String) {
+        initializeDataFromJson(JSON.parse(initialDataString))
+    }
+
+    fun initializeDataFromJson(initialDataJson: dynamic) {
+        Factory.allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().forEach { repository ->
+            val entities = initialDataJson[repository.localStorageKey]
+            if (entities != null) {
+                repository.replaceAll(entities)
+            }
+        }
+    }
+
     fun createBackup() {
         handlingErrors("createBackup") {
             val cordova = window.cordova
