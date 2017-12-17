@@ -37,8 +37,8 @@ object FileBackupComponent {
         return JSON.stringify(json(*backupItems))
     }
 
-    fun initializeData(initialDataString: String) {
-        initializeDataFromJson(JSON.parse(initialDataString))
+    fun initializeData(initialData: Any) {
+        initializeDataFromJson(if (initialData is String) JSON.parse(initialData) else initialData)
     }
 
     fun initializeDataFromJson(initialDataJson: dynamic) {
