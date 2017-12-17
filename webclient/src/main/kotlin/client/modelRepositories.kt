@@ -28,8 +28,8 @@ open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("to
     companion object : ToDoLocalStorageRepository() {
         init {
             if (!isInitialized()) {
-                yestedJQuery.get<dynamic>("initial-data.json") { initialData ->
-                    FileBackupComponent.initializeDataFromJson(initialData)
+                yestedJQuery.get<Any>("initial-data.json") { initialData ->
+                    FileBackupComponent.initializeData(initialData)
                 }
             }
         }
