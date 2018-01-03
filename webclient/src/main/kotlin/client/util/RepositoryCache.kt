@@ -81,26 +81,6 @@ fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T>
     return listProperty<T,ID<T>>(IdFieldSelector(), criteria)
 }
 
-interface FieldSelector<T : WithID<T>,F> {
-    fun invoke(entity: T): F
-    override operator fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
-}
-
-class IdFieldSelector<T : WithID<T>> : FieldSelector<T,ID<T>> {
-    override fun invoke(entity: T): ID<T> = entity.getID()!!
-    override fun equals(other: Any?): Boolean = other is IdFieldSelector<*>
-    override fun hashCode(): Int = toString().hashCode()
-    override fun toString(): String = "IdFieldSelector"
-}
-
-class SelfSelector<T : WithID<T>> : FieldSelector<T,T> {
-    override fun invoke(entity: T): T = entity
-    override fun equals(other: Any?): Boolean = other is SelfSelector<*>
-    override fun hashCode(): Int = toString().hashCode()
-    override fun toString(): String = "SelfSelector"
-}
-
 internal data class RepositoryQuery<T : WithID<T>,F>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
 
 fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<T>> {

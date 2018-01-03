@@ -153,3 +153,23 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
         listeners += listener
     }
 }
+
+interface FieldSelector<T : WithID<T>,F> {
+    fun invoke(entity: T): F
+    override operator fun equals(other: Any?): Boolean
+    override fun hashCode(): Int
+}
+
+class IdFieldSelector<T : WithID<T>> : FieldSelector<T,ID<T>> {
+    override fun invoke(entity: T): ID<T> = entity.getID()!!
+    override fun equals(other: Any?): Boolean = other is IdFieldSelector<*>
+    override fun hashCode(): Int = toString().hashCode()
+    override fun toString(): String = "IdFieldSelector"
+}
+
+class SelfSelector<T : WithID<T>> : FieldSelector<T,T> {
+    override fun invoke(entity: T): T = entity
+    override fun equals(other: Any?): Boolean = other is SelfSelector<*>
+    override fun hashCode(): Int = toString().hashCode()
+    override fun toString(): String = "SelfSelector"
+}
