@@ -3,19 +3,6 @@
 package firebase.storage
 
 import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
 
 external interface FullMetadata : firebase.storage.UploadMetadata {
     var bucket: String
@@ -43,7 +30,7 @@ external interface Reference {
     override fun toString(): String
     fun updateMetadata(metadata: firebase.storage.SettableMetadata): Promise<Any>
 }
-external interface `T$2` {
+external interface ICustomMetadata {
     @nativeGetter
     operator fun get(key: String): String?
     @nativeSetter
@@ -55,7 +42,7 @@ external interface SettableMetadata {
     var contentEncoding: String?
     var contentLanguage: String?
     var contentType: String?
-    var customMetadata: `T$2`?
+    var customMetadata: ICustomMetadata?
 }
 external interface Storage {
     var app: firebase.app.App
@@ -66,25 +53,25 @@ external interface Storage {
     fun setMaxOperationRetryTime(time: Number): Any
     fun setMaxUploadRetryTime(time: Number): Any
 }
-external interface `T$3` {
+external interface ITaskEvent {
     var STATE_CHANGED: String
 }
-external var TaskEvent: `T$3` = definedExternally
-external interface `T$4` {
+external var TaskEvent: ITaskEvent = definedExternally
+external interface ITaskState {
     var CANCELED: String
     var ERROR: String
     var PAUSED: String
     var RUNNING: String
     var SUCCESS: String
 }
-external var TaskState: `T$4` = definedExternally
+external var TaskState: ITaskState = definedExternally
 external interface UploadMetadata : firebase.storage.SettableMetadata {
     var md5Hash: String?
 }
 external interface UploadTask {
     fun cancel(): Boolean
     fun catch(onRejected: (a: Error) -> Any): Promise<Any>
-    fun on(event: firebase.storage.TaskEvent, nextOrObserver: Any? = definedExternally /* null */, error: (a: Error) -> Any? = definedExternally /* null */, complete: () -> Any? = definedExternally /* null */): Function<*>
+    fun on(event: firebase.storage.ITaskEvent, nextOrObserver: Any? = definedExternally /* null */, error: (a: Error) -> Any? = definedExternally /* null */, complete: () -> Any? = definedExternally /* null */): Function<*>
     fun pause(): Boolean
     fun resume(): Boolean
     var snapshot: firebase.storage.UploadTaskSnapshot
@@ -95,7 +82,7 @@ external interface UploadTaskSnapshot {
     var downloadURL: String?
     var metadata: firebase.storage.FullMetadata
     var ref: firebase.storage.Reference
-    var state: firebase.storage.TaskState
+    var state: firebase.storage.ITaskState
     var task: firebase.storage.UploadTask
     var totalBytes: Number
 }

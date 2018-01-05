@@ -1,21 +1,8 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
-@file:[JsQualifier("firebase"), JsModule("firebase")]
+@file:[JsQualifier("firebase") JsModule("firebase")]
 package firebase
 
 import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
 
 external interface FirebaseError {
     var code: String
@@ -30,16 +17,16 @@ external open class Promise<T> : Promise_Instance<T> {
         fun <T> resolve(value: T): firebase.Promise<T> = definedExternally
     }
 }
-external open class Promise_Instance<T>(resolver: (a: ((a: T) -> Nothing?)? /*= null*/, b: ((a: Error) -> Nothing?)? /*= null*/) -> Any) : firebase.Thenable<Any> {
-    open fun catch(onReject: ((a: Error) -> Any)? = definedExternally /* null */): firebase.Thenable<Any> = definedExternally
-    open fun then(onResolve: ((a: T) -> Any)? = definedExternally /* null */, onReject: ((a: Error) -> Any)? = definedExternally /* null */): firebase.Promise<Any> = definedExternally
+external open class Promise_Instance<T>(resolver: (a: ((a: T) -> Nothing?)? /*= null*/, b: ((a: Error) -> Nothing?)? /*= null*/) -> Any) : firebase.Thenable<T> {
+    override fun catch(onReject: ((a: Error) -> Any)?): firebase.Thenable<Any> = definedExternally
+    override fun then(onResolve: ((a: T) -> Any)?, onReject: ((a: Error) -> Any)?): firebase.Promise<Any> = definedExternally
 }
 external var SDK_VERSION: String = definedExternally
 external interface Thenable<T> {
     fun catch(onReject: ((a: Error) -> Any)? = definedExternally /* null */): Any
     fun then(onResolve: ((a: T) -> Any)? = definedExternally /* null */, onReject: ((a: Error) -> Any)? = definedExternally /* null */): firebase.Thenable<Any>
 }
-external interface `T$0` {
+external interface IProfile {
     var displayName: String?
     var photoURL: String?
 }
@@ -59,7 +46,7 @@ external interface User : firebase.UserInfo {
     fun unlink(providerId: String): firebase.Promise<Any>
     fun updateEmail(newEmail: String): firebase.Promise<Any>
     fun updatePassword(newPassword: String): firebase.Promise<Any>
-    fun updateProfile(profile: `T$0`): firebase.Promise<Any>
+    fun updateProfile(profile: IProfile): firebase.Promise<Any>
 }
 external interface UserInfo {
     var displayName: String?
