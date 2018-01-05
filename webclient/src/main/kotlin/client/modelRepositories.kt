@@ -2,10 +2,13 @@ package client
 
 import client.component.FileBackupComponent
 import client.component.UndoComponent
+import client.ext.firebase.FirebaseRepositorySync
 import client.util.LocalStorageRepository
 import common.*
 import common.util.*
+import firebase.app.App
 import net.yested.ext.jquery.yestedJQuery
+import kotlin.js.json
 
 /**
  * Persistent Repositories.
@@ -15,7 +18,21 @@ import net.yested.ext.jquery.yestedJQuery
  */
 
 object Factory {
-    val toDoRepository: Repository<ToDo> = if (true) ToDoLocalStorageRepository() else InMemoryRepository()
+    // To use firebase, add your app at https://console.firebase.google.com/
+    val firebaseConfig = json(
+            "apiKey" to "ZZZFirebaseApiKeyZZZ",
+            "authDomain" to "ZZZAppIdZZZ.firebaseapp.com",
+            "databaseURL" to "https://ZZZAppIdZZZ.firebaseio.com",
+            "projectId" to "ZZZAppIdZZZ",
+            "storageBucket" to "",
+            "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
+    val firebaseApp = firebase.initializeApp(firebaseConfig)
+
+    val toDoRepository: Repository<ToDo> = when ("localStorage") {
+        "localStorage" -> ToDoLocalStorageRepository()
+        "firebase" -> ToDoFirebaseRepository(firebaseApp)
+        else -> InMemoryRepository()
+    }
     val allRepositories = listOf(toDoRepository)
 
     init {
@@ -32,3 +49,4 @@ object Factory {
 }
 
 open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
+open class ToDoFirebaseRepository(firebaseApp: App) : FirebaseRepositorySync<ToDo, ToDoJS>(ToDoLocalStorageRepository(), "toDos", { it.toNormal() }, firebaseApp)
