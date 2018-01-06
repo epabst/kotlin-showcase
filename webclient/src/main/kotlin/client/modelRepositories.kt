@@ -15,23 +15,20 @@ import net.yested.ext.jquery.yestedJQuery
  */
 
 object Factory {
-    val toDoRepository: Repository<ToDo>
-        = if (true) ToDoLocalStorageRepository else ToDoInMemoryRepository
+    val toDoRepository: Repository<ToDo> = if (true) ToDoLocalStorageRepository() else InMemoryRepository()
     val allRepositories = listOf(toDoRepository)
 
     init {
-        UndoComponent.watch(toDoRepository)
-    }
-}
-
-open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() }) {
-    companion object : ToDoLocalStorageRepository() {
-        init {
-            if (!isInitialized()) {
+        if (toDoRepository is ToDoLocalStorageRepository) {
+            if (!toDoRepository.isInitialized()) {
                 yestedJQuery.get<Any>("initial-data.json") { initialData ->
                     FileBackupComponent.initializeData(initialData)
                 }
             }
         }
+
+        UndoComponent.watch(toDoRepository)
     }
 }
+
+open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
