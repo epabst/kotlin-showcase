@@ -15,7 +15,7 @@ import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
 
-val appName = "ZZZAppNameZZZ"
+val appName = "Jack Dance Toothbrush Time"
 val appFilenamePrefix = appName.replace(Regex("\\W"), "").toLowerCase()
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
 

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="org.ZZZQualifiedPackageNameZZZ" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ZZZAppNameZZZ</name>
+<widget id="pabstsoftware.toothbrush" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Jack Dance Toothbrush Time</name>
     <description>
-        ZZZAppDescriptionZZZ
+        What affects how long you brush your teeth?
     </description>
-    <author email="ZZZEmailZZZ" href="ZZZWebsiteZZZ">
-        ZZZDeveloperNameZZZ
+    <author email="epabst@gmail.com" href="ZZZWebsiteZZZ">
+        Eric Pabst
     </author>
     <!-- The trailing question mark helps to keep it as a one-page app even when buttons ensure a ? in the URL. -->
     <content src="index.html?" />
