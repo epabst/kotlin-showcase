@@ -1,8 +1,8 @@
 package client.util
 
 import common.util.ProviderDate
-import common.util.RichDate
-import common.util.toRichDate
+import net.yested.ext.moment.FormatString
+import net.yested.ext.moment.FormatStringBuilder
 import net.yested.ext.moment.Moment
 
 /**
@@ -23,4 +23,8 @@ class MomentDate(val moment: Moment) : ProviderDate {
     override fun toString(): String = moment.format("ll")
 }
 
-fun Moment.toRichDate(): RichDate = MomentDate(this).toRichDate()
+val dateTimeFormat: FormatString by lazy {
+    val builder = FormatStringBuilder()
+    builder.year.fourDigits + "/" + builder.month.twoDigits + "/" + builder.dayOfMonth.twoDigits +
+            " " + builder.hour24.twoDigits + ":" + builder.minutes.twoDigits + ":" + builder.seconds.twoDigits
+}

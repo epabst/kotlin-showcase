@@ -6,7 +6,6 @@ import client.test.ToDoLocalStorageRepositoryTest
 import client.util.JavascriptProviderTest
 import client.util.LocalStorageRepositoryTest
 import client.util.RepositoryCacheTest
-import common.util.RichDateTest
 
 /**
  * A QUnit test.  To run this, build this module and open runner.html in a browser.
@@ -17,7 +16,6 @@ import common.util.RichDateTest
 
 fun main(args: Array<String>) {
     JavascriptProviderTest.suite()
-    RichDateTest.suite()
     JSModelTest.suite()
     LocalStorageRepositoryTest.suite()
     RepositoryCacheTest.suite()

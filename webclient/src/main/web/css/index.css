@@ -1,12 +1,21 @@
 #page {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 #buttonBar {
   white-space: nowrap;
 }
 #buttonBar .btn {
   vertical-align: top;
+}
+body {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 body.platform-android #backButton {
   display: none;

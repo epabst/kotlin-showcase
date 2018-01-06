@@ -1,13 +1,11 @@
 package client
 
-import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.FirebaseRepositorySync
 import client.util.LocalStorageRepository
 import common.*
 import common.util.*
 import firebase.app.App
-import net.yested.ext.jquery.yestedJQuery
 import kotlin.js.json
 
 /**
@@ -26,21 +24,13 @@ object Factory {
             "storageBucket" to "",
             "messagingSenderId" to "99366826872")
     val firebaseApp = firebase.initializeApp(firebaseConfig)
-    val toDoRepository: Repository<ToDo> = if (true) ToDoFirebaseRepository(firebaseApp) else InMemoryRepository()
-    val allRepositories = listOf(toDoRepository)
+    val timerRepository: Repository<Timer> = if (true) TimerFirebaseRepository(firebaseApp) else InMemoryRepository()
+    val allRepositories = listOf(timerRepository)
 
     init {
-        if (toDoRepository is ToDoLocalStorageRepository) {
-            if (!toDoRepository.isInitialized()) {
-                yestedJQuery.get<Any>("initial-data.json") { initialData ->
-                    FileBackupComponent.initializeData(initialData)
-                }
-            }
-        }
-
-        UndoComponent.watch(toDoRepository)
+        UndoComponent.watch(timerRepository)
     }
 }
 
-open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
-open class ToDoFirebaseRepository(firebaseApp: App) : FirebaseRepositorySync<ToDo, ToDoJS>(ToDoLocalStorageRepository(), "toDos", { it.toNormal() }, firebaseApp)
+open class TimerLocalStorageRepository : LocalStorageRepository<Timer, TimerJS>("timers", { it.toNormal() })
+open class TimerFirebaseRepository(firebaseApp: App) : FirebaseRepositorySync<Timer, TimerJS>(TimerLocalStorageRepository(), "timers", { it.toNormal() }, firebaseApp)

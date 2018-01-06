@@ -2,7 +2,6 @@ package client
 
 import client.util.*
 import client.util.IDJS
-import client.util.RichDateJS
 import common.*
 
 /**
@@ -12,14 +11,13 @@ import common.*
  * Time: 6:27 AM
  */
 
-external interface ToDoJS {
-    val name: String
-    val dueDate: RichDateJS?
-    val note: String?
-    val createDate: RichDateJS
+external interface TimerJS {
+    val device: String
+    val date: String
+    val durationSeconds: Int
     val id: IDJS?
 }
 
-fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDate?.toNormal(), note.emptyToNull(), createDate.toNormal(), id?.toNormal())
+fun TimerJS.toNormal(): Timer {
+    return Timer(device, date, durationSeconds, id?.toNormal())
 }

@@ -4,9 +4,10 @@ import client.util.JavascriptProvider
 import client.util.*
 import common.*
 import common.util.*
+import net.yested.ext.moment.Moment
 
 /**
- * A test for [ToDoJS], etc.
+ * A test for [TimerJS], etc.
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 6/16/16
  * Time: 6:17 AM
@@ -14,23 +15,24 @@ import common.util.*
 object JSModelTest {
     fun suite() {
         PlatformProvider.instance = JavascriptProvider
-
-        describe("ToDoJS") {
+        val nowDateTime = Moment.now().format(dateTimeFormat)
+        
+        describe("TimerJS") {
             it("should serialize/deserialize") {
-                val toDoId = ID<ToDo>(1234)
-                val originalToDo = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = toDoId)
-                val json = JSON.stringify(originalToDo)
-                val toDoJS: ToDoJS = JSON.parse<ToDoJS>(json)
-                toDoJS.toNormal().mustBe(originalToDo)
+                val timerId = ID<Timer>(1234)
+                val originalTimer = Timer("User #1", nowDateTime, 100, id = timerId)
+                val json = JSON.stringify(originalTimer)
+                val timerJS: TimerJS = JSON.parse(json)
+                timerJS.toNormal().mustBe(originalTimer)
             }
 
             it("should serialize/deserialize as an Array") {
-                val toDo1 = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = ID(1234))
-                val toDo2 = ToDo("To-Do #2", RichDate.today(), "other notes", RichDate.today(), id = ID(5678))
-                val originalList = listOf(toDo1, toDo2)
+                val timer1 = Timer("User #1", nowDateTime, 101, id = ID(1234))
+                val timer2 = Timer("User #2", nowDateTime, 102, id = ID(5678))
+                val originalList = listOf(timer1, timer2)
                 val json = JSON.stringify(originalList)
-                val toDos2: Array<ToDoJS> = JSON.parse<Array<ToDoJS>>(json)
-                toDos2.toList().map { it.toNormal() }.mustBe(originalList)
+                val timers2: Array<TimerJS> = JSON.parse(json)
+                timers2.toList().map { it.toNormal() }.mustBe(originalList)
             }
         }
 
@@ -47,7 +49,6 @@ object JSModelTest {
     }
 
     private fun serializeDeserialize(value: Long): LongJS {
-        val deserialized = JSON.parse<LongJS>(JSON.stringify(value))
-        return deserialized
+        return JSON.parse(JSON.stringify(value))
     }
 }

@@ -2,12 +2,9 @@ package client
 
 import client.cordova.initializeForCordova
 import client.util.*
-import common.ToDo
 import common.util.PlatformProvider
-import common.util.ID
 import common.util.inContext
 import net.yested.core.html.*
-import net.yested.core.properties.*
 import net.yested.core.utils.*
 import net.yested.ext.jquery.*
 import org.w3c.dom.HTMLDivElement
@@ -25,9 +22,9 @@ fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
 }
 
 object UI {
-    val toDoId = Property<ID<ToDo>?>(null)
-    val toDosScreen: HTMLDivElement by lazy { inContext("toDosScreen") { toDosScreen(ToDosModel()) } }
-    val toDoScreen: HTMLDivElement by lazy { inContext("toDoScreen") { toDoScreen(ToDoModel(toDoId)) } }
+    val timersScreen: HTMLDivElement by lazy { inContext("timersScreen") { timersScreen(TimersModel()) } }
+    val timerModel = TimerModel()
+    val timerScreen: HTMLDivElement by lazy { inContext("timerScreen") { timerScreen(timerModel) } }
 }
 
 /**
@@ -52,13 +49,11 @@ fun main(args: Array<String>) {
                 inContext("About to draw '$hash'") { console.info("About to draw '$hash'") }
                 val firstHash = hash[0]
                 when (firstHash) {
-                    "#toDo" -> {
-                        setChildWithoutSplash(UI.toDoScreen, divContainer)
-                        val toDoId: ID<ToDo>? = if (hash.size > 1) ID(hash[1]) else null
-                        UI.toDoId.set(toDoId)
+                    "#timers" -> {
+                        setChildWithoutSplash(UI.timersScreen, divContainer)
                     }
                     else -> {
-                        setChildWithoutSplash(UI.toDosScreen, divContainer)
+                        setChildWithoutSplash(UI.timerScreen, divContainer)
                     }
                 }
                 if (firstHash != previousHash) {
