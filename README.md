@@ -37,6 +37,10 @@ without selecting the "separate module per source set" option.
 
 Set the module output paths to webclient/out/production/classes and webclient/out/test/classes.
 
+# How to deploy to firebase hosting
+
+In the webclient directory, run "firebase deploy".
+
 # How to Build mobile
 
 See mobile/README.md
