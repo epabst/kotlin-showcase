@@ -1,5 +1,5 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
-@file:[JsQualifier("firebase") JsModule("firebase")]
+@file:[JsModule("firebase") JsNonModule]
 package firebase
 
 import kotlin.js.*
@@ -55,7 +55,7 @@ external interface UserInfo {
     var providerId: String
     var uid: String
 }
-external fun app(name: String): firebase.app.App = definedExternally
+external fun app(name: String = definedExternally): firebase.app.App = definedExternally
 external var apps: Array<firebase.app.App?> = definedExternally
 external fun auth(app: firebase.app.App? = definedExternally /* null */): firebase.auth.Auth = definedExternally
 external fun database(app: firebase.app.App? = definedExternally /* null */): firebase.database.Database = definedExternally
