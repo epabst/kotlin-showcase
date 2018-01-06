@@ -110,6 +110,7 @@ task copyHtmlToPublic(type: Copy) {
     .replace("../../../out/production/classes/", "")
     .replace("webclient.js", "js/index.js?" + Math.random()) }
 }
+copyHtmlToPublic.dependsOn(extractJsLibs)
 
 task copyToPublic
 copyToPublic.dependsOn(copyToPublicExceptHtml)
