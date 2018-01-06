@@ -1,9 +1,10 @@
 import org.apache.tools.ant.taskdefs.condition.Os
-import java.nio.file.Files
-import java.nio.file.LinkOption
-import java.nio.file.Paths
 
 apply plugin: "kotlin2js"
+
+clean.doLast {
+  file("out").deleteDir()
+}
 
 task cleanupLinkCommonSource {
   if (file("${rootDir}/webclient/src/main/kotlin/common").exists()) {
@@ -84,6 +85,42 @@ compileTestKotlin2Js {
   kotlinOptions.outputFile = "webclient/out/test/classes/webclient_test.js"
   kotlinOptions.sourceMap = true
 }.dependsOn(extractTestJsLibs)
+
+task copyToPublicExceptHtml(type: Copy) {
+  from("${projectDir}/src/main/web")
+  from("${projectDir}/out/production/classes")
+  include("**/*")
+  exclude("webclient")
+  exclude("index.html")
+  into("${projectDir}/build/public")
+  rename { String fileName -> fileName.replace("webclient.js", "js/index.js") }
+}
+// kotlin.js and Yested.js must exist.  Follow the instructions in ../README.md to generate them.
+copyToPublicExceptHtml.doFirst {
+  assert file("${projectDir}/out/production/classes/lib/kotlin.js").exists()
+  assert file("${projectDir}/out/production/classes/lib/Yested.js").exists()
+}
+
+task copyHtmlToPublic(type: Copy) {
+  from("${projectDir}/src/main/web")
+  include("index.html")
+  into("${projectDir}/build/public")
+  filter { String line -> line
+    .replace("../../../out/production/classes/", "")
+    .replace("webclient.", "js/index.") }
+}
+
+task copyToPublic
+copyToPublic.dependsOn(copyToPublicExceptHtml)
+copyToPublic.dependsOn(copyHtmlToPublic)
+copyToPublic.doLast {
+  assert file("${projectDir}/build/public/lib/kotlin.js").exists()
+  assert file("${projectDir}/build/public/lib/Yested.js").exists()
+  assert file("${projectDir}/build/public/js/index.js").exists()
+  assert file("${projectDir}/build/public/css/index.css").exists()
+  assert file("${projectDir}/build/public/index.html").exists()
+}
+assemble.dependsOn(copyToPublic)
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"

@@ -15,35 +15,25 @@ clean.doLast {
 }
 
 task copyWebClientExceptHtml(type: Copy) {
-  from("${project(':webclient').projectDir}/src/main/web")
-  from("${project(':webclient').projectDir}/out/production/classes")
+  from("${project(':webclient').projectDir}/build/public")
   include("**/*")
-  exclude("webclient")
   exclude("index.html")
   into("www")
-  rename { String fileName -> fileName.replace("webclient.js", "js/index.js") }
 }
 
 copyWebClientExceptHtml.dependsOn(clean)
-
-// kotlin.js and Yested.js must exist.  Follow the instructions in ../README.md to generate them.
-copyWebClientExceptHtml.doFirst {
-  assert file("${project(':webclient').projectDir}/out/production/classes/lib/kotlin.js").exists()
-  assert file("${project(':webclient').projectDir}/out/production/classes/lib/Yested.js").exists()
-}
 
 // Copy webclient files
 // Automatically copies files from the webclient module to this module.
 // This allows sharing code between the two modules and enables using KotlinJS
 
 task copyWebClientHtml(type: Copy) {
-  from("${project(':webclient').projectDir}/src/main/web")
+  from("${project(':webclient').projectDir}/build/public")
   include("index.html")
   into("www")
   filter { String line -> line
     .replaceAll("<!--CORDOVA (.*?)-->", "\$1")
-    .replace("../../../out/production/classes/", "")
-    .replace("webclient.", "js/index.") }
+  }
 }
 
 task copyIcon(type: Copy) {
