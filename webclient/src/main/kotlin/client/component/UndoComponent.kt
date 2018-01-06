@@ -26,8 +26,7 @@ object UndoComponent {
     val redoCount: Int get() = redoCommands.get().size
 
     fun undo() {
-        commandRecorder = NoOpCommandRecorder
-        try {
+        notUndoable {
             val undoCommandsCopy = undoCommands.get()
             val index = undoCommandsCopy.size - 1
             val commandToUndo = undoCommandsCopy[index]
@@ -35,14 +34,11 @@ object UndoComponent {
             console.info("$commandToUndo (undoing: $commandToUndo)")
             undoCommands.removeAt(index)
             redoCommands.add(redoCommand)
-        } finally {
-            commandRecorder = NormalCommandRecorder
         }
     }
 
     fun redo() {
-        commandRecorder = NoOpCommandRecorder
-        try {
+        notUndoable {
             val redoCommandsCopy = redoCommands.get()
             val index = redoCommandsCopy.size - 1
             val commandToRedo = redoCommandsCopy[index]
@@ -50,8 +46,6 @@ object UndoComponent {
             console.info("$commandToRedo (redo)")
             redoCommands.removeAt(index)
             undoCommands.add(undoCommand)
-        } finally {
-            commandRecorder = NormalCommandRecorder
         }
     }
 
@@ -86,6 +80,16 @@ object UndoComponent {
         } else {
             // there is already a special commandRecorder, so just run the function
             return function()
+        }
+    }
+
+    fun <T> notUndoable(function: () -> T): T {
+        val originalRecorder = commandRecorder
+        commandRecorder = NoOpCommandRecorder
+        try {
+            return function()
+        } finally {
+            commandRecorder = originalRecorder
         }
     }
 
