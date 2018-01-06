@@ -18,22 +18,27 @@ open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Reposi
     init {
         collectionRef.on("child_added") { snapshot, _ ->
             handlingErrors("child_added") {
+                val entity = snapshot!!.valueWithId()
+                console.info("child_added: $entity")
                 UndoComponent.notUndoable {
-                    delegate.save(snapshot!!.valueWithId())
+                    delegate.save(entity)
                 }
             }
         }
         collectionRef.on("child_changed") { snapshot, _ ->
             handlingErrors("child_changed") {
+                val entity = snapshot!!.valueWithId()
+                console.info("child_changed: $entity")
                 UndoComponent.notUndoable {
-                    delegate.save(snapshot!!.valueWithId())
+                    delegate.save(entity)
                 }
             }
         }
         collectionRef.on("child_removed") { snapshot, _ ->
             handlingErrors("child_removed") {
                 val id = snapshot?.id
-
+                val entity = snapshot!!.valueWithId()
+                console.info("child_removed: $entity")
                 if (id != null) {
                     UndoComponent.notUndoable {
                         delegate.remove(id)
