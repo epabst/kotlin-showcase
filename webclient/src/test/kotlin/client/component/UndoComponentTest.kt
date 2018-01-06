@@ -139,6 +139,23 @@ object UndoComponentTest {
             (UndoComponent.undoCount - originalUndoCount).mustBe(3)
         }
 
+        it("should support not allowing undoing") {
+            val originalValue = EntityForTesting("George")
+            val newId = repository.save(null, originalValue)
+            val originalValueWithId = originalValue.withID(newId)
+
+            val newId2 = repository.save(EntityForTesting("Bob"))
+
+            val originalUndoCount = UndoComponent.undoCount
+
+            UndoComponent.notUndoable {
+                repository.save(originalValueWithId, EntityForTesting("Harry"))
+                repository.remove(newId2)
+            }
+
+            (UndoComponent.undoCount - originalUndoCount).mustBe(0)
+        }
+
         it("should undo commands in reverse order and redo in original order") {
             repository.addListener(object : RepositoryListener<EntityForTesting> {
                 override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
