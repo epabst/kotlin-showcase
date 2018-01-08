@@ -1,6 +1,7 @@
 package client.ext.firebase
 
 import client.component.UndoComponent
+import client.util.LocalStorageRepository
 import client.util.handlingErrors
 import common.util.*
 import firebase.app.App
@@ -12,7 +13,7 @@ import firebase.database.DataSnapshot
  * Date: 1/4/18
  * Time: 11:05 PM
  */
-open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Repository<T>, val path: String, private val toData: (JS) -> T, firebaseApp: App) : Repository<T> {
+open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Repository<T>, val path: String, val toData: (JS) -> T, val firebaseApp: App) : Repository<T> {
     private val collectionRef = firebaseApp.database().ref(path)
 
     init {
@@ -92,4 +93,8 @@ open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Reposi
     override fun removeListener(listener: RepositoryListener<T>) {
         delegate.removeListener(listener)
     }
+}
+
+fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, toData: (JS) -> T, firebaseApp: App) : Repository<T> {
+    return FirebaseRepositorySync(LocalStorageRepository(path, toData), path, toData, firebaseApp)
 }
