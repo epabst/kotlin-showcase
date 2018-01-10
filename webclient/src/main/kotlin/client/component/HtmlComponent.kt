@@ -1,7 +1,8 @@
 package client.component
 
+import net.yested.core.html.tag
 import net.yested.ext.bootstrap3.ColumnDefinition
-import org.w3c.dom.HTMLElement
+import org.w3c.dom.*
 import kotlin.dom.addClass
 import kotlin.dom.hasClass
 import kotlin.dom.removeClass
@@ -29,3 +30,7 @@ var HTMLElement.responsiveWidth: ColumnDefinition
     set(value) {
         addClass(value.css)
     }
+
+fun HTMLElement.iframe(init:(HTMLIFrameElement.()->Unit)? = null) = tag(this, tagName = "iframe", init = init)
+fun HTMLElement.video(init:(HTMLVideoElement.()->Unit)? = null) = tag(this, tagName = "video", init = init)
+fun HTMLElement.audio(init:(HTMLAudioElement.()->Unit)? = null) = tag(this, tagName = "audio", init = init)

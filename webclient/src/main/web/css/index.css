@@ -46,6 +46,9 @@ label.disabled {
   opacity: 1;
   cursor: not-allowed;
 }
+.embed-responsive{
+  position: initial;
+}
 .container-fluid {
   padding-top: 15px;
   padding-bottom: 15px;

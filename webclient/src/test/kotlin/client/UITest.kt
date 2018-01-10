@@ -59,9 +59,9 @@ object UITest {
 
             it("should re-sort when a timer is updated") {
                 timerRepository.list().filter { it.device.startsWith("Device#") }.forEach { timerRepository.remove(it) }
-                timerRepository.save(null, Timer("Device#1", nowDateTime(), 5))
-                val id2 = timerRepository.save(null, Timer("Device#2", nowDateTime(), 5))
-                timerRepository.save(null, Timer("Device#3", nowDateTime(), 5))
+                timerRepository.save(null, Timer("Device#1", nowDateTime(), 3, TimerType.SONG.name, 5))
+                val id2 = timerRepository.save(null, Timer("Device#2", nowDateTime(), 3, TimerType.SONG.name, 5))
+                timerRepository.save(null, Timer("Device#3", nowDateTime(), 3, TimerType.SONG.name, 5))
 
                 val timersModel = TimersModel(timerRepository)
                 val masterScreen = timersScreen(timersModel, animate = false)

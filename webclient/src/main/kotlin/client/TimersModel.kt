@@ -49,6 +49,13 @@ fun timersScreen(model: TimersModel, animate: Boolean = true): HTMLDivElement {
                         th {
                             Col.Width.Sm(2) and Col.Width.Xs(2)
                             addClass("text-left")
+                            sortControlWithArrow(model.currentSort, compareBy { it.type }, sortNow = true) {
+                                div { appendText("Type") }
+                            }
+                        }
+                        th {
+                            Col.Width.Sm(3) and Col.Width.Xs(3)
+                            addClass("text-left")
                             sortControlWithArrow(model.currentSort, compareBy { it.date }, sortNow = true) {
                                 div { appendText("Date") }
                             }
@@ -61,7 +68,7 @@ fun timersScreen(model: TimersModel, animate: Boolean = true): HTMLDivElement {
                             }
                         }
                         th {
-                            Col.Width.Sm(8) and Col.Width.Xs(8)
+                            Col.Width.Sm(5) and Col.Width.Xs(5)
                             addClass("text-left")
                             sortControlWithArrow(model.currentSort, compareBy { it.device }) { appendText("Device") }
                         }
@@ -77,6 +84,13 @@ fun timersScreen(model: TimersModel, animate: Boolean = true): HTMLDivElement {
                             responsiveWidth = Col.Width.Xs(2) and Col.Width.Tn(2)
                             div {
                                 className = "text-left"
+                                textContent = item.timerType
+                            }
+                        }
+                        td {
+                            responsiveWidth = Col.Width.Xs(3) and Col.Width.Tn(3)
+                            div {
+                                className = "text-left"
                                 textContent = item.date
                             }
                         }
@@ -88,7 +102,7 @@ fun timersScreen(model: TimersModel, animate: Boolean = true): HTMLDivElement {
                             }
                         }
                         td {
-                            responsiveWidth = Col.Width.Xs(8) and Col.Width.Tn(8)
+                            responsiveWidth = Col.Width.Xs(5) and Col.Width.Tn(5)
                             div {
                                 className = "text-left"
                                 textContent = item.device

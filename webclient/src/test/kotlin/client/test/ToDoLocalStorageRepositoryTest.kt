@@ -18,9 +18,9 @@ object ToDoLocalStorageRepositoryTest {
 
         it("should read all Timers") {
             val repository = TimerLocalStorageRepository()
-            val itemId1 = repository.save(null, Timer("Item #1", nowDateTime(), 6))
-            val itemId2 = repository.save(null, Timer("Item #2", nowDateTime(), 6))
-            val itemId3 = repository.save(null, Timer("Item #3", nowDateTime(), 6))
+            val itemId1 = repository.save(null, Timer("Item #1", nowDateTime(), 1, TimerType.VIDEO.name, 6))
+            val itemId2 = repository.save(null, Timer("Item #2", nowDateTime(), 2, TimerType.NONE.name, 6))
+            val itemId3 = repository.save(null, Timer("Item #3", nowDateTime(), 3, TimerType.SONG.name, 6))
 
             try {
                 val reloadedRepository = TimerLocalStorageRepository()

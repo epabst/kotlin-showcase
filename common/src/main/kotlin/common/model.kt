@@ -9,11 +9,17 @@ import common.util.WithID
  * Date: 6/9/16
  * Time: 6:27 AM
  */
-data class Timer(val device: String, val date: String, val durationSeconds: Int, val id: ID<Timer>? = null) : WithID<Timer> {
+data class Timer(val device: String, val date: String, val timerNumber: Int, val timerType: String, val durationSeconds: Int, val id: ID<Timer>? = null) : WithID<Timer> {
     override fun getID(): ID<Timer>? = id
 
     override fun withID(id: ID<Timer>): Timer = copy(id = id)
 
     /** Used by [UndoComponent.watch]. */
     override fun toString(): String = "$durationSeconds seconds on $date"
+
+    val type: TimerType get() = TimerType.valueOf(timerType)
+}
+
+enum class TimerType {
+    NONE, VIDEO, SONG
 }

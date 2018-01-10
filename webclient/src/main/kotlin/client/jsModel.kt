@@ -14,10 +14,12 @@ import common.*
 external interface TimerJS {
     val device: String
     val date: String
+    val timerNumber: Int?
+    val timerType: String?
     val durationSeconds: Int
     val id: IDJS?
 }
 
 fun TimerJS.toNormal(): Timer {
-    return Timer(device, date, durationSeconds, id?.toNormal())
+    return Timer(device, date, timerNumber ?: 1, timerType ?: TimerType.NONE.name, durationSeconds, id?.toNormal())
 }
