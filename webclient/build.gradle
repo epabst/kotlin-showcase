@@ -95,6 +95,7 @@ task copyToPublicExceptHtml(type: Copy) {
   into("${projectDir}/build/public")
   rename { String fileName -> fileName.replace("webclient.js", "js/index.js") }
 }
+copyToPublicExceptHtml.dependsOn(compileKotlin2Js)
 // kotlin.js and Yested.js must exist.  Follow the instructions in ../README.md to generate them.
 copyToPublicExceptHtml.doFirst {
   assert file("${projectDir}/out/production/classes/lib/kotlin.js").exists()
@@ -107,7 +108,7 @@ task copyHtmlToPublic(type: Copy) {
   into("${projectDir}/build/public")
   filter { String line -> line
     .replace("../../../out/production/classes/", "")
-    .replace("webclient.", "js/index.") }
+    .replace("webclient.js", "js/index.js?" + Math.random()) }
 }
 
 task copyToPublic
