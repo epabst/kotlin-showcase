@@ -23,7 +23,8 @@ import kotlin.js.Math
  */
 class TimerModel {
     val timerNumber = 0.toProperty()
-    val timerType = timerNumber.mapAsDefault { TimerType.values()[(Math.random() * 3).toInt()] }
+    val shuffledTimerTypes = (TimerType.values() + TimerType.values()).toList().shuffled()
+    val timerType = timerNumber.mapAsDefault { shuffledTimerTypes[it % shuffledTimerTypes.size] }
     val videoKeys = listOf("Odlthx3ROwE", "vM1xswYzyVY", "lnEKzXIxcq4", "FUuMhg9NtxY", "9omhrI0Pnq8", "PIrRpgWfY4M",
             "zqD5hDbgLyU", "LZoI-MFnTHE")
     val videoKey = timerNumber.map { videoKeys[(Math.random() * videoKeys.size).toInt()] }
