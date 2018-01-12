@@ -24,6 +24,11 @@ import kotlin.js.Math
 class TimerModel {
     val timerNumber = 0.toProperty()
     val timerType = timerNumber.mapAsDefault { TimerType.values()[(Math.random() * 3).toInt()] }
+    val videoKeys = listOf("Odlthx3ROwE", "vM1xswYzyVY", "lnEKzXIxcq4", "FUuMhg9NtxY", "9omhrI0Pnq8", "PIrRpgWfY4M",
+            "zqD5hDbgLyU", "LZoI-MFnTHE")
+    val videoKey = timerNumber.map { videoKeys[(Math.random() * videoKeys.size).toInt()] }
+    val audioKeys = listOf("9MJAg0VDgO0", "GFQYaoiIFh8", "iO_WxYC34eM")
+    val audioKey = timerNumber.map { audioKeys[(Math.random() * audioKeys.size).toInt()] }
     val timerRepository = Factory.timerRepository
     val startTime: Property<Moment?> = null.toProperty()
     val timerMode: Property<TimerStatus> = TimerStatus.INITIAL.toProperty()
@@ -90,7 +95,9 @@ fun timerScreen(model: TimerModel): HTMLDivElement {
                         addClass("embed-responsive embed-responsive-16by9")
                         iframe {
                             addClass("embed-responsive-item")
-                            src = "https://www.youtube.com/embed/8F9jXYOH2c0?autoplay=1&list=PLGVpxD1HlmJ98lm8UTpY01al5hvlnmfs3"
+                            model.videoKey.onNext {
+                                src = "https://www.youtube.com/embed/$it?autoplay=1"
+                            }
                             setAttribute("gesture", "media")
                             setAttribute("allow", "autoplay; encrypted-media")
                         }
@@ -105,7 +112,10 @@ fun timerScreen(model: TimerModel): HTMLDivElement {
                             addClass("text-right")
                             width = "100"
                             height = "100"
-                            src = "https://www.youtube.com/embed/4AqjqOqNrjw?autoplay=1"
+
+                            model.audioKey.onNext {
+                                src = "https://www.youtube.com/embed/$it?autoplay=1"
+                            }
                             setAttribute("gesture", "media")
                             setAttribute("allow", "autoplay; encrypted-media")
                         }
