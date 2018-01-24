@@ -124,8 +124,38 @@ internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementW
     }
 }
 
+open class CompositeRepository<T : WithID<T>,R>(private val repositoryMap: Map<R,Repository<T>>, private val categorizer: (T) -> R) : Repository<T> {
+    override fun list(): List<T> = repositoryMap.values.flatMap { it.list() }
+
+    override fun find(id: ID<T>): T? {
+        return repositoryMap.values.asSequence().map { it.find(id) }.find { it != null }
+    }
+
+    override fun save(original: T?, replacement: T): ID<T> {
+        val originalCategory = original?.let { categorizer.invoke(it) }
+        val category = categorizer.invoke(replacement)
+        val replacementRepository = repositoryMap[category] ?: error("no repository found for category=$category")
+        if (originalCategory == category) {
+            return replacementRepository.save(original, replacement)
+        } else {
+            val originalRepository = originalCategory?.let { repositoryMap[it] ?: error("no repository found for category=$category") }
+            originalRepository?.remove(original)
+            return replacementRepository.save(null, replacement)
+        }
+    }
+
+    override fun remove(id: ID<T>) {
+        return repositoryMap.values.asSequence().forEach { it.remove(id) }
+    }
+
+    override fun generateID(): ID<T> = repositoryMap.values.firstOrNull()!!.generateID()
+
+    override fun addListener(listener: RepositoryListener<T>) {
+        repositoryMap.values.forEach { it.addListener(listener) }
+    }
+}
+
 open class InMemoryRepository<T : WithID<T>> : Repository<T> {
-    private var idGenerator = IdGenerator()
     private val list: ArrayList<T> = ArrayList()
     private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
@@ -155,6 +185,10 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
 
     override fun addListener(listener: RepositoryListener<T>) {
         listeners += listener
+    }
+
+    companion object {
+        private val idGenerator = IdGenerator()
     }
 }
 

@@ -76,15 +76,12 @@ open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Reposi
         return newID
     }
 
-    override fun remove(item: T) {
-        val id = item.getID()
-        if (id != null) {
-            delegate.remove(item)
-            // Remove it immediately so that it won't be found anymore.
-            // Later, when Firebase notifies of child_removed, it will not notify listeners again.
-            handlingErrors("firebase remove") {
-                collectionRef.child(id.toString()).remove()
-            }
+    override fun remove(id: ID<T>) {
+        delegate.remove(id)
+        // Remove it immediately so that it won't be found anymore.
+        // Later, when Firebase notifies of child_removed, it will not notify listeners again.
+        handlingErrors("firebase remove") {
+            collectionRef.child(id.toString()).remove()
         }
     }
 
