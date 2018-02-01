@@ -228,6 +228,39 @@ class RepositoryTest : Spek({
             onSavedCount.mustBe(1)
             onRemovedCount.mustBe(1)
         }
+
+        it("should wrap in a single undoable the removing and adding when moving to another Repository") {
+            var undoableCount = 0
+            val repositoryA = InMemoryRepository<EntityForTesting>()
+            val repositoryN = InMemoryRepository<EntityForTesting>()
+            val entityA = repositoryA.saveAndGet(EntityForTesting("A"))
+
+            val undoProvider: UndoProvider = object : UndoProvider {
+                override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+                    undoableCount++
+                    //should not have moved yet
+                    repositoryA.find(entityA.getID()!!).mustNotBe(null)
+                    repositoryN.find(entityA.getID()!!).mustBe(null)
+                    val result = function()
+                    repositoryA.find(entityA.getID()!!).mustBe(null)
+                    repositoryN.find(entityA.getID()!!).mustNotBe(null)
+                    return result
+                }
+
+                override fun <T> notUndoable(function: () -> T): T {
+                    return function()
+                }
+            }
+
+            val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN), undoProvider) {
+                entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+            }
+
+            undoableCount.mustBe(0)
+
+            compositeRepository.save(entityA.copy(name = "N"))
+            undoableCount.mustBe(1)
+        }
     }
 })
 

@@ -124,7 +124,36 @@ internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementW
     }
 }
 
-open class CompositeRepository<T : WithID<T>,R>(private val repositoryMap: Map<R,Repository<T>>, private val categorizer: (T) -> R) : Repository<T> {
+interface UndoProvider {
+    fun <T : WithID<T>, F> undoableSave(original: T?, replacementWithID: T, function: () -> F): F {
+        val isUpdate = original != null && original.getID() != null
+        val pastTenseDescription = if (isUpdate) "Updated $original" else "Added $replacementWithID"
+        val undoPastTenseDescription = if (isUpdate) "Reverted $original" else "Deleted $replacementWithID"
+        return undoable(pastTenseDescription, undoPastTenseDescription, function)
+    }
+
+
+    fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T
+
+    fun <T> notUndoable(function: () -> T): T
+
+    companion object {
+        val empty: UndoProvider = object : UndoProvider {
+            override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+                return function()
+            }
+
+            override fun <T> notUndoable(function: () -> T): T {
+                return function()
+            }
+        }
+    }
+}
+
+open class CompositeRepository<T : WithID<T>,R>(
+        private val repositoryMap: Map<R,Repository<T>>,
+        private val undoProvider: UndoProvider = UndoProvider.empty,
+        private val categorizer: (T) -> R) : Repository<T> {
     override fun list(): List<T> = repositoryMap.values.flatMap { it.list() }
 
     override fun find(id: ID<T>): T? {
@@ -138,9 +167,11 @@ open class CompositeRepository<T : WithID<T>,R>(private val repositoryMap: Map<R
         if (originalCategory == category) {
             return replacementRepository.save(original, replacement)
         } else {
-            val originalRepository = originalCategory?.let { repositoryMap[it] ?: error("no repository found for category=$category") }
-            originalRepository?.remove(original)
-            return replacementRepository.save(null, replacement)
+            return undoProvider.undoableSave(original, replacement) {
+                val originalRepository = originalCategory?.let { repositoryMap[it] ?: error("no repository found for category=$category") }
+                originalRepository?.remove(original)
+                replacementRepository.save(null, replacement)
+            }
         }
     }
 

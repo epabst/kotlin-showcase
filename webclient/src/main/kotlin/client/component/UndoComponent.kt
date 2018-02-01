@@ -2,6 +2,7 @@ package client.component
 
 import common.util.Repository
 import common.util.RepositoryListener
+import common.util.UndoProvider
 import common.util.WithID
 import net.yested.core.properties.*
 import net.yested.core.utils.*
@@ -15,7 +16,7 @@ import kotlin.dom.appendText
  * Date: 8/6/16
  * Time: 12:03 AM
  */
-object UndoComponent {
+object UndoComponent : UndoProvider {
     private var commandRecorder: CommandRecorder = NormalCommandRecorder
     /** New commands are added at the end, calling [Property.set] each time. */
     private val undoCommands: Property<List<Command>> = emptyList<Command>().toProperty()
@@ -66,7 +67,7 @@ object UndoComponent {
      * Without doing this, each repository action (save or remove)
      * will each be individually undoable.
      */
-    fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+    override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
         if (commandRecorder == NormalCommandRecorder) {
             val undoableGroup = UndoableGroup(pastTenseDescription, undoPastTenseDescription)
             commandRecorder = undoableGroup
@@ -83,7 +84,7 @@ object UndoComponent {
         }
     }
 
-    fun <T> notUndoable(function: () -> T): T {
+    override fun <T> notUndoable(function: () -> T): T {
         val originalRecorder = commandRecorder
         commandRecorder = NoOpCommandRecorder
         try {
