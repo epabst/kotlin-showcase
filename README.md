@@ -25,6 +25,8 @@ First run "./gradlew build" in this top-level directory.
 
 In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Browser".  Voila!
 
+Alternative: If that doesn't work, go to webclient/build/public/index.html and "Open in Browser".
+
 # How to Run webclient tests from IntelliJ (v. 2017.1)
 
 In IntelliJ, richt-click on webclient and "Rebuild".
