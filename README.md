@@ -12,6 +12,11 @@ Simple To-Do App.
 
 Search for "ZZZ" and replace it with the information for your custom app.
 
+Change the code to your hearts desire.
+You can supply initial data in webclient/src/main/web/initial-data.json, 
+whether manually or by copying in the output from the backup button in the app 
+which exports the current state of the data. 
+
 # How to Prepare to Build webclient
 
 * Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
