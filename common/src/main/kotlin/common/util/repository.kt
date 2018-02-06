@@ -84,6 +84,20 @@ interface Repository<T : WithID<T>> {
     fun removeListener(listener: RepositoryListener<T>)
 }
 
+class EmptyRepository<T : WithID<T>> : Repository<T> {
+    override fun list(): List<T> = emptyList()
+
+    override fun save(original: T?, replacement: T): ID<T> = throw UnsupportedOperationException("read-only")
+
+    override fun remove(id: ID<T>) = Unit // no-op
+
+    override fun generateID(): ID<T> = throw UnsupportedOperationException("read-only")
+
+    override fun addListener(listener: RepositoryListener<T>) = Unit // no-op
+
+    override fun removeListener(listener: RepositoryListener<T>) = Unit // no-op
+}
+
 fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
     list(criteria).forEach { remove(it) }
 }

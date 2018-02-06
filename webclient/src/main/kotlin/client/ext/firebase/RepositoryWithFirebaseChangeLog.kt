@@ -10,8 +10,8 @@ import net.yested.ext.moment.Moment
  * Date: 1/8/18
  * Time: 11:05 PM
  */
-open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(private val delegate: FirebaseRepositorySync<T,JS>) : Repository<T> {
-    private val changeLogRef = delegate.firebaseApp.database().ref("changeLog/${delegate.path}")
+open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, private val delegate: FirebaseRepositorySync<T,JS>) : Repository<T> {
+    private val changeLogRef = delegate.firebaseApp.database().ref(path)
 
     override fun generateID(): ID<T> {
         return delegate.generateID()
