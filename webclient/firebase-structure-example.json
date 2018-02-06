@@ -11,6 +11,12 @@
           "name": "..."
         }
       }
+    },
+    "_namespaces": {
+      "makeAWishApp": {
+        "todoList": {},
+        "_trash": {}
+      }
     }
   },
   "publicChanges": {
@@ -39,6 +45,11 @@
           }
         }
       }
+    },
+    "_namespaces": {
+      "makeAWishApp": {
+        "todoList": {}
+      }
     }
   },
   "userOwned": {
@@ -57,8 +68,10 @@
         "name": "User #1"
       },
       "toDoList": {},
-      "_trash": {
-        "toDoList": {}
+      "_namespaces": {
+        "makeAWishApp": {
+          "todoList": {}
+        }
       }
     }
   }
