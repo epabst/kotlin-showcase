@@ -1,28 +1,29 @@
 package client.test
 
-import client.ToDoLocalStorageRepository
+import client.ToDoJS
+import client.toNormal
 import client.util.*
 import common.*
 import common.util.*
 
 /**
- * A test for [ToDoLocalStorageRepository].
+ * A test for [LocalStorageRepository] with the model.
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 6/16/16
  * Time: 6:17 AM
  */
-object ToDoLocalStorageRepositoryTest {
+object ModelLocalStorageRepositoryTest {
     fun suite() {
         PlatformProvider.instance = JavascriptProvider
 
         it("should read all To-Dos") {
-            val repository = ToDoLocalStorageRepository()
+            val repository = LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
             val itemId1 = repository.save(null, ToDo("Item #1"))
             val itemId2 = repository.save(null, ToDo("Item #2"))
             val itemId3 = repository.save(null, ToDo("Item #3"))
 
             try {
-                val reloadedRepository = ToDoLocalStorageRepository()
+                val reloadedRepository = LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
                 val allItems = reloadedRepository.list()
                 allItems.mustBe(repository.list())
             } finally {

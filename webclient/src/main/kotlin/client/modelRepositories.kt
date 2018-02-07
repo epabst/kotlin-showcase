@@ -2,11 +2,8 @@ package client
 
 import client.component.FileBackupComponent
 import client.component.UndoComponent
-import client.ext.firebase.FirebaseRepositorySync
-import client.util.LocalStorageRepository
-import common.*
-import common.util.*
-import firebase.app.App
+import client.ext.firebase.FirebaseAndLocalRepository
+import client.util.*
 import net.yested.ext.jquery.yestedJQuery
 import kotlin.js.json
 
@@ -28,15 +25,11 @@ object Factory {
             "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
     val firebaseApp = firebase.initializeApp(firebaseConfig)
 
-    val toDoRepository: Repository<ToDo> = when ("localStorage") {
-        "localStorage" -> ToDoLocalStorageRepository()
-        "firebase" -> ToDoFirebaseRepository(firebaseApp)
-        else -> InMemoryRepository()
-    }
+    val toDoRepository = FirebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", { it.toNormal() }, firebaseApp)
     val allRepositories = listOf(toDoRepository)
 
     init {
-        if (toDoRepository is ToDoLocalStorageRepository) {
+        if (toDoRepository is LocalStorageRepository<*,*>) {
             if (!toDoRepository.isInitialized()) {
                 yestedJQuery.get<Any>("initial-data.json") { initialData ->
                     FileBackupComponent.initializeData(initialData)
@@ -47,6 +40,3 @@ object Factory {
         UndoComponent.watch(toDoRepository)
     }
 }
-
-open class ToDoLocalStorageRepository : LocalStorageRepository<ToDo, ToDoJS>("toDoList", { it.toNormal() })
-open class ToDoFirebaseRepository(firebaseApp: App) : FirebaseRepositorySync<ToDo, ToDoJS>(ToDoLocalStorageRepository(), "toDos", { it.toNormal() }, firebaseApp)

@@ -2,7 +2,7 @@ package client.suite
 
 import client.JSModelTest
 import client.UITest
-import client.test.ToDoLocalStorageRepositoryTest
+import client.test.ModelLocalStorageRepositoryTest
 import client.util.JavascriptProviderTest
 import client.util.LocalStorageRepositoryTest
 import client.util.RepositoryCacheTest
@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     JSModelTest.suite()
     LocalStorageRepositoryTest.suite()
     RepositoryCacheTest.suite()
-    ToDoLocalStorageRepositoryTest.suite()
+    ModelLocalStorageRepositoryTest.suite()
     UITest.suite()
 //    UndoComponentTest.suite()
 }
