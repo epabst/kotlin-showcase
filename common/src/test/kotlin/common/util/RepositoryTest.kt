@@ -13,89 +13,84 @@ class RepositoryTest : Spek({
 
     describe("InMemoryRepository") {
         it("should snapshot list") {
-            InMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
-            val list1 = InMemoryRepositoryForTesting.list()
+            inMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
+            val list1 = inMemoryRepositoryForTesting.list()
 
-            InMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
-            val list2 = InMemoryRepositoryForTesting.list()
+            inMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
+            val list2 = inMemoryRepositoryForTesting.list()
             list2.size.mustBe(list1.size + 1)
         }
 
         it("should save into the same index as the original") {
-            val id1 = InMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
-            InMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
-            InMemoryRepositoryForTesting.save(null, EntityForTesting("C"))
-            val entity1 = InMemoryRepositoryForTesting.list().find { it.id == id1 }!!
-            val index1 = InMemoryRepositoryForTesting.list().indexOf(entity1)
+            val id1 = inMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
+            inMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
+            inMemoryRepositoryForTesting.save(null, EntityForTesting("C"))
+            val entity1 = inMemoryRepositoryForTesting.list().find { it.id == id1 }!!
+            val index1 = inMemoryRepositoryForTesting.list().indexOf(entity1)
             val modifiedEntity1 = entity1.copy(name = "A2")
-            InMemoryRepositoryForTesting.save(entity1, modifiedEntity1)
-            InMemoryRepositoryForTesting.list().indexOf(modifiedEntity1).mustBe(index1)
+            inMemoryRepositoryForTesting.save(entity1, modifiedEntity1)
+            inMemoryRepositoryForTesting.list().indexOf(modifiedEntity1).mustBe(index1)
         }
 
         it("should notify listeners") {
-            var onSavedCount = 0
-            var onRemovedCount = 0
-            val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                    onSavedCount++
-                }
+            val listener = CountingListener<EntityForTesting>()
+            inMemoryRepositoryForTesting.addListener(listener)
+            listener.onSavedCount.mustBe(0)
+            listener.onRemovedCount.mustBe(0)
 
-                override fun onRemoved(item: EntityForTesting) {
-                    onRemovedCount++
-                }
-            }
-            InMemoryRepositoryForTesting.addListener(listener)
-            onSavedCount.mustBe(0)
-            onRemovedCount.mustBe(0)
+            val id1 = inMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
+            listener.onSavedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(id1)
+            listener.onRemovedCount.mustBe(1)
+        }
 
-            val id1 = InMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
-            onSavedCount.mustBe(1)
-            InMemoryRepositoryForTesting.remove(id1)
-            onRemovedCount.mustBe(1)
+        it("should not notify a listener once the listener has been removed") {
+            val listener = CountingListener<EntityForTesting>()
+            inMemoryRepositoryForTesting.addListener(listener)
+
+            val id1 = inMemoryRepositoryForTesting.save(null, EntityForTesting("A"))
+            listener.onSavedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(id1)
+            listener.onRemovedCount.mustBe(1)
+
+            inMemoryRepositoryForTesting.removeListener(listener)
+
+            val id2 = inMemoryRepositoryForTesting.save(null, EntityForTesting("B"))
+            listener.onSavedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(id2)
+            listener.onRemovedCount.mustBe(1)
         }
 
         it("should not notify listeners for no-op save") {
-            var onSavedCount = 0
-            val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                    onSavedCount++
-                }
-                override fun onRemoved(item: EntityForTesting) {}
-            }
-            InMemoryRepositoryForTesting.addListener(listener)
-            onSavedCount.mustBe(0)
+            val listener = CountingListener<EntityForTesting>()
+            inMemoryRepositoryForTesting.addListener(listener)
+            listener.onSavedCount.mustBe(0)
 
             val originalEntity = EntityForTesting("A")
-            val id1 = InMemoryRepositoryForTesting.save(null, originalEntity)
-            onSavedCount.mustBe(1)
+            val id1 = inMemoryRepositoryForTesting.save(null, originalEntity)
+            listener.onSavedCount.mustBe(1)
 
-            InMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A"))
-            onSavedCount.mustBe(1)
+            inMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A"))
+            listener.onSavedCount.mustBe(1)
 
-            InMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A").withID(id1))
-            onSavedCount.mustBe(1)
+            inMemoryRepositoryForTesting.save(originalEntity.withID(id1), EntityForTesting("A").withID(id1))
+            listener.onSavedCount.mustBe(1)
         }
 
         it("should not notify listeners for no-op remove") {
-            var onRemovedCount = 0
-            val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-                override fun onRemoved(item: EntityForTesting) {
-                    onRemovedCount++
-                }
-                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
-            }
-            InMemoryRepositoryForTesting.addListener(listener)
-            onRemovedCount.mustBe(0)
+            val listener = CountingListener<EntityForTesting>()
+            inMemoryRepositoryForTesting.addListener(listener)
+            listener.onRemovedCount.mustBe(0)
 
             val originalEntity = EntityForTesting("A")
-            val id1 = InMemoryRepositoryForTesting.save(null, originalEntity)
+            val id1 = inMemoryRepositoryForTesting.save(null, originalEntity)
 
-            InMemoryRepositoryForTesting.remove(id1)
-            onRemovedCount.mustBe(1)
-            InMemoryRepositoryForTesting.remove(id1)
-            onRemovedCount.mustBe(1)
-            InMemoryRepositoryForTesting.remove(originalEntity.withID(id1))
-            onRemovedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(id1)
+            listener.onRemovedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(id1)
+            listener.onRemovedCount.mustBe(1)
+            inMemoryRepositoryForTesting.remove(originalEntity.withID(id1))
+            listener.onRemovedCount.mustBe(1)
         }
     }
 
@@ -144,30 +139,20 @@ class RepositoryTest : Spek({
         }
 
         it("should notify listeners") {
-            var onSavedCount = 0
-            var onRemovedCount = 0
-            val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                    onSavedCount++
-                }
-
-                override fun onRemoved(item: EntityForTesting) {
-                    onRemovedCount++
-                }
-            }
+            val listener = CountingListener<EntityForTesting>()
             val repositoryA = InMemoryRepository<EntityForTesting>()
             val repositoryN = InMemoryRepository<EntityForTesting>()
             val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
                 entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
             }
             compositeRepository.addListener(listener)
-            onSavedCount.mustBe(0)
-            onRemovedCount.mustBe(0)
+            listener.onSavedCount.mustBe(0)
+            listener.onRemovedCount.mustBe(0)
 
             val id1 = compositeRepository.save(EntityForTesting("A"))
-            onSavedCount.mustBe(1)
+            listener.onSavedCount.mustBe(1)
             compositeRepository.remove(id1)
-            onRemovedCount.mustBe(1)
+            listener.onRemovedCount.mustBe(1)
         }
 
         it("should handle save that moves it to another Repository") {
@@ -201,17 +186,7 @@ class RepositoryTest : Spek({
         }
 
         it("should notify as removed and added when moving to another Repository") {
-            var onSavedCount = 0
-            var onRemovedCount = 0
-            val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-                override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                    onSavedCount++
-                }
-
-                override fun onRemoved(item: EntityForTesting) {
-                    onRemovedCount++
-                }
-            }
+            val listener = CountingListener<EntityForTesting>()
             val repositoryA = InMemoryRepository<EntityForTesting>()
             val repositoryN = InMemoryRepository<EntityForTesting>()
 
@@ -221,12 +196,12 @@ class RepositoryTest : Spek({
             val entityA = compositeRepository.saveAndGet(EntityForTesting("A"))
 
             compositeRepository.addListener(listener)
-            onSavedCount.mustBe(0)
-            onRemovedCount.mustBe(0)
+            listener.onSavedCount.mustBe(0)
+            listener.onRemovedCount.mustBe(0)
 
             compositeRepository.save(entityA.copy(name = "N"))
-            onSavedCount.mustBe(1)
-            onRemovedCount.mustBe(1)
+            listener.onSavedCount.mustBe(1)
+            listener.onRemovedCount.mustBe(1)
         }
 
         it("should wrap in a single undoable the removing and adding when moving to another Repository") {
@@ -270,4 +245,19 @@ data class EntityForTesting(val name: String, val id: ID<EntityForTesting>? = nu
     override fun withID(id: ID<EntityForTesting>): EntityForTesting = copy(id = id)
 }
 
-object InMemoryRepositoryForTesting : InMemoryRepository<EntityForTesting>()
+open class InMemoryRepositoryForTesting : InMemoryRepository<EntityForTesting>()
+
+val inMemoryRepositoryForTesting = InMemoryRepositoryForTesting()
+
+class CountingListener<in T> : RepositoryListener<T> {
+    var onSavedCount: Int = 0
+    var onRemovedCount: Int = 0
+
+    override fun onSaved(original: T?, replacementWithID: T) {
+        onSavedCount++
+    }
+
+    override fun onRemoved(item: T) {
+        onRemovedCount++
+    }
+}

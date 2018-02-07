@@ -80,6 +80,8 @@ interface Repository<T : WithID<T>> {
     }
 
     fun addListener(listener: RepositoryListener<T>)
+
+    fun removeListener(listener: RepositoryListener<T>)
 }
 
 fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
@@ -184,6 +186,10 @@ open class CompositeRepository<T : WithID<T>,R>(
     override fun addListener(listener: RepositoryListener<T>) {
         repositoryMap.values.forEach { it.addListener(listener) }
     }
+
+    override fun removeListener(listener: RepositoryListener<T>) {
+        repositoryMap.values.forEach { it.removeListener(listener) }
+    }
 }
 
 open class InMemoryRepository<T : WithID<T>> : Repository<T> {
@@ -216,6 +222,10 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
 
     override fun addListener(listener: RepositoryListener<T>) {
         listeners += listener
+    }
+
+    override fun removeListener(listener: RepositoryListener<T>) {
+        listeners -= listener
     }
 
     companion object {

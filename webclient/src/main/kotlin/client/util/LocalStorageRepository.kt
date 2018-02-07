@@ -81,6 +81,10 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
         listeners += listener
     }
 
+    override fun removeListener(listener: RepositoryListener<T>) {
+        listeners -= listener
+    }
+
     private fun store() {
         localStorage.setItem(localStorageKey, JSON.stringify(listForLocalStorage))
         listOrNull = listForLocalStorage

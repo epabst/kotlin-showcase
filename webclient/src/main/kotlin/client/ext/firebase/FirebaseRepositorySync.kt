@@ -88,4 +88,8 @@ open class FirebaseRepositorySync<T : WithID<T>,JS>(private val delegate: Reposi
     override fun addListener(listener: RepositoryListener<T>) {
         delegate.addListener(listener)
     }
+
+    override fun removeListener(listener: RepositoryListener<T>) {
+        delegate.removeListener(listener)
+    }
 }
