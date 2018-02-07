@@ -1,0 +1,65 @@
+{
+  "public": {
+    "toDoList": {
+      "123": {
+        "name": "..."
+      }
+    },
+    "_trash": {
+      "todoList": {
+        "456": {
+          "name": "..."
+        }
+      }
+    }
+  },
+  "publicChanges": {
+    "toDoList": {
+      "123": {
+        "90832983493334": {
+          "timestamp": "90832983493334",
+          "user": "user1",
+          "userAgent": "Chrome...",
+          "value": {
+            "name": "original name"
+          }
+        },
+        "90832983499999": {
+          "timestamp": "90832983499999",
+          "user": "user1",
+          "userAgent": "Chrome...",
+          "value": null
+        },
+        "90832988888888": {
+          "timestamp": "90832988888888",
+          "user": "user1",
+          "userAgent": "Chrome...",
+          "value": {
+            "name": "name after restored"
+          }
+        }
+      }
+    }
+  },
+  "userOwned": {
+    "user1": {
+      "icon": "http://...jpg",
+      "statusMessageList": {},
+      "_trash": {
+        "statusMessageList": {}
+      }
+    }
+  },
+  "userPrivate": {
+    "user1": {
+      "account": {
+        "email": "user1@gmail.com",
+        "name": "User #1"
+      },
+      "toDoList": {},
+      "_trash": {
+        "toDoList": {}
+      }
+    }
+  }
+}

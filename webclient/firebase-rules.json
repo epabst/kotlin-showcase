@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "public": {
+      ".read": true,
+      ".write": true
+    },
+    "publicChanges": {
+      ".read": false,
+      ".write": "!data.exists()"
+    },
+    "userPrivate": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "userOwned": {
+      "$uid": {
+        ".read": true,
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
