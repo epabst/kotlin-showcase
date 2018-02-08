@@ -4,6 +4,7 @@ import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.FirebaseAndLocalRepository
 import client.util.*
+import common.ToDo
 import net.yested.ext.jquery.yestedJQuery
 import kotlin.js.json
 
@@ -16,16 +17,16 @@ import kotlin.js.json
 
 object Factory {
     // To use firebase, add your app at https://console.firebase.google.com/
-    val firebaseConfig = json(
+    private val firebaseConfig = json(
             "apiKey" to "ZZZFirebaseApiKeyZZZ",
             "authDomain" to "ZZZAppIdZZZ.firebaseapp.com",
             "databaseURL" to "https://ZZZAppIdZZZ.firebaseio.com",
             "projectId" to "ZZZAppIdZZZ",
             "storageBucket" to "",
             "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
-    val firebaseApp = firebase.initializeApp(firebaseConfig)
+    private val firebaseApp = firebase.initializeApp(firebaseConfig)
 
-    val toDoRepository = FirebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", { it.toNormal() }, firebaseApp)
+    val toDoRepository = FirebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", "toDoList", { it.toNormal() }, firebaseApp)
     val allRepositories = listOf(toDoRepository)
 
     init {

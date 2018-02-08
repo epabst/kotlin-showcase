@@ -96,10 +96,13 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
     override fun removeListener(listener: RepositoryListener<T>) {
         delegate.removeListener(listener)
     }
+
+    override val localStorageKeys: Set<String>
+        get() = delegate.localStorageKeys
 }
 
-fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, toData: (JS) -> T, firebaseApp: App) : FirebaseRepositorySync<T,JS> {
-    return FirebaseRepositorySync(LocalStorageRepository(path, toData), path, toData, firebaseApp)
+fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, localPath: String, toData: (JS) -> T, firebaseApp: App) : FirebaseRepositorySync<T,JS> {
+    return FirebaseRepositorySync(LocalStorageRepository(localPath, toData), path, toData, firebaseApp)
 }
 
 enum class ProtectionLevel {
@@ -112,7 +115,7 @@ fun <T : WithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativeP
                                                                        firebaseApp: App,
                                                                        categorizer: (T) -> ProtectionLevel) : Repository<T> {
     val privateRepository = PrivateFirebaseRepository(userId, relativePath, toData, firebaseApp)
-    val publicRepository = FirebaseAndLocalRepository("public/$relativePath", toData, firebaseApp)
+    val publicRepository = FirebaseAndLocalRepository("public/$relativePath", relativePath, toData, firebaseApp)
     val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository)
     return CompositeRepository(mapOf(PRIVATE to privateRepository, PUBLIC to publicRepositoryWithChangeLog), UndoComponent, categorizer)
 }
@@ -121,7 +124,7 @@ fun <T : WithID<T>,JS> PrivateFirebaseRepository(userId: Property<String?>, rela
     val emptyRepository = EmptyRepository<T>()
     val privateRepository = SwitchableRepository(emptyRepository, UndoComponent)
     userId.onNext {
-        privateRepository.delegate = it?.let { FirebaseAndLocalRepository("userPrivate/$it/$relativePath", toData, firebaseApp) } ?: emptyRepository
+        privateRepository.delegate = it?.let { FirebaseAndLocalRepository("userPrivate/$it/$relativePath", "userPrivate/$it/$relativePath", toData, firebaseApp) } ?: emptyRepository
     }
     return privateRepository
 }
