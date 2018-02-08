@@ -86,6 +86,10 @@ interface Repository<T : WithID<T>> {
     val localStorageKeys: Set<String>
 }
 
+fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
+    list(criteria).forEach { remove(it) }
+}
+
 class EmptyRepository<T : WithID<T>> : Repository<T> {
     override fun list(): List<T> = emptyList()
 
