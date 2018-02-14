@@ -106,10 +106,6 @@ class EmptyRepository<T : WithID<T>> : Repository<T> {
     override val localStorageKeys: Set<String> = emptySet()
 }
 
-fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
-    list(criteria).forEach { remove(it) }
-}
-
 interface RepositoryCriteria<T : WithID<T>> {
     fun invoke(entity: T): Boolean
 
