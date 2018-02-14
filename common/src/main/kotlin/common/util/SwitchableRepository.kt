@@ -53,4 +53,7 @@ open class SwitchableRepository<T : WithID<T>>(
         delegate.removeListener(listener)
         listeners -= listener
     }
+
+    override val localStorageKeys: Set<String>
+        get() = delegate.localStorageKeys
 }

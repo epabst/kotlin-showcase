@@ -12,7 +12,9 @@ import net.yested.ext.bootstrap3.*
 import net.yested.ext.moment.Moment
 import net.yested.ext.moment.format
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.get
 import org.w3c.files.*
+import kotlin.browser.localStorage
 import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.appendText
@@ -31,8 +33,8 @@ object FileBackupComponent {
     }
 
     private fun getBackupDataAsString(): String {
-        val backupItems = Factory.allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().map {
-            Pair(it.localStorageKey, it.listForLocalStorage)
+        val backupItems = Factory.allRepositories.flatMap { it.localStorageKeys }.map {
+            Pair(it, localStorage[it]?.let { JSON.parse<Any>(it) })
         }.toTypedArray()
         return JSON.stringify(json(*backupItems))
     }

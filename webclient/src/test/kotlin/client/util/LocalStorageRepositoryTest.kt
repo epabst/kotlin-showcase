@@ -2,6 +2,7 @@ package client.util
 
 import client.component.UndoComponent
 import common.util.*
+import org.w3c.dom.get
 import kotlin.browser.localStorage
 import kotlin.test.fail
 
@@ -57,17 +58,39 @@ object LocalStorageRepositoryTest {
             it("should distinguish between empty and uninitialized") {
                 val localStorageKey = "unitTest"
                 localStorage.removeItem(localStorageKey)
+
+                // should not look at localStorage until a method is called
                 val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
-                localRepository.isInitialized().mustBe(false)
+                localStorage[localRepository.localStorageKey].mustBe(null)
+
+                // should initialize localStorage
                 val id = localRepository.save(null, EntityForTesting("hello"))
-                localRepository.isInitialized().mustBe(true)
+                localStorage[localRepository.localStorageKey].mustNotBe(null)
 
                 localRepository.remove(id) // this should cause it to store an empty list into local storage.
-                localRepository.isInitialized().mustBe(true)
+                localStorage[localRepository.localStorageKey].mustNotBe(null)
 
                 val localRepositoryCopy = LocalStorageRepositoryForTesting(localStorageKey)
                 localRepositoryCopy.list().size.mustBe(0)
-                localRepositoryCopy.isInitialized().mustBe(true) // the empty list in local storage should be considered initialized.
+                localStorage[localRepository.localStorageKey].mustNotBe(null)
+            }
+
+            it("shouldn't load from localStorage until a method is called on the Repository") {
+                val localStorageKey = "unitTest"
+                localStorage.removeItem(localStorageKey)
+
+                // should not look at localStorage until a method is called
+                val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
+                localStorage[localRepository.localStorageKey].mustBe(null)
+
+                // should get a snapshot of localStorage
+                localRepository.list().size.mustBe(0)
+                localStorage[localRepository.localStorageKey].mustBe(null)
+
+                val localRepositoryCopy = LocalStorageRepositoryForTesting(localStorageKey)
+                localRepositoryCopy.save(EntityForTesting("George"))
+                // unfortunately, it doesn't read from localStorage at this point
+                localRepository.list().size.mustBe(0)
             }
 
             it("should include ID on original when notifying listeners") {

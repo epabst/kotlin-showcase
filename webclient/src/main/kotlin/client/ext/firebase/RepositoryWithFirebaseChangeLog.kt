@@ -48,6 +48,9 @@ open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, priva
     override fun removeListener(listener: RepositoryListener<T>) {
         delegate.removeListener(listener)
     }
+
+    override val localStorageKeys: Set<String>
+        get() = delegate.localStorageKeys
 }
 
 data class ChangeLogEntry<T : WithID<T>>(val data: T?,

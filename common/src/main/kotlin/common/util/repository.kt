@@ -82,6 +82,8 @@ interface Repository<T : WithID<T>> {
     fun addListener(listener: RepositoryListener<T>)
 
     fun removeListener(listener: RepositoryListener<T>)
+
+    val localStorageKeys: Set<String>
 }
 
 class EmptyRepository<T : WithID<T>> : Repository<T> {
@@ -96,6 +98,8 @@ class EmptyRepository<T : WithID<T>> : Repository<T> {
     override fun addListener(listener: RepositoryListener<T>) = Unit // no-op
 
     override fun removeListener(listener: RepositoryListener<T>) = Unit // no-op
+
+    override val localStorageKeys: Set<String> = emptySet()
 }
 
 fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
@@ -204,6 +208,9 @@ open class CompositeRepository<T : WithID<T>,R>(
     override fun removeListener(listener: RepositoryListener<T>) {
         repositoryMap.values.forEach { it.removeListener(listener) }
     }
+
+    override val localStorageKeys: Set<String>
+        get() = repositoryMap.values.flatMap { it.localStorageKeys }.toSet()
 }
 
 open class InMemoryRepository<T : WithID<T>> : Repository<T> {
@@ -241,6 +248,8 @@ open class InMemoryRepository<T : WithID<T>> : Repository<T> {
     override fun removeListener(listener: RepositoryListener<T>) {
         listeners -= listener
     }
+
+    override val localStorageKeys: Set<String> = emptySet()
 
     companion object {
         private val idGenerator = IdGenerator()

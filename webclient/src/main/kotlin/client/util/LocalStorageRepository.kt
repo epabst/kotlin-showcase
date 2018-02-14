@@ -2,6 +2,8 @@ package client.util
 
 import client.component.UndoComponent
 import common.util.*
+import org.w3c.dom.get
+import org.w3c.dom.set
 import kotlin.browser.localStorage
 import kotlin.js.Math
 
@@ -18,21 +20,20 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
         return ID((Math.random() * Long.MAX_VALUE).toString())
     }
 
-    private var listOrNull: List<T>? = localStorage.getItem(localStorageKey)?.let { listString ->
-        try {
-//            console.info(localStorageKey + ": " + listString)
-            val jsArray = JSON.parse<Array<JS>>(listString)
-            jsArray.map { toData(it) }
-        } catch (t: Throwable) {
-            console.info(localStorageKey + ": " + listString)
-            console.error(t)
-            null
+    private val listForLocalStorage: ArrayList<T> by lazy {
+        val listOrNull: List<T>? = localStorage[localStorageKey]?.let { listString ->
+            try {
+//                console.info(localStorageKey + ": " + listString)
+                val jsArray = JSON.parse<Array<JS>>(listString)
+                jsArray.map { toData(it) }
+            } catch (t: Throwable) {
+                console.info(localStorageKey + ": " + listString)
+                console.error(t)
+                null
+            }
         }
+        listOrNull?.let { ArrayList(it) } ?: ArrayList()
     }
-
-    val listForLocalStorage: ArrayList<T> = listOrNull?.let { ArrayList(it) } ?: ArrayList()
-
-    fun isInitialized(): Boolean = listOrNull != null
 
     override fun list(): List<T> = listForLocalStorage.toList()
 
@@ -59,7 +60,6 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
         val priorEntities = listForLocalStorage.toList()
         listForLocalStorage.clear()
         listForLocalStorage.addAll(parsedEntities)
-        listOrNull = listForLocalStorage
         listeners.forEach { listener -> priorEntities.forEach { listener.onRemoved(it) } }
         listeners.forEach { listener -> parsedEntities.forEach { listener.onSaved(null, it) } }
         store()
@@ -86,7 +86,8 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
     }
 
     private fun store() {
-        localStorage.setItem(localStorageKey, JSON.stringify(listForLocalStorage))
-        listOrNull = listForLocalStorage
+        localStorage[localStorageKey] = JSON.stringify(listForLocalStorage)
     }
+
+    override val localStorageKeys: Set<String> = setOf(localStorageKey)
 }

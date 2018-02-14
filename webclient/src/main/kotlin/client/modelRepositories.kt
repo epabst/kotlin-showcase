@@ -3,9 +3,10 @@ package client
 import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.FirebaseAndLocalRepository
-import client.util.*
 import common.ToDo
 import net.yested.ext.jquery.yestedJQuery
+import org.w3c.dom.get
+import kotlin.browser.localStorage
 import kotlin.js.json
 
 /**
@@ -30,11 +31,9 @@ object Factory {
     val allRepositories = listOf(toDoRepository)
 
     init {
-        if (toDoRepository is LocalStorageRepository<*,*>) {
-            if (!toDoRepository.isInitialized()) {
-                yestedJQuery.get<Any>("initial-data.json") { initialData ->
-                    FileBackupComponent.initializeData(initialData)
-                }
+        if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
+            yestedJQuery.get<Any>("initial-data.json") { initialData ->
+                FileBackupComponent.initializeData(initialData)
             }
         }
 
