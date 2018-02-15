@@ -46,7 +46,7 @@ Set the module output paths to webclient/out/production/classes and webclient/ou
 
 # How to deploy to firebase hosting
 
-Prerequisite: Replace ZZZAppIdZZZ in .firebaserc
+Prerequisite: Replace ZZZAppIdZZZ in webclient/.firebaserc
 
 In the webclient directory, run "firebase deploy".
 
