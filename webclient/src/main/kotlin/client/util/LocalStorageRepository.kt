@@ -43,6 +43,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
         val newID = replacementWithID.getID()!!
         val originalWithID = originalID?.let { original?.withID(it) }
         if (originalWithID != replacementWithID) {
+            console.info("Saving $replacement over original=$original")
             UndoComponent.undoable(
                     if (originalID == null) "Added $replacementWithID" else "Updated $replacementWithID",
                     if (originalID == null) "Deleted $replacementWithID" else "Reverted $originalWithID") {
