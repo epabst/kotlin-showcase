@@ -18,3 +18,4 @@ tmp/
 015_copy_app_to_synced_folder.js
 gen/
 mobile/www/
+/webclient/node_modules/
