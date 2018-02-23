@@ -1,9 +1,7 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
-node_modules/
-platforms/
-plugins/
-www/css/
-www/js/
-www/lib/
+/node_modules/
+/www/css/
+/www/js/
+/www/lib/

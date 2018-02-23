@@ -1,0 +1,156 @@
+#page {
+  display: flex;
+  flex-direction: column;
+}
+#buttonBar {
+  white-space: nowrap;
+}
+#buttonBar .btn {
+  vertical-align: top;
+}
+body.platform-android #backButton {
+  display: none;
+}
+#form-inline {
+  display: flex;
+  flex-direction: row;
+}
+#page.hide-splash #splash {
+  display: none;
+}
+.tag-true,
+.tag-100 {
+  font-weight: bold;
+}
+.tag-false,
+.tag-false:hover,
+.tag-false:focus,
+.tag-false.focus,
+.tag-0,
+.tag-0:hover,
+.tag-0:focus,
+.tag-0.focus {
+  text-decoration: line-through;
+}
+.tag-null,
+.tag-null:hover,
+.tag-null:focus,
+.tag-null.focus {
+  color: gray;
+}
+.match-true, .match-true a {
+  font-weight: inherit;
+}
+.match-null, .match-null a {
+  color: gray;
+  font-weight: lighter;
+  font-style: italic;
+}
+.match-false, .filter-text-match-false {
+  display: none;
+}
+.commandDescription {
+  flex: 1;
+  overflow-x: hidden;
+}
+.flex1 {
+  flex: 1;
+}
+.table-responsive>table>tbody>tr>td {
+  vertical-align: middle;
+}
+input.form-control[readonly].picker__input {
+  background-color: inherit;
+  opacity: inherit;
+}
+label.disabled {
+  color: #eee;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.container-fluid {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+.container-fluid>.navbar-header, .container>.navbar-header {
+  margin-left: 0;
+  margin-right: 0;
+}
+.h1, .h2, .h3, h1, h2, h3 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+label {
+  margin-bottom: 0;
+}
+.form-control-static {
+  min-height: 0;
+  padding: 7px 0 0 0;
+}
+.form-group {
+  margin-bottom: 10px;
+}
+.form-control, .input-group .form-control {
+  width: inherit;
+}
+.input-group.date, .form-control {
+  width: initial;
+}
+.form-control, .input-group.date, .input-group .form-control {
+  display: inline;
+}
+.input-group .form-control, .input-group-addon, .input-group-btn {
+    display: inherit;
+}
+.input-group.date {
+  white-space: nowrap;
+}
+.table-responsive>table.table>tbody>tr>td {
+  white-space: normal;
+  overflow-x: hidden;
+  border-top: 0;
+}
+.input-group .form-control.date {
+  width: initial;
+}
+.key-info {
+  border-color: red;
+  border-style: dashed;
+  border-width: thin;
+}
+.balance-alert .glyphicon {
+  color: red;
+}
+.balance-alert {
+  white-space: normal;
+}
+.btn .glyphicon-minus {
+  color: red;
+}
+.btn .glyphicon-plus {
+  color: green;
+}
+.buttonPlaceholder {
+  display: inline-block;
+}
+.nowrap {
+  white-space: nowrap;
+  display: inline-block;
+}
+.table-responsive>table.table>tbody>tr>td {
+  border-top: 0;
+}
+.table-responsive>table>tbody>tr {
+  border-top: 1px solid #ddd;
+}
+@media screen and (max-width: 479px) {
+  .table-responsive>table>tbody>tr>td {
+    display: inline-block;
+  }
+  input.text {
+    width: 100%;
+  }
+  input.int {
+    width: 5em;
+  }
+}
