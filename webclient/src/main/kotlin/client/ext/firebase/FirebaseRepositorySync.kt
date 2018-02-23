@@ -4,6 +4,7 @@ import client.component.UndoComponent
 import client.ext.firebase.ProtectionLevel.PRIVATE
 import client.ext.firebase.ProtectionLevel.PUBLIC
 import client.util.LocalStorageRepository
+import client.util.handleError
 import client.util.handlingErrors
 import common.util.*
 import firebase.app.App
@@ -155,7 +156,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         handlingErrors("firebase set") {
             collectionRef.child(id.toString())
                     .set(JSON.parse(JSON.stringify(replacement.withID(id))))
-                    .then(onResolve = { markAsSynced(id) }, onReject = { console.log(it.message) })
+                    .then(onResolve = { markAsSynced(id) }, onReject = { handleError(it) })
         }
     }
 
@@ -171,7 +172,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         handlingErrors("firebase remove") {
             collectionRef.child(id.toString())
                     .remove()
-                    .then(onResolve = { markAsSynced(id) }, onReject = { console.log(it.message) })
+                    .then(onResolve = { markAsSynced(id) }, onReject = { handleError(it) })
         }
     }
 
