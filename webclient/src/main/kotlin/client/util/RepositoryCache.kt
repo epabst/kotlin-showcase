@@ -83,6 +83,10 @@ fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T>
 
 internal data class RepositoryQuery<T : WithID<T>,F>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
 
+fun <T : WithID<T>,F> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
+    return listProperty(selector, criteria).get()
+}
+
 fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<T>> {
     return repositoryCache(this).listProperty(RepositoryQuery(SelfSelector(), criteria))
 }
