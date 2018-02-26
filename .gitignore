@@ -19,3 +19,4 @@ tmp/
 gen/
 mobile/www/
 /webclient/node_modules/
+/webclient/src/main/kotlin/common
