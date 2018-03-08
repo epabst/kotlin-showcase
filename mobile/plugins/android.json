@@ -9,16 +9,16 @@
     "installed_plugins": {
         "cordova-plugin-file": {
             "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
-        }
-    },
-    "dependent_plugins": {
-        "cordova-plugin-compat": {
+        },
+        "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
         },
         "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
-        },
-        "cordova-plugin-whitelist": {
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-compat": {
             "PACKAGE_NAME": "org.ZZZQualifiedPackageNameZZZ"
         },
         "cordova-plugin-x-toast": {

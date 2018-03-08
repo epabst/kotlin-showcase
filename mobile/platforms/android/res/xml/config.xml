@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="pabstsoftware.options" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="pabstsoftware.futurebalance" version="1.0.23" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <feature name="File">
         <param name="android-package" value="org.apache.cordova.file.FileUtils" />
         <param name="onload" value="true" />
@@ -16,15 +16,35 @@
     <feature name="Toast">
         <param name="android-package" value="nl.xservices.plugins.Toast" />
     </feature>
-    <name>Applicable Options</name>
+    <name>Future Balance</name>
     <description>
-        See the known options for your situation, and contribute your own.
+      The app for keeping your bank account balances where they need to be.
     </description>
-    <author email="epabst@gmail.com" href="https://www.facebook.com/Pabst-Software-225611549276/">
+    <author email="epabst@gmail.com" href="https://www.linkedin.com/in/eric-pabst-3911972">
         Eric Pabst
     </author>
     <content src="index.html?" />
-    <access origin="*" />
+    <icon src="www/img/logo.png" />
+    <icon height="57" src="res/icons/icon.png" width="57" />
+    <icon height="114" src="res/icons/icon@2x.png" width="114" />
+    <icon height="40" src="res/icons/icon-40.png" width="40" />
+    <icon height="80" src="res/icons/icon-40@2x.png" width="80" />
+    <icon height="50" src="res/icons/icon-50.png" width="50" />
+    <icon height="100" src="res/icons/icon-50@2x.png" width="100" />
+    <icon height="57" src="res/icons/icon-57.png" width="57" />
+    <icon height="114" src="res/icons/icon-57@2x.png" width="114" />
+    <icon height="60" src="res/icons/icon-60.png" width="60" />
+    <icon height="120" src="res/icons/icon-60@2x.png" width="120" />
+    <icon height="180" src="res/icons/icon-60@3x.png" width="180" />
+    <icon height="72" src="res/icons/icon-72.png" width="72" />
+    <icon height="144" src="res/icons/icon-72@2x.png" width="144" />
+    <icon height="76" src="res/icons/icon-76.png" width="76" />
+    <icon height="152" src="res/icons/icon-76@2x.png" width="152" />
+    <icon height="167" src="res/icons/icon-83.5@2x.png" width="167" />
+    <icon height="29" src="res/icons/icon-small.png" width="29" />
+    <icon height="58" src="res/icons/icon-small@2x.png" width="58" />
+    <icon height="87" src="res/icons/icon-small@3x.png" width="87" />
+    <splash src="www/img/splash.png" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />

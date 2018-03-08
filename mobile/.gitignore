@@ -2,8 +2,8 @@
 # http://git-scm.com/docs/gitignore
 
 /node_modules/
-/www/css/
-/www/js/
-/www/lib/
+/www
+!/www/plugins/
+!/www/cordova*
 /platforms/android/assets/www/
 /publish-folder
