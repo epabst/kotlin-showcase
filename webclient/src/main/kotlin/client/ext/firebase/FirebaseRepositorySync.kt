@@ -51,33 +51,39 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
 
     init {
         collectionRef.on("child_added") { snapshot, _ ->
-            handlingErrors("child_added") {
-                UndoComponent.notUndoable {
-                    val id = snapshot!!.id!!
-                    val result = delegate.save(snapshot.value().withID(id))
-                    markAsSynced(id)
-                    result
+            window.requestAnimationFrame {
+                handlingErrors("child_added") {
+                    UndoComponent.notUndoable {
+                        val id = snapshot!!.id!!
+                        val result = delegate.save(snapshot.value().withID(id))
+                        markAsSynced(id)
+                        result
+                    }
                 }
             }
         }
         collectionRef.on("child_changed") { snapshot, _ ->
-            handlingErrors("child_changed") {
-                UndoComponent.notUndoable {
-                    val id = snapshot!!.id!!
-                    val result = delegate.save(snapshot.value().withID(id))
-                    markAsSynced(id)
-                    result
+            window.requestAnimationFrame {
+                handlingErrors("child_changed") {
+                    UndoComponent.notUndoable {
+                        val id = snapshot!!.id!!
+                        val result = delegate.save(snapshot.value().withID(id))
+                        markAsSynced(id)
+                        result
+                    }
                 }
             }
         }
         collectionRef.on("child_removed") { snapshot, _ ->
-            handlingErrors("child_removed") {
-                val id = snapshot?.id
+            window.requestAnimationFrame {
+                handlingErrors("child_removed") {
+                    val id = snapshot?.id
 
-                if (id != null) {
-                    UndoComponent.notUndoable {
-                        delegate.remove(id)
-                        markAsSynced(id)
+                    if (id != null) {
+                        UndoComponent.notUndoable {
+                            delegate.remove(id)
+                            markAsSynced(id)
+                        }
                     }
                 }
             }
