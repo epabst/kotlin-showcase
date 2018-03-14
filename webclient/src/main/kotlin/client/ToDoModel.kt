@@ -35,7 +35,7 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
 
     fun save(): Boolean {
         if (validation.get().success) {
-            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get().emptyToNull(), id = toDo.get()?.id)
+            val updatedToDo = ToDo(name.get(), dueDate.get()?.toRichDate(), notes.get().emptyToNull(), id = toDoId.get())
             val newId = toDoRepository.save(updatedToDo)
             toDoId.set(newId)
             window.history.backToHash(backHash.get())
@@ -46,13 +46,13 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
     }
 
     fun cancel() {
-        toDo.set(null)
+        toDoId.set(null)
         window.history.backToHash(backHash.get())
     }
 
     fun delete() {
-        toDo.get()?.let { toDo ->
-            toDoRepository.remove(toDo)
+        toDoId.get()?.let { toDoId ->
+            toDoRepository.remove(toDoId)
         }
         window.history.backToHash(ToDosModel.toUrl())
     }
@@ -81,7 +81,7 @@ fun toDoScreen(model: ToDoModel): HTMLDivElement {
                 btsButton(onclick = { model.cancel() }) { appendText("Cancel") }
                 nbsp(4)
                 btsButton(onclick = { model.delete() }, look = ButtonLook.Danger) {
-                    model.toDo.onNext { visible = it?.id != null }
+                    model.toDoId.onNext { visible = it != null }
                     appendText("Delete ToDo")
                 }
             }
