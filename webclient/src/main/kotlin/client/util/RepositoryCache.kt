@@ -59,9 +59,9 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <F> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
+    internal fun <F : Any> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
         return listCache.getOrPut(query) {
-            Property(repository.list(query.criteria).map { query.selector.invoke(it) }.distinct())
+            Property(repository.list(query.criteria).map { query.selector.invoke(it) }.distinct().filterNotNull())
         } as ReadOnlyProperty<List<F>>
     }
 }
@@ -81,9 +81,9 @@ fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T>
     return listProperty<T,ID<T>>(IdFieldSelector(), criteria)
 }
 
-internal data class RepositoryQuery<T : WithID<T>,F>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
+internal data class RepositoryQuery<T : WithID<T>,F : Any>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
 
-fun <T : WithID<T>,F> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
+fun <T : WithID<T>,F : Any> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
     return listProperty(selector, criteria).get()
 }
 
@@ -91,7 +91,7 @@ fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> =
     return repositoryCache(this).listProperty(RepositoryQuery(SelfSelector(), criteria))
 }
 
-fun <T : WithID<T>,F> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
+fun <T : WithID<T>,F : Any> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
     return repositoryCache(this).listProperty(RepositoryQuery(selector, criteria))
 }
 
