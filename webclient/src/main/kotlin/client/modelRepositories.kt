@@ -3,7 +3,9 @@ package client
 import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.FirebaseAndLocalRepository
+import client.util.handleError
 import common.ToDo
+import net.yested.core.properties.Property
 import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
@@ -27,10 +29,18 @@ object Factory {
             "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
     private val firebaseApp = firebase.initializeApp(firebaseConfig)
 
+    val userId = Property<String?>(null)
     val toDoRepository = FirebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", "toDoList", { it.toNormal() }, firebaseApp)
     val allRepositories = listOf(toDoRepository)
 
     init {
+        firebaseApp.auth().onAuthStateChanged({ user ->
+            console.log("uid=${user.uid} isAnonymous=${user.isAnonymous} displayName=${user.displayName} email=${user.email} photoURL=${user.photoURL}")
+            userId.set(user.uid)
+        }, opt_error = { handleError(Exception("Error ${it.code}: ${it.message}")) })
+
+        firebaseApp.auth().signInAnonymously()
+
         if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
             yestedJQuery.get<Any>("initial-data.json") { initialData ->
                 FileBackupComponent.initializeData(initialData)

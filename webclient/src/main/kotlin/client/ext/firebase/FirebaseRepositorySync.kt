@@ -209,7 +209,7 @@ fun <T : WithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativeP
                                                                        categorizer: (T) -> ProtectionLevel) : Repository<T> {
     val privateRepository = PrivateFirebaseRepository(userId, relativePath, toData, firebaseApp)
     val publicRepository = FirebaseAndLocalRepository("public/$relativePath", relativePath, toData, firebaseApp)
-    val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository)
+    val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository, userId)
     return CompositeRepository(mapOf(PRIVATE to privateRepository, PUBLIC to publicRepositoryWithChangeLog), UndoComponent, categorizer)
 }
 
