@@ -2,6 +2,7 @@
 @file:JsQualifier("firebase.auth")
 package firebase.auth
 
+import firebase.User
 import kotlin.js.*
 
 external interface ActionCodeInfo
@@ -14,7 +15,8 @@ external interface Auth {
     var currentUser: firebase.User?
     fun fetchProvidersForEmail(email: String): firebase.Promise<Any>
     fun getRedirectResult(): firebase.Promise<Any>
-    fun onAuthStateChanged(nextOrObserver: Any, opt_error: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */, opt_completed: (() -> Any)? = definedExternally /* null */): () -> Any
+    fun onAuthStateChanged(nextOrObserver: (User) -> Any, opt_error: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */, opt_completed: (() -> Any)? = definedExternally /* null */): () -> Any
+    fun onAuthStateChanged(nextOrObserver: Any = definedExternally, opt_error: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */, opt_completed: (() -> Any)? = definedExternally /* null */): () -> Any
     fun sendPasswordResetEmail(email: String): firebase.Promise<Any>
     fun signInAnonymously(): firebase.Promise<Any>
     fun signInWithCredential(credential: firebase.auth.AuthCredential): firebase.Promise<Any>
