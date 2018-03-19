@@ -1,12 +1,11 @@
 package client.ext.firebase
 
 import client.component.UndoComponent
-import client.ext.firebase.ProtectionLevel.PRIVATE
-import client.ext.firebase.ProtectionLevel.PUBLIC
 import client.util.LocalStorageRepository
 import client.util.handleError
 import client.util.handlingErrors
 import common.util.*
+import common.util.ProtectionLevel.*
 import firebase.app.App
 import firebase.database.DataSnapshot
 import net.yested.core.properties.Property
@@ -198,19 +197,23 @@ fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, localPath: Strin
     return FirebaseRepositorySync(LocalStorageRepository(localPath, toData), path, toData, firebaseApp)
 }
 
-enum class ProtectionLevel {
-    PRIVATE, PUBLIC, OWNED
-}
-
 fun <T : WithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
                                                                        userId: Property<String?>,
                                                                        toData: (JS) -> T,
                                                                        firebaseApp: App,
                                                                        categorizer: (T) -> ProtectionLevel) : Repository<T> {
-    val privateRepository = PrivateFirebaseRepository(userId, relativePath, toData, firebaseApp)
     val publicRepository = FirebaseAndLocalRepository("public/$relativePath", relativePath, toData, firebaseApp)
     val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository, userId)
-    return CompositeRepository(mapOf(PRIVATE to privateRepository, PUBLIC to publicRepositoryWithChangeLog), UndoComponent, categorizer)
+    val privateRepository = PrivateFirebaseRepository(userId, relativePath, toData, firebaseApp)
+    val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
+    return CompositeRepository(mapOf(PUBLIC to publicRepositoryWithChangeLog, PRIVATE to privateRepository, DEVICE to deviceRepository), UndoComponent, categorizer)
+}
+
+fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
+                                                                                userId: Property<String?>,
+                                                                                toData: (JS) -> T,
+                                                                                firebaseApp: App) : Repository<T> {
+    return PublicWithChangeLogAndPrivateFirebaseRepository(relativePath, userId, toData, firebaseApp, { it.protectionLevel })
 }
 
 fun <T : WithID<T>,JS> PrivateFirebaseRepository(userId: Property<String?>, relativePath: String, toData: (JS) -> T, firebaseApp: App): SwitchableRepository<T> {
