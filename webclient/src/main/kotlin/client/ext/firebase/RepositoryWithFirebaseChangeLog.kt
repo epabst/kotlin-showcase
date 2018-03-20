@@ -31,15 +31,18 @@ open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, priva
         return newID
     }
 
-    override fun remove(item: T) {
-        val id = item.getID()
-        if (id != null) {
-            delegate.remove(item)
-            handlingErrors("changelog: firebase push removal") {
-                val changeLogEntry = ChangeLogEntry(null, userId.get() ?: throw Error("Not authenticated yet"))
-                changeLogRef.child(id.toString()).push(changeLogEntry)
+    override fun remove(item: T): Boolean {
+        val removed = delegate.remove(item)
+        if (removed) {
+            val id = item.getID()
+            if (id != null) {
+                handlingErrors("changelog: firebase push removal") {
+                    val changeLogEntry = ChangeLogEntry(null, userId.get() ?: throw Error("Not authenticated yet"))
+                    changeLogRef.child(id.toString()).push(changeLogEntry)
+                }
             }
         }
+        return removed
     }
 
     override fun addListener(listener: RepositoryListener<T>) {

@@ -13,9 +13,7 @@ import kotlin.js.Math
  * Date: 6/9/16
  * Time: 6:19 AM
  */
-open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String, private val toData: (JS) -> T) : Repository<T> {
-    private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
-
+open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String, private val toData: (JS) -> T) : NotifyingRepository<T>(UndoComponent) {
     override fun generateID(): ID<T> {
         return ID((Math.random() * Long.MAX_VALUE).toString())
     }
@@ -37,22 +35,14 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
 
     override fun list(): List<T> = listForLocalStorage.toList()
 
-    override fun save(original: T?, replacement: T): ID<T> {
-        val originalID = original?.getID() ?: replacement.getID()
-        val replacementWithID = getOrGenerateID(originalID, replacement)
-        val newID = replacementWithID.getID()!!
-        val originalWithID = originalID?.let { original?.withID(it) }
-        if (originalWithID != replacementWithID) {
-            console.info("Saving $replacement over original=$original")
-            UndoComponent.undoable(
-                    if (originalID == null) "Added $replacementWithID" else "Updated $replacementWithID",
-                    if (originalID == null) "Deleted $replacementWithID" else "Reverted $originalWithID") {
-                putIntoList(listForLocalStorage, replacementWithID, originalID)
-                listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
-                store()
-            }
-        }
-        return newID
+    override fun doSave(originalWithID: T?, replacementWithID: T) {
+        console.info("Saving $replacementWithID over original=$originalWithID")
+        putIntoList(listForLocalStorage, replacementWithID, originalWithID?.getID())
+    }
+
+    override fun doAfterNotify() {
+        super.doAfterNotify()
+        store()
     }
 
     fun replaceAll(entityJsonArray: Array<JS>) {
@@ -66,24 +56,14 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
         store()
     }
 
-    override fun remove(id: ID<T>) {
-        val index = listForLocalStorage.indexOfFirst { it.getID() == id }
-        if (index >= 0) {
-            val item = listForLocalStorage.get(index)
-            UndoComponent.undoable("Deleted $item", "Restored $item") {
-                listForLocalStorage.removeAt(index)
-                listeners.forEach { it.onRemoved(item) }
-                store()
-            }
+    override fun doRemove(item: T): Boolean {
+        val index = listForLocalStorage.indexOfFirst { it.getID() == item.getID() }
+        val found = index >= 0
+        if (found) {
+            console.info("Removing $item")
+            listForLocalStorage.removeAt(index)
         }
-    }
-
-    override fun addListener(listener: RepositoryListener<T>) {
-        listeners += listener
-    }
-
-    override fun removeListener(listener: RepositoryListener<T>) {
-        listeners -= listener
+        return found
     }
 
     private fun store() {

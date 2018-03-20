@@ -40,8 +40,8 @@ open class SwitchableRepository<T : WithID<T>>(
         return delegate.save(original, replacement)
     }
 
-    override fun remove(id: ID<T>) {
-        delegate.remove(id)
+    override fun remove(id: ID<T>): Boolean {
+        return delegate.remove(id)
     }
 
     override fun addListener(listener: RepositoryListener<T>) {

@@ -56,15 +56,17 @@ interface Repository<T : WithID<T>> {
         return entity.withID(save(entity))
     }
 
-    fun remove(id: ID<T>) {
+    fun remove(id: ID<T>): Boolean {
         val item = find(id)
         if (item != null) {
-            remove(item)
+            return remove(item)
+        } else {
+            return false
         }
     }
 
-    fun remove(item: T) {
-        item.getID()?.let { remove(it) }
+    fun remove(item: T): Boolean {
+        return item.getID()?.let { remove(it) } ?: false
     }
 
     fun find(id: ID<T>): T? = list().find { it.getID() == id }
@@ -95,7 +97,7 @@ class EmptyRepository<T : WithID<T>> : Repository<T> {
 
     override fun save(original: T?, replacement: T): ID<T> = throw UnsupportedOperationException("read-only")
 
-    override fun remove(id: ID<T>) = Unit // no-op
+    override fun remove(id: ID<T>): Boolean = false
 
     override fun generateID(): ID<T> = throw UnsupportedOperationException("read-only")
 
@@ -144,6 +146,54 @@ internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementW
     }
 }
 
+abstract class NotifyingRepository<T : WithID<T>>(val undoProvider: UndoProvider) : Repository<T> {
+    private val _listeners: MutableList<RepositoryListener<T>> = ArrayList(4)
+
+    protected val listeners: List<RepositoryListener<T>> get() = _listeners
+
+    final override fun save(original: T?, replacement: T): ID<T> {
+        val originalID = original?.getID() ?: replacement.getID()
+        val replacementWithID = getOrGenerateID(originalID, replacement)
+        val newID = replacementWithID.getID()!!
+        val originalWithID = originalID?.let { original?.withID(it) }
+        if (originalWithID != replacementWithID) {
+            undoProvider.undoable(
+                    if (originalID == null) "Added $replacementWithID" else "Updated $replacementWithID",
+                    if (originalID == null) "Deleted $replacementWithID" else "Reverted $originalWithID") {
+                doSave(originalWithID, replacementWithID)
+                listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
+                doAfterNotify()
+            }
+        }
+        return newID
+    }
+
+    abstract fun doSave(originalWithID: T?, replacementWithID: T)
+
+    final override fun remove(item: T): Boolean {
+        return undoProvider.undoable("Deleted $item", "Restored $item") {
+            val didRemoval = doRemove(item)
+            if (didRemoval) {
+                listeners.forEach { it.onRemoved(item) }
+            }
+            doAfterNotify()
+            didRemoval
+        }
+    }
+
+    abstract fun doRemove(item: T): Boolean
+
+    open fun doAfterNotify() {}
+
+    final override fun addListener(listener: RepositoryListener<T>) {
+        _listeners += listener
+    }
+
+    final override fun removeListener(listener: RepositoryListener<T>) {
+        _listeners -= listener
+    }
+}
+
 interface UndoProvider {
     fun <T : WithID<T>, F> undoableSave(original: T?, replacementWithID: T, function: () -> F): F {
         val isUpdate = original != null && original.getID() != null
@@ -172,81 +222,55 @@ interface UndoProvider {
 
 open class CompositeRepository<T : WithID<T>,R>(
         private val repositoryMap: Map<R,Repository<T>>,
-        private val undoProvider: UndoProvider = UndoProvider.empty,
-        private val categorizer: (T) -> R) : Repository<T> {
+        undoProvider: UndoProvider = UndoProvider.empty,
+        private val categorizer: (T) -> R) : NotifyingRepository<T>(undoProvider) {
+
     override fun list(): List<T> = repositoryMap.values.flatMap { it.list() }
 
     override fun find(id: ID<T>): T? {
         return repositoryMap.values.asSequence().map { it.find(id) }.find { it != null }
     }
 
-    override fun save(original: T?, replacement: T): ID<T> {
-        val originalCategory = original?.let { categorizer.invoke(it) }
-        val category = categorizer.invoke(replacement)
+    override fun doSave(originalWithID: T?, replacementWithID: T) {
+        val originalCategory = originalWithID?.let { categorizer.invoke(it) }
+        val category = categorizer.invoke(replacementWithID)
         val replacementRepository = repositoryMap[category] ?: error("no repository found for category=$category")
         if (originalCategory == category) {
-            return replacementRepository.save(original, replacement)
+            replacementRepository.save(originalWithID, replacementWithID)
         } else {
-            return undoProvider.undoableSave(original, replacement) {
-                val originalRepository = originalCategory?.let { repositoryMap[it] ?: error("no repository found for category=$category") }
-                originalRepository?.remove(original)
-                replacementRepository.save(null, replacement)
-            }
+            val originalRepository = originalCategory?.let { repositoryMap[it] ?: error("no repository found for category=$category") }
+            originalRepository?.remove(originalWithID)
+            replacementRepository.save(null, replacementWithID)
         }
     }
 
-    override fun remove(id: ID<T>) {
-        return repositoryMap.values.asSequence().forEach { it.remove(id) }
+    override fun doRemove(item: T): Boolean {
+        return repositoryMap.values.asSequence().any { it.remove(item) }
     }
 
     override fun generateID(): ID<T> = repositoryMap.values.firstOrNull()!!.generateID()
-
-    override fun addListener(listener: RepositoryListener<T>) {
-        repositoryMap.values.forEach { it.addListener(listener) }
-    }
-
-    override fun removeListener(listener: RepositoryListener<T>) {
-        repositoryMap.values.forEach { it.removeListener(listener) }
-    }
 
     override val localStorageKeys: Set<String>
         get() = repositoryMap.values.flatMap { it.localStorageKeys }.toSet()
 }
 
-open class InMemoryRepository<T : WithID<T>> : Repository<T> {
+open class InMemoryRepository<T : WithID<T>>(undoProvider: UndoProvider = UndoProvider.empty) : NotifyingRepository<T>(undoProvider) {
     private val list: ArrayList<T> = ArrayList()
-    private val listeners: ArrayList<RepositoryListener<T>> = ArrayList(4)
 
     override fun list(): List<T> = list.toList()
 
-    override fun save(original: T?, replacement: T): ID<T> {
-        val originalID = original?.getID() ?: replacement.getID()
-        val replacementWithID = getOrGenerateID(originalID, replacement)
-        val newID = replacementWithID.getID()!!
-        val originalWithID = originalID?.let { original?.withID(it) }
-        if (originalWithID != replacementWithID) {
-            putIntoList(list, replacementWithID, originalID)
-            listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
-        }
-        return newID
+    override fun doSave(originalWithID: T?, replacementWithID: T) {
+        putIntoList(list, replacementWithID, originalWithID?.getID())
     }
 
     override fun generateID(): ID<T> = ID(idGenerator.generateID().toString())
 
-    override fun remove(id: ID<T>) {
-        val index = list.indexOfFirst { it.getID() == id }
+    override fun doRemove(item: T): Boolean {
+        val index = list.indexOfFirst { it.getID() == item.getID() }
         if (index >= 0) {
-            val item = list.removeAt(index)
-            listeners.forEach { it.onRemoved(item) }
+            list.removeAt(index)
         }
-    }
-
-    override fun addListener(listener: RepositoryListener<T>) {
-        listeners += listener
-    }
-
-    override fun removeListener(listener: RepositoryListener<T>) {
-        listeners -= listener
+        return index >= 0
     }
 
     override val localStorageKeys: Set<String> = emptySet()

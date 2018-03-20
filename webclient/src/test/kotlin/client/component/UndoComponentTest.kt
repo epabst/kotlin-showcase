@@ -156,6 +156,16 @@ object UndoComponentTest {
             (UndoComponent.undoCount - originalUndoCount).mustBe(0)
         }
 
+        it("should ignore a no-up undoable") {
+            val originalUndoCount = UndoComponent.undoCount
+
+            UndoComponent.undoable("no-op", "no-op") {
+                println("Hello")
+            }
+
+            (UndoComponent.undoCount - originalUndoCount).mustBe(0)
+        }
+
         it("should undo commands in reverse order and redo in original order") {
             repository.addListener(object : RepositoryListener<EntityForTesting> {
                 override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {

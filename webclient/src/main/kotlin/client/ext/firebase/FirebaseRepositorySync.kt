@@ -166,12 +166,15 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         }
     }
 
-    override fun remove(id: ID<T>) {
-        delegate.remove(id)
-        markAsNotSynced(id, null)
-        // Remove it immediately so that it won't be found anymore.
-        // Later, when Firebase notifies of child_removed, it will not notify listeners again.
-        removeInFirebase(id)
+    override fun remove(id: ID<T>): Boolean {
+        val removed = delegate.remove(id)
+        if (removed) {
+            markAsNotSynced(id, null)
+            // Remove it immediately so that it won't be found anymore.
+            // Later, when Firebase notifies of child_removed, it will not notify listeners again.
+            removeInFirebase(id)
+        }
+        return removed
     }
 
     private fun removeInFirebase(id: ID<T>) {

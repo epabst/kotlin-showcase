@@ -73,7 +73,9 @@ object UndoComponent : UndoProvider {
             commandRecorder = undoableGroup
             try {
                 val result = function()
-                addUndoCommand(undoableGroup)
+                if (!undoableGroup.isEmpty()) {
+                    addUndoCommand(undoableGroup)
+                }
                 return result
             } finally {
                 commandRecorder = NormalCommandRecorder
@@ -173,6 +175,8 @@ private class UndoableGroup(private val redoPastTenseDescription: String, undoPa
     override fun addUndoCommandIfAppropriate(undoCommand: Command) {
         undoCommands.add(0, undoCommand)
     }
+
+    fun isEmpty(): Boolean = undoCommands.isEmpty()
 
     /** Run all undoCommands and return the redo. */
     override fun executeAndGetOpposite(): Command {
