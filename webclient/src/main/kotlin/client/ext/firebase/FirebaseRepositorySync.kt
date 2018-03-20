@@ -55,9 +55,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
                 handlingErrors("child_added") {
                     UndoComponent.notUndoable {
                         val id = snapshot!!.id!!
-                        val result = delegate.save(snapshot.value().withID(id))
-                        markAsSynced(id)
-                        result
+                        delegate.save(snapshot.value().withID(id))
                     }
                 }
             }
@@ -67,9 +65,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
                 handlingErrors("child_changed") {
                     UndoComponent.notUndoable {
                         val id = snapshot!!.id!!
-                        val result = delegate.save(snapshot.value().withID(id))
-                        markAsSynced(id)
-                        result
+                        delegate.save(snapshot.value().withID(id))
                     }
                 }
             }
@@ -82,7 +78,6 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
                     if (id != null) {
                         UndoComponent.notUndoable {
                             delegate.remove(id)
-                            markAsSynced(id)
                         }
                     }
                 }
@@ -95,25 +90,22 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         window.requestAnimationFrame {
             val firstOrNull = valuesToSync.entries.firstOrNull()
             if (firstOrNull != null) {
-                syncToFirebase(firstOrNull)
-                valuesToSync.remove(firstOrNull.key)
-                syncRemainingToFirebaseAsynchronously()
+                syncToFirebase(firstOrNull) {
+                    markAsSynced(it)
+                    syncRemainingToFirebaseAsynchronously()
+                }
             }
         }
     }
 
-    private fun syncToFirebase(valueToSync: Map.Entry<String, T?>) {
+    private fun syncToFirebase(valueToSync: Map.Entry<String, T?>, onComplete: (ID<T>) -> Unit = {}) {
         val id = ID<T>(valueToSync.key)
         val value = valueToSync.value
-        if (value != null) setInFirebase(id, value) else removeInFirebase(id)
+        if (value != null) setInFirebase(id, value, onComplete) else removeInFirebase(id, onComplete)
     }
 
     private fun markAsNotSynced(id: ID<T>, value: T?) {
-        if (value != null) {
-            valuesToSync.put(id._id, value)
-        } else {
-            valuesToSync.remove(id._id)
-        }
+        valuesToSync.put(id._id, value)
         storeValuesToSync()
     }
 
@@ -154,15 +146,18 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         // Later, when Firebase notifies of child_added or child_changed, it will not notify listeners again.
         val newID = delegate.save(original, replacement)
         markAsNotSynced(newID, replacement)
-        setInFirebase(newID, replacement)
+        setInFirebase(newID, replacement) { markAsSynced(it) }
         return newID
     }
 
-    private fun setInFirebase(id: ID<T>, replacement: T) {
+    private fun setInFirebase(id: ID<T>, replacement: T, onComplete: (ID<T>) -> Unit = {}) {
         handlingErrors("firebase set") {
-            collectionRef.child(id.toString())
-                    .set(JSON.parse(JSON.stringify(replacement.withID(id))))
-                    .then(onResolve = { markAsSynced(id) }, onReject = { handleError(it) })
+            val value = JSON.parse<Any>(JSON.stringify(replacement.withID(id)))
+            collectionRef.child(id.toString()).set(value, onComplete = { error ->
+                handlingErrors("firebase set") {
+                    if (error == null) onComplete(id) else handleError(error)
+                }
+            })
         }
     }
 
@@ -172,16 +167,18 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
             markAsNotSynced(id, null)
             // Remove it immediately so that it won't be found anymore.
             // Later, when Firebase notifies of child_removed, it will not notify listeners again.
-            removeInFirebase(id)
+            removeInFirebase(id) { markAsSynced(id) }
         }
         return removed
     }
 
-    private fun removeInFirebase(id: ID<T>) {
+    private fun removeInFirebase(id: ID<T>, onComplete: (ID<T>) -> Unit = {}) {
         handlingErrors("firebase remove") {
-            collectionRef.child(id.toString())
-                    .remove()
-                    .then(onResolve = { markAsSynced(id) }, onReject = { handleError(it) })
+            collectionRef.child(id.toString()).remove(onComplete = { error ->
+                handlingErrors("firebase remove onComplete") {
+                    if (error == null) onComplete(id) else handleError(error)
+                }
+            })
         }
     }
 
