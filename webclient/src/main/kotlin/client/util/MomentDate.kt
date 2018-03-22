@@ -1,8 +1,6 @@
 package client.util
 
 import common.util.ProviderDate
-import common.util.RichDate
-import common.util.toRichDate
 import net.yested.ext.moment.Moment
 
 /**
@@ -24,5 +22,3 @@ class MomentDate(val moment: Moment) : ProviderDate {
     override fun toDisplayDateTimeString(): String = moment.format("lll")
     override fun toIsoTimestampString(): String = moment.format()
 }
-
-fun Moment.toRichDate(): RichDate = MomentDate(this).toRichDate()

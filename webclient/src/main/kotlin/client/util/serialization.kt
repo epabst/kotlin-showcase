@@ -1,9 +1,7 @@
 package client.util
 
 import common.util.ID
-import common.util.RichDate
 import common.util.WithID
-import net.yested.ext.moment.Moment
 
 /**
  * Serialization support for util classes.
@@ -32,15 +30,6 @@ fun LongJS?.toNormal(): Long? {
 }
 
 fun <E : WithID<E>> String.toID(): ID<E>? = ID(this)
-
-fun RichDate.toMoment(): Moment = (date as MomentDate).moment
-
-external interface RichDateJS {
-    val months: Int
-    val days: Int
-}
-
-fun RichDateJS.toNormal(): RichDate = RichDate(months, days)
 
 external interface IDJS {
     val id: LongJS?
