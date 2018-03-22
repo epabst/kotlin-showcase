@@ -41,6 +41,7 @@ interface ProviderDate {
     val month: Int
     val dayOfMonth: Int
     val millisecondsSinceUnixEpoch: Long
+    fun toIsoTimestampString(): String
 }
 
 fun ProviderDate(input: String): ProviderDate = PlatformProvider.instance.toDate(input)
