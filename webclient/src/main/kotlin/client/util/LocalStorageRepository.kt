@@ -5,7 +5,7 @@ import common.util.*
 import org.w3c.dom.get
 import org.w3c.dom.set
 import kotlin.browser.localStorage
-import kotlin.js.Math
+import kotlin.js.Math.random
 
 /**
  * A [Repository] that uses [browser.localStorage].
@@ -15,7 +15,7 @@ import kotlin.js.Math
  */
 open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String, private val toData: (JS) -> T) : NotifyingRepository<T>(UndoComponent) {
     override fun generateID(): ID<T> {
-        return ID((Math.random() * Long.MAX_VALUE).toString())
+        return ID((random() * Long.MAX_VALUE).toString())
     }
 
     private val listForLocalStorage: ArrayList<T> by lazy {

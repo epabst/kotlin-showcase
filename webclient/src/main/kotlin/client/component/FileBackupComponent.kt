@@ -62,7 +62,7 @@ object FileBackupComponent {
                     handlingErrors("createBackup/directoryEntry") {
                         val flags = object : Flags {}
                         flags.create = true
-                        @Suppress("UNCHECKED_CAST_TO_NATIVE_INTERFACE")
+                        @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
                         val directory = directoryEntry as DirectoryEntry
                         directory.getFile("${appFilenamePrefix}-${Moment.now().format(backupDateFormat)}.json", flags, { fileEntry ->
                             handlingErrors("createBackup/fileEntry") {
