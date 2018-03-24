@@ -105,9 +105,16 @@ class JvmDate(private val calendar: Calendar) : ProviderDate {
 
     override fun hashCode(): Int = calendar.hashCode()
 
-    override fun toString(): String = DateFormat.getDateInstance(DateFormat.SHORT).format(calendar.time)
+    override fun toString(): String = shortDateInstance.format(calendar.time)
 
-    override fun toIsoTimestampString(): String = DateFormat.getDateTimeInstance().format(calendar.time)
+    override fun toDisplayDateTimeString(): String = dateTimeInstance.format(calendar.time)
+
+    override fun toIsoTimestampString(): String = dateTimeInstance.format(calendar.time)
+
+    companion object {
+        private val shortDateInstance = DateFormat.getDateInstance(DateFormat.SHORT)
+        private val dateTimeInstance = DateFormat.getDateTimeInstance()
+    }
 }
 
 class FunctionThreadLocal<T>(private val factory: () -> T) : ThreadLocal<T>() {
