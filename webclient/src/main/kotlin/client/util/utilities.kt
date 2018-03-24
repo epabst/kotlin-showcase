@@ -58,3 +58,11 @@ fun <T> ReadOnlyProperty<Collection<T>>.contains(itemProperty: ReadOnlyProperty<
 fun String?.emptyToNull(): String? {
     return if (this == null || this.isEmpty()) null else this
 }
+
+fun <T> biasing(selector: (T) -> Boolean): Comparator<T> {
+    return compareBy { !selector(it) }
+}
+
+fun <T> Comparator<T>.thenBiasing(selector: (T) -> Boolean): Comparator<T> {
+    return thenBy { !selector(it) }
+}
