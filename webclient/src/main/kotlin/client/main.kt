@@ -27,7 +27,8 @@ fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
 object UI {
     val toDoId = Property<ID<ToDo>?>(null)
     val toDosScreen: HTMLDivElement by lazy { inContext("toDosScreen") { toDosScreen(ToDosModel()) } }
-    val toDoScreen: HTMLDivElement by lazy { inContext("toDoScreen") { toDoScreen(ToDoModel(toDoId)) } }
+    val toDoModel = ToDoModel(toDoId)
+    val toDoScreen: HTMLDivElement by lazy { inContext("toDoScreen") { toDoScreen(toDoModel) } }
 }
 
 /**
@@ -54,8 +55,7 @@ fun main(args: Array<String>) {
                 when (firstHash) {
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoScreen, divContainer)
-                        val toDoId: ID<ToDo>? = if (hash.size > 1) ID(hash[1]) else null
-                        UI.toDoId.set(toDoId)
+                        UI.toDoModel.setFromHash(hash)
                     }
                     else -> {
                         setChildWithoutSplash(UI.toDosScreen, divContainer)

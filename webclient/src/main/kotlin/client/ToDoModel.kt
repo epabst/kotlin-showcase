@@ -57,6 +57,11 @@ class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
         window.history.backToHash(ToDosModel.toUrl())
     }
 
+    fun setFromHash(hash: Array<String>) {
+        val toDoId: ID<ToDo>? = if (hash.size > 1) ID(hash[1]) else null
+        this.toDoId.set(toDoId)
+    }
+
     companion object {
         fun toUrl(toDoId: ID<ToDo>?): String = "#toDo" + if (toDoId != null) "/" + toDoId else ""
     }
