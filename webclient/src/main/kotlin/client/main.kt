@@ -49,8 +49,8 @@ fun main(args: Array<String>) {
 
             var previousHash = ""
 
-            window.location.splitHashProperty.onNext { hash ->
-                inContext("About to draw '$hash'") { console.info("About to draw '$hash'") }
+            window.location.splitHashProperty.async().onNext { hash ->
+                inContext("About to draw '${hash.joinToString("/")}'") { console.info("About to draw '${hash.joinToString("/")}'") }
                 val firstHash = hash[0]
                 when (firstHash) {
                     "#toDo" -> {
