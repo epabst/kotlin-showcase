@@ -10,6 +10,9 @@ enum class ProtectionLevel(val label: String) {
     /** Owned by all users. */
     PUBLIC("Public: modifiable by all users"),
 
+    /** Private to those who have the link.  It is visible an all of their devices. */
+    PRIVATE_VIA_LINK("Private shared via link: modifiable by users who have the private link"),
+
     /** Private to the owning user.  It is visible an all of their devices. */
     PRIVATE("Private: only visible to me, but on any device"),
 
@@ -20,8 +23,16 @@ enum class ProtectionLevel(val label: String) {
     DEVICE("Device: Kept only on this device")
 }
 
+data class PrivateViaLinkSpace(val id: ID<PrivateViaLinkSpace>? = null) : WithID<PrivateViaLinkSpace> {
+    override fun getID(): ID<PrivateViaLinkSpace>? = id
+
+    override fun withID(id: ID<PrivateViaLinkSpace>): PrivateViaLinkSpace = copy(id = id)
+}
+
 interface ProtectedWithID<T : ProtectedWithID<T>> : WithID<T> {
     val protectionLevel: ProtectionLevel
+
+    val privateViaLinkSpaceId: ID<PrivateViaLinkSpace>
 
     fun copy(protectionLevel: ProtectionLevel): T
 

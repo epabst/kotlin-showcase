@@ -9,6 +9,8 @@ import firebase.app.App
 import firebase.database.DataSnapshot
 import firebase.database.Reference
 import net.yested.core.properties.Property
+import net.yested.core.properties.ReadOnlyProperty
+import net.yested.core.properties.onChange
 import kotlin.browser.window
 
 /**
@@ -121,30 +123,52 @@ fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, localPath: Strin
     return FirebaseRepositorySync(LocalStorageRepository(localPath, toData), listOf(path), { path }, toData, firebaseApp)
 }
 
-fun <T : WithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
-                                                                       userId: Property<String?>,
-                                                                       toData: (JS) -> T,
-                                                                       firebaseApp: App,
-                                                                       categorizer: (T) -> ProtectionLevel) : Repository<T> {
+fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
+                                                                                userId: Property<String?>,
+                                                                                privateViaLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>,
+                                                                                toData: (JS) -> T,
+                                                                                firebaseApp: App,
+                                                                                categorizer: (T) -> ProtectionLevel) : Repository<T> {
     val publicRepository = FirebaseAndLocalRepository("public/$relativePath", relativePath, toData, firebaseApp)
     val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository, userId)
+    val privateViaLinkRepository = PrivateViaLinkFirebaseRepository(privateViaLinkIds, relativePath, toData, firebaseApp)
     val privateRepository = PrivateFirebaseRepository(userId, relativePath, toData, firebaseApp)
     val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
-    return CompositeRepository(mapOf(PUBLIC to publicRepositoryWithChangeLog, PRIVATE to privateRepository, DEVICE to deviceRepository), UndoComponent, categorizer)
+    return CompositeRepository(mapOf(
+            PUBLIC to publicRepositoryWithChangeLog,
+            PRIVATE_VIA_LINK to privateViaLinkRepository,
+            PRIVATE to privateRepository,
+            DEVICE to deviceRepository), UndoComponent, categorizer)
 }
 
 fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
                                                                                 userId: Property<String?>,
+                                                                                privateViaLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>,
                                                                                 toData: (JS) -> T,
                                                                                 firebaseApp: App) : Repository<T> {
-    return PublicWithChangeLogAndPrivateFirebaseRepository(relativePath, userId, toData, firebaseApp, { it.protectionLevel })
+    return PublicWithChangeLogAndPrivateFirebaseRepository(relativePath, userId, privateViaLinkIds, toData, firebaseApp, { it.protectionLevel })
 }
 
-fun <T : WithID<T>,JS> PrivateFirebaseRepository(userId: Property<String?>, relativePath: String, toData: (JS) -> T, firebaseApp: App): SwitchableRepository<T> {
-    val emptyRepository = EmptyRepository<T>()
-    val privateRepository = SwitchableRepository(emptyRepository, UndoComponent)
-    userId.onNext {
-        privateRepository.delegate = it?.let { FirebaseAndLocalRepository("userPrivate/$it/$relativePath", "userPrivate/$it/$relativePath", toData, firebaseApp) } ?: emptyRepository
+fun <T : ProtectedWithID<T>,JS> PrivateViaLinkFirebaseRepository(privateLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>, relativePath: String, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
+    val localPivateSharedViaLinkRepository = LocalStorageRepository("privateSharedViaLink/$relativePath", toData)
+    val initialPaths = privateLinkIds.get().map { it.getPath(relativePath) }
+    val pathChooser: (T) -> String = { it.privateViaLinkSpaceId.getPath(relativePath) }
+    val firebaseRepositorySync = FirebaseRepositorySync(localPivateSharedViaLinkRepository, initialPaths, pathChooser, toData, firebaseApp)
+    privateLinkIds.onChange { oldIds, newIds ->
+        newIds.minus(oldIds).forEach { firebaseRepositorySync.addSubscribedPath("privateSharedViaLink/${it._id}/$relativePath") }
+        oldIds.minus(newIds).forEach { firebaseRepositorySync.removeSubscribedPath("privateSharedViaLink/${it._id}/$relativePath") }
     }
-    return privateRepository
+    return firebaseRepositorySync
+}
+
+private fun ID<PrivateViaLinkSpace>.getPath(relativePath: String) = "privateSharedViaLink/${_id}/$relativePath"
+
+class PrivateFirebaseRepository<T : WithID<T>,JS>(userId: ReadOnlyProperty<String?>, relativePath: String, toData: (JS) -> T, firebaseApp: App)
+    : SwitchableRepository<T>(EmptyRepository<T>(), UndoComponent) {
+    init {
+        val emptyRepository = delegate
+        userId.onNext {
+            delegate = it?.let { FirebaseAndLocalRepository("userPrivate/$it/$relativePath", "userPrivate/$it/$relativePath", toData, firebaseApp) } ?: emptyRepository
+        }
+    }
 }
