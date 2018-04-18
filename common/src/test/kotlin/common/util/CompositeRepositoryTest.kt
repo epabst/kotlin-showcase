@@ -71,6 +71,23 @@ class CompositeRepositoryTest : Spek({
         listener.onRemovedCount.mustBe(1)
     }
 
+    it("should notify listeners when item added to child Repository") {
+        val listener = CountingListener<EntityForTesting>()
+        val repositoryA = InMemoryRepository<EntityForTesting>()
+        val repositoryN = InMemoryRepository<EntityForTesting>()
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        }
+        compositeRepository.addListener(listener)
+        listener.onSavedCount.mustBe(0)
+        listener.onRemovedCount.mustBe(0)
+
+        val id1 = repositoryA.save(EntityForTesting("A"))
+        listener.onSavedCount.mustBe(1)
+        repositoryA.remove(id1)
+        listener.onRemovedCount.mustBe(1)
+    }
+
     it("should handle save that moves it to another Repository") {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
