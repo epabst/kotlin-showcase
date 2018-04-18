@@ -51,3 +51,5 @@ object JSModelTest {
         return deserialized
     }
 }
+
+fun <T : WithID<T>> ID(id: Long): ID<T> = ID(id.toString())

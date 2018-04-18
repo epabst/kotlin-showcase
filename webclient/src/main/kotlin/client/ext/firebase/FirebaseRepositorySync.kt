@@ -53,8 +53,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
             window.requestAnimationFrame {
                 handlingErrors("child_added") {
                     UndoComponent.notUndoable {
-                        val id = snapshot!!.id!!
-                        delegate.save(snapshot.value().withID(id))
+                        delegate.save(snapshot!!.valueWithId())
                     }
                 }
             }
@@ -63,8 +62,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
             window.requestAnimationFrame {
                 handlingErrors("child_changed") {
                     UndoComponent.notUndoable {
-                        val id = snapshot!!.id!!
-                        delegate.save(snapshot.value().withID(id))
+                        delegate.save(snapshot!!.valueWithId())
                     }
                 }
             }
@@ -100,7 +98,11 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
     private fun syncToFirebase(valueToSync: Map.Entry<String, T?>, onComplete: (ID<T>) -> Unit = {}) {
         val id = ID<T>(valueToSync.key)
         val value = valueToSync.value
-        if (value != null) setInFirebase(id, value, onComplete) else removeInFirebase(id, onComplete)
+        if (value != null) {
+            setInFirebase(value.withID(id), onComplete)
+        } else {
+            removeInFirebase(id, onComplete)
+        }
     }
 
     private fun markAsNotSynced(id: ID<T>, value: T?) {
@@ -122,7 +124,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
     }
 
     override fun generateID(): ID<T> {
-        return delegate.generateID()
+        return ID(collectionRef.push().key!!)
     }
 
     private fun DataSnapshot.valueWithId(): T {
@@ -134,30 +136,35 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         return toData(this.`val`() as JS)
     }
 
-    private val DataSnapshot.id: ID<T>? get() = key?.toLong()?.let { ID(it) }
+    private val DataSnapshot.id: ID<T>? get() = key?.let { ID(it) }
 
     override fun list(): List<T> {
         return delegate.list()
     }
 
     override fun save(original: T?, replacement: T): ID<T> {
+        val originalID = original?.getID()
+        val replacementPossiblyWithOriginalId = if (originalID != null) replacement.withID(originalID) else replacement
+        val newID = setInFirebase(replacementPossiblyWithOriginalId) { it: ID<T> -> markAsSynced(it) }
+        val replacementWithID = replacement.withID(newID)
         // Save it immediately so that it can be immediately found.
+        delegate.save(original, replacementWithID)
         // Later, when Firebase notifies of child_added or child_changed, it will not notify listeners again.
-        val newID = delegate.save(original, replacement)
-        markAsNotSynced(newID, replacement)
-        setInFirebase(newID, replacement) { markAsSynced(it) }
+        markAsNotSynced(newID, replacementWithID)
         return newID
     }
 
-    private fun setInFirebase(id: ID<T>, replacement: T, onComplete: (ID<T>) -> Unit = {}) {
-        handlingErrors("firebase set") {
-            val value = JSON.parse<Any>(JSON.stringify(replacement.withID(id)))
-            collectionRef.child(id.toString()).set(value, onComplete = { error ->
-                handlingErrors("firebase set") {
-                    if (error == null) onComplete(id) else handleError(error)
-                }
-            })
-        }
+    private fun setInFirebase(entity: T, onComplete: (ID<T>) -> Unit = {}): ID<T> {
+        val givenID = entity.getID()
+        val newReference = givenID?.let { collectionRef.child(it.toString()) } ?: collectionRef.push()
+        val id = givenID ?: ID(newReference.key!!)
+        val jsonValue = JSON.parse<Any>(JSON.stringify(entity.withID(id)))
+        newReference.set(jsonValue, onComplete = { error ->
+            handlingErrors("firebase set") {
+                if (error == null) onComplete(id) else handleError(error)
+            }
+        })
+        return id
     }
 
     override fun remove(id: ID<T>): Boolean {

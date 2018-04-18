@@ -14,8 +14,6 @@ data class ID<T : WithID<T>>(val _id: String) {
     override fun toString(): String = _id
 }
 
-fun <T : WithID<T>> ID(id: Long): ID<T> = ID(id.toString())
-
 interface WithID<T : WithID<T>> {
     fun getID(): ID<T>?
 

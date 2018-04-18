@@ -1,5 +1,6 @@
 package client.util
 
+import client.ID
 import client.component.UndoComponent
 import common.util.*
 import org.w3c.dom.get
