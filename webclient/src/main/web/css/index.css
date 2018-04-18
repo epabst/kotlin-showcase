@@ -59,10 +59,10 @@ label {
 .form-group {
   margin-bottom: 10px;
 }
-.form-control, .input-group .form-control {
+.input-group .form-control {
   width: inherit;
 }
-.input-group.date, .form-control {
+.input-group.date {
   width: initial;
 }
 .form-control, .input-group.date, .input-group .form-control {
