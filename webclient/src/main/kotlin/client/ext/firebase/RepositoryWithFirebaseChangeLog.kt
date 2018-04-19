@@ -12,6 +12,7 @@ import net.yested.ext.moment.Moment
  * Time: 11:05 PM
  */
 open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, private val delegate: FirebaseRepositorySync<T, JS>, val userId: Property<String?>) : Repository<T> {
+    private val firebaseDatabaseWithLocalStorage = delegate.databaseWithLocalStorage
     private val changeLogRef = delegate.firebaseApp.database().ref(path)
 
     override fun generateID(): ID<T> {
@@ -26,7 +27,7 @@ open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, priva
         val newID = delegate.save(original, replacement)
         handlingErrors("changelog: firebase push save") {
             val changeLogEntry = ChangeLogEntry(replacement, userId.get() ?: throw Error("Not authenticated yet"))
-            changeLogRef.child(newID.toString()).push(changeLogEntry)
+            firebaseDatabaseWithLocalStorage.push(changeLogRef.child(newID.toString()), changeLogEntry)
         }
         return newID
     }
@@ -38,7 +39,7 @@ open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, priva
             if (id != null) {
                 handlingErrors("changelog: firebase push removal") {
                     val changeLogEntry = ChangeLogEntry(null, userId.get() ?: throw Error("Not authenticated yet"))
-                    changeLogRef.child(id.toString()).push(changeLogEntry)
+                    firebaseDatabaseWithLocalStorage.push(changeLogRef.child(id.toString()), changeLogEntry)
                 }
             }
         }
