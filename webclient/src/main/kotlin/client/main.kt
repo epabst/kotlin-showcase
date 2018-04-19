@@ -16,7 +16,7 @@ import kotlin.browser.window
 import kotlin.dom.addClass
 
 val appName = "ZZZAppNameZZZ"
-val appFilenamePrefix = appName.replace(Regex("\\W"), "").toLowerCase()
+val appNameForFilesystem = appName.replace(Regex("\\W"), "").toLowerCase()
 val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
 
 fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {

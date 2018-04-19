@@ -1,7 +1,7 @@
 package client.component
 
 import client.Factory
-import client.appFilenamePrefix
+import client.appNameForFilesystem
 import client.cordova.*
 import client.util.LocalStorageRepository
 import client.util.handleError
@@ -64,7 +64,7 @@ object FileBackupComponent {
                         flags.create = true
                         @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
                         val directory = directoryEntry as DirectoryEntry
-                        directory.getFile("${appFilenamePrefix}-${Moment.now().format(backupDateFormat)}.json", flags, { fileEntry ->
+                        directory.getFile("${appNameForFilesystem}-${Moment.now().format(backupDateFormat)}.json", flags, { fileEntry ->
                             handlingErrors("createBackup/fileEntry") {
                                 fileEntry.createWriter({ writer ->
                                     handlingErrors("createBackup/writer") {
