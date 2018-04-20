@@ -5,8 +5,15 @@
       ".write": true
     },
     "publicChanges": {
-      ".read": false,
-      ".write": "!data.exists()"
+      ".read": true,
+      "$name": {
+        "$id": {
+          "$changeTimestamp": {
+            ".read": false,
+  	        ".write": "!data.exists()"
+          }
+        }
+      }
     },
     "userPrivate": {
       "$uid": {
