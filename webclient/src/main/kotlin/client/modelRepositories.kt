@@ -35,8 +35,8 @@ object Factory {
 
     init {
         firebaseApp.auth().onAuthStateChanged({ user ->
-            console.log("uid=${user.uid} isAnonymous=${user.isAnonymous} displayName=${user.displayName} email=${user.email} photoURL=${user.photoURL}")
-            userId.set(user.uid)
+            console.log("uid=${user?.uid} isAnonymous=${user?.isAnonymous} displayName=${user?.displayName} email=${user?.email} photoURL=${user?.photoURL}")
+            userId.set(user?.uid)
         }, opt_error = { handleError(Exception("Error ${it.code}: ${it.message}")) })
 
         firebaseApp.auth().signInAnonymously()
