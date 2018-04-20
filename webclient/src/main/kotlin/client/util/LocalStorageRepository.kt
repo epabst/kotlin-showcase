@@ -67,7 +67,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val localStorageKey: String,
     }
 
     private fun store() {
-        localStorage[localStorageKey] = JSON.stringify(listForLocalStorage)
+        whenStable({ JSON.stringify(listForLocalStorage) }) { localStorage[localStorageKey] = it }
     }
 
     override val localStorageKeys: Set<String> = setOf(localStorageKey)

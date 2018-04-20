@@ -3,6 +3,7 @@ package client.ext.firebase
 import client.appNameForFilesystem
 import client.util.handleError
 import client.util.handlingErrors
+import client.util.whenStable
 import firebase.database.Database
 import firebase.database.Reference
 import org.w3c.dom.get
@@ -73,7 +74,9 @@ open class FirebaseDatabaseWithLocalStorage(val firebaseDatabase: Database) {
     }
 
     private fun storeValuesToSync() {
-        localStorage[unsyncedLocalStorageKey] = JSON.stringify(json(*valuesToSync.map { it.key to it.value }.toTypedArray()))
+        whenStable({ valuesToSync.map { it.key to it.value } }) {
+            localStorage[unsyncedLocalStorageKey] = JSON.stringify(json(*it.toTypedArray()))
+        }
     }
 
     private fun syncRemainingToFirebaseAsynchronously() {

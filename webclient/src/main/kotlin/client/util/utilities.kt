@@ -9,6 +9,7 @@ package client.util
 import common.util.ID
 import common.util.WithID
 import net.yested.core.properties.*
+import kotlin.browser.window
 
 /**
  * Map a List to another list, reusing the items from the time before whenever equal to the function result.
@@ -65,4 +66,18 @@ fun <T> biasing(selector: (T) -> Boolean): Comparator<T> {
 
 fun <T> Comparator<T>.thenBiasing(selector: (T) -> Boolean): Comparator<T> {
     return thenBy { !selector(it) }
+}
+
+fun <T> whenStable(changingValue: () -> T, callback: (T) -> Unit) {
+    fun whenStable(changingValue: () -> T, priorValue: T, callback: (T) -> Any) {
+        window.requestAnimationFrame {
+            val newValue = changingValue.invoke()
+            if (newValue == priorValue) {
+                callback.invoke(newValue)
+            } else {
+                whenStable(changingValue, newValue, callback)
+            }
+        }
+    }
+    whenStable(changingValue, changingValue.invoke(), callback)
 }
