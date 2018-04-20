@@ -7,6 +7,7 @@ import common.util.*
 import common.util.ProtectionLevel.*
 import firebase.app.App
 import firebase.database.DataSnapshot
+import firebase.database.Reference
 import net.yested.core.properties.Property
 import kotlin.browser.window
 
@@ -16,51 +17,42 @@ import kotlin.browser.window
  * Date: 1/4/18
  * Time: 11:05 PM
  */
-open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Repository<T>, val path: String, private val toData: (JS) -> T, val firebaseApp: App) : NormalizingRepository<T>() {
+open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Repository<T>,
+                                                        initialPaths: List<String>,
+                                                        private val pathChooser: (T) -> String,
+                                                        private val toData: (JS) -> T,
+                                                        val firebaseApp: App) : NormalizingRepository<T>() {
     private val rawDatabase = firebaseApp.database()
     val databaseWithLocalStorage = FirebaseDatabaseWithLocalStorage(rawDatabase)
-    private val collectionRef = rawDatabase.ref(path)
-
-    init {
-        collectionRef.on("child_added") { snapshot, _ ->
-            window.requestAnimationFrame {
-                handlingErrors("child_added") {
-                    UndoComponent.notUndoable {
-                        delegate.save(snapshot!!.valueWithId())
-                    }
+    private val subscribedPaths = mutableSetOf<String>()
+    private val callbackToSave: (DataSnapshot?, String?) -> Int = { snapshot, _ ->
+        window.requestAnimationFrame {
+            handlingErrors("child_added or child_changed") {
+                UndoComponent.notUndoable {
+                    delegate.save(snapshot!!.valueWithId())
                 }
             }
         }
-        collectionRef.on("child_changed") { snapshot, _ ->
-            window.requestAnimationFrame {
-                handlingErrors("child_changed") {
+    }
+    private val callbackToRemove: (DataSnapshot?, String?) -> Int = { snapshot, _ ->
+        window.requestAnimationFrame {
+            handlingErrors("child_removed") {
+                val id = snapshot?.id
+                if (id != null) {
                     UndoComponent.notUndoable {
-                        delegate.save(snapshot!!.valueWithId())
-                    }
-                }
-            }
-        }
-        collectionRef.on("child_removed") { snapshot, _ ->
-            window.requestAnimationFrame {
-                handlingErrors("child_removed") {
-                    val id = snapshot?.id
-
-                    if (id != null) {
-                        UndoComponent.notUndoable {
-                            delegate.remove(id)
-                        }
+                        delegate.remove(id)
                     }
                 }
             }
         }
     }
 
-    private fun firebase.database.Reference.on(eventType: String, callback: (a: firebase.database.DataSnapshot?, b: String? /*= null*/) -> Any): (a: firebase.database.DataSnapshot?, b: String? /*= null*/) -> Any {
-        return this.on(eventType, callback, null, null)
+    init {
+        initialPaths.forEach { addSubscribedPath(it) }
     }
 
     override fun generateID(): ID<T> {
-        return ID(collectionRef.push().key!!)
+        return ID(rawDatabase.ref().push().key!!)
     }
 
     private fun DataSnapshot.valueWithId(): T {
@@ -79,17 +71,20 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
     }
 
     override fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
-        val reference = collectionRef.child(replacementWithID.getID()!!.toString())
-        databaseWithLocalStorage.set(reference, JSON.parse(JSON.stringify(replacementWithID)))
+        databaseWithLocalStorage.set(referenceFor(replacementWithID), JSON.parse(JSON.stringify(replacementWithID)))
         delegate.save(originalWithID, replacementWithID)
     }
 
-    override fun remove(id: ID<T>): Boolean {
-        val removed = delegate.remove(id)
+    override fun remove(item: T): Boolean {
+        val removed = delegate.remove(item)
         if (removed) {
-            databaseWithLocalStorage.remove(collectionRef.child(id.toString()))
+            databaseWithLocalStorage.remove(referenceFor(item))
         }
         return removed
+    }
+
+    private fun referenceFor(entityWithID: T): Reference {
+        return rawDatabase.ref(pathChooser.invoke(entityWithID)).child(entityWithID.getID()!!.toString())
     }
 
     override fun addListener(listener: RepositoryListener<T>) {
@@ -100,12 +95,30 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         delegate.removeListener(listener)
     }
 
+    fun addSubscribedPath(path: String) {
+        if (subscribedPaths.add(path)) {
+            val reference = rawDatabase.ref(path)
+            reference.on("child_added", callbackToSave)
+            reference.on("child_changed", callbackToSave)
+            reference.on("child_removed", callbackToRemove)
+        }
+    }
+
+    fun removeSubscribedPath(path: String) {
+        if (subscribedPaths.remove(path)) {
+            val reference = rawDatabase.ref(path)
+            reference.off("child_added", callbackToSave)
+            reference.off("child_changed", callbackToSave)
+            reference.off("child_removed", callbackToRemove)
+        }
+    }
+
     override val localStorageKeys: Set<String>
         get() = delegate.localStorageKeys
 }
 
 fun <T : WithID<T>,JS> FirebaseAndLocalRepository(path: String, localPath: String, toData: (JS) -> T, firebaseApp: App) : FirebaseRepositorySync<T,JS> {
-    return FirebaseRepositorySync(LocalStorageRepository(localPath, toData), path, toData, firebaseApp)
+    return FirebaseRepositorySync(LocalStorageRepository(localPath, toData), listOf(path), { path }, toData, firebaseApp)
 }
 
 fun <T : WithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
