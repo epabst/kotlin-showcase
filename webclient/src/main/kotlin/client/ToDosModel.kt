@@ -4,10 +4,9 @@ import client.component.FileBackupComponent.backupButton
 import client.component.responsiveWidth
 import client.component.undoComponent
 import client.component.visible
-import client.util.mapEachReusingByID
+import client.util.listProperty
 import common.ToDo
 import common.util.Repository
-import common.util.RepositoryListener
 import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*
@@ -23,30 +22,10 @@ import kotlin.dom.appendText
 /**
  * UI for showing a list of ToDos.
  * @author Eric Pabst (epabst@gmail.com)
- * Date: 6/7/16
- * Time: 6:37 AM
  */
 class ToDosModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
-    val data = Property<List<ToDo>?>(repository.list())
-    val dataProperties = data.mapEachReusingByID { it.toProperty() }
-    val currentSort = Property<SortSpecification<Property<ToDo>>?>(null)
-
-    init {
-        repository.addListener(object : RepositoryListener<ToDo> {
-            override fun onSaved(original: ToDo?, replacementWithID: ToDo) {
-                if (original == null) {
-                    data.set(repository.list())
-                } else {
-                    dataProperties.get()?.find { it.get().id == original.id }?.set(replacementWithID)
-                    data.set(repository.list())
-                }
-            }
-
-            override fun onRemoved(item: ToDo) {
-                data.set(repository.list())
-            }
-        })
-    }
+    val data = repository.listProperty()
+    val currentSort = Property<SortSpecification<ToDo>?>(null)
 
     fun delete(todo: ToDo) {
         repository.remove(todo)
@@ -70,12 +49,12 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                         th {
                             Col.Width.Sm(8) and Col.Width.Xs(8)
                             addClass("text-left")
-                            sortControlWithArrow(model.currentSort, compareBy<Property<ToDo>> { it.get().name }, sortNow = true) { appendText("ToDo") }
+                            sortControlWithArrow(model.currentSort, compareBy { it.name }, sortNow = true) { appendText("ToDo") }
                         }
                         th {
                             Col.Width.Sm(2) and Col.Width.Xs(2)
                             addClass("text-right")
-                            sortControlWithArrow(model.currentSort, compareBy<Property<ToDo>> { it.get().dueDate }) {
+                            sortControlWithArrow(model.currentSort, compareBy { it.dueDate }) {
                                 div { appendText("Due Date") }
                             }
                         }
@@ -85,17 +64,17 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                         }
                     }
                 }
-                tbody(model.dataProperties.sortedWith(model.currentSort), effect = if (animate) Collapse() else NoEffect) { item ->
+                tbody(model.data.sortedWith(model.currentSort), effect = if (animate) Collapse() else NoEffect) { item ->
                     tr {
                         td {
                             responsiveWidth = Col.Width.Sm(8) and Col.Width.Xs(7) and Col.Width.Xxs(9) and Col.Width.Tn(12)
                             div {
                                 className = "text-left name"
-                                editOnClick(item) { it.onNext { textContent = it.name } }
+                                editOnClick(item) { textContent = it.name }
                             }
                             div {
                                 className = "text-left hidden-lg hidden-md hidden-sm hidden-xs"
-                                editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
+                                editOnClick(item) { textContent = (it.dueDate ?: "").toString() }
                             }
                         }
                         td {
@@ -103,14 +82,14 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                             addClass("hidden-xxs hidden-tn")
                             div {
                                 addClass("text-right")
-                                editOnClick(item) { it.onNext { textContent = (it.dueDate ?: "").toString() } }
+                                editOnClick(item) { textContent = (it.dueDate ?: "").toString() }
                             }
                         }
                         td {
                             responsiveWidth = Col.Width.Sm(2) and Col.Width.Xs(2) and Col.Width.Xxs(3) and Col.Width.Tn(12)
                             div {
                                 className = "text-right"
-                                btsButton(onclick = { model.delete(item.get()) }) {
+                                btsButton(onclick = { model.delete(item) }) {
                                     appendText("Delete")
                                 }
                             }
@@ -121,7 +100,7 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
         }
         row {
             col(Col.Width.Xs(12)) {
-                model.data.onNext { visible = it?.isEmpty() ?: true }
+                model.data.onNext { visible = it.isEmpty() }
                 appendText("There are no to-dos.")
             }
         }
@@ -155,8 +134,8 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
     }
 }
 
-private fun HTMLElement.editOnClick(toDo: ReadOnlyProperty<ToDo>, render: HTMLAnchorElement.(ReadOnlyProperty<ToDo>) -> Unit) {
-    a { toDo.onNext { href = ToDoModel.toUrl(it.id) }
+private fun HTMLElement.editOnClick(toDo: ToDo, render: HTMLAnchorElement.(ToDo) -> Unit) {
+    a { href = ToDoModel.toUrl(toDo.id)
         render(toDo)
     }
 }

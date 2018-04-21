@@ -2,6 +2,7 @@ package client
 
 import client.component.visible
 import client.util.emptyToNull
+import client.util.findProperty
 import client.util.toMoment
 import client.util.toRichDate
 import common.*
@@ -25,12 +26,12 @@ import kotlin.dom.appendText
  * Time: 6:37 AM
  */
 class ToDoModel(val toDoId: Property<ID<ToDo>?>) {
-    val toDo = toDoId.mapAsDefault { it?.let { Factory.toDoRepository.find(it) } }
     val toDoRepository = Factory.toDoRepository
-    val name = toDo.mapAsDefault { it?.name ?: "" }
+    val persistedToDo = toDoId.flatMapIfNotNull { it.let { toDoRepository.findProperty(it) } }
+    val name = persistedToDo.mapAsDefault { it?.name ?: "" }
     val validation = name.validate("Description is mandatory", { it.length > 0})
-    val dueDate = toDo.mapAsDefault { it?.dueDate?.toMoment() }
-    val notes = toDo.mapAsDefault { it?.note ?: "" }
+    val dueDate = persistedToDo.mapAsDefault { it?.dueDate?.toMoment() }
+    val notes = persistedToDo.mapAsDefault { it?.note ?: "" }
     val backHash = ToDosModel.toUrl().toProperty()
 
     fun save(): Boolean {

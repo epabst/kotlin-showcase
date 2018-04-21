@@ -5,7 +5,6 @@ import client.util.*
 import client.util.JavascriptProvider
 import common.*
 import common.util.*
-import kotlin.test.fail
 import net.yested.core.properties.*
 import net.yested.ext.jquery.destinationBack
 import kotlin.browser.window
@@ -39,7 +38,8 @@ object UITest {
                     window.location.hash = ToDosModel.toUrl()
 
                     val toDoModel = ToDoModel(null.toProperty())
-                    toDoModel.toDo.set(ToDo("Txt#1"))
+                    toDoModel.toDoId.set(null)
+                    toDoModel.name.set("Txt#1")
                     window.location.hash = ToDoModel.toUrl(null)
                     toDoScreen(toDoModel)
 
@@ -70,13 +70,15 @@ object UITest {
                     val originalSize = toDoRepository.list().size
                     val originalUndoCount = UndoComponent.undoCount
                     val toDoModel = ToDoModel(null.toProperty())
-                    toDoModel.toDo.set(ToDo("Txt#1"))
+                    toDoModel.toDoId.set(null)
+                    toDoModel.name.set("Txt#1")
                     toDoScreen(toDoModel)
                     toDoModel.save().mustBe(true)
                     val toDoId1 = toDoModel.toDoId.get()
                     toDoId1.mustNotBe(null)
 
-                    toDoModel.toDo.set(ToDo("Txt#2"))
+                    toDoModel.toDoId.set(null)
+                    toDoModel.name.set("Txt#2")
                     toDoModel.save().mustBe(true)
                     val toDoId2 = toDoModel.toDoId.get()
                     toDoId2.mustNotBe(toDoId1)
@@ -85,13 +87,13 @@ object UITest {
                     (toDoRepository.list().size - originalSize).mustBe(2)
                     val optionsModel = ToDosModel(toDoRepository)
                     toDosScreen(optionsModel)
-                    ((optionsModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(2)
+                    (optionsModel.data.get().size - originalSize).mustBe(2)
 
                     UndoComponent.undoCount.mustBe(originalUndoCount + 2)
                     UndoComponent.undo()
                     UndoComponent.undoCount.mustBe(originalUndoCount + 1)
                     (toDoRepository.list().size - originalSize).mustBe(1)
-                    ((optionsModel.dataProperties.get() ?: fail("grid.list should be set")).size - originalSize).mustBe(1)
+                    (optionsModel.data.get().size - originalSize).mustBe(1)
                 } finally {
                     testToDoIds.forEach { toDoRepository.remove(it) }
                 }
@@ -119,6 +121,7 @@ object UITest {
                     val todoId: Property<ID<ToDo>?> = null.toProperty()
                     val toDoModel = ToDoModel(todoId)
                     toDoScreen(toDoModel)
+                    toDoModel.toDoId.set(null)
                     toDoModel.name.set("TestToDo1")
                     toDoModel.dueDate.set(today.toMoment())
                     toDoModel.save().mustBe(true)
@@ -142,7 +145,7 @@ object UITest {
                 val id2 = toDoRepository.save(null, ToDo("Txt#2", today))
 
                 val masterModel = ToDosModel(toDoRepository)
-                val dataProperty2 = masterModel.dataProperties.get()?.find { it.get().id == id2 }!!
+                val dataProperty2 = masterModel.data.mapAsDefault { it.find { it.id == id2 }!! }
 
                 val masterScreen = toDosScreen(masterModel, animate = false)
                 masterScreen.textContent.mustContain("Txt#1")
@@ -159,7 +162,7 @@ object UITest {
                 masterScreen.textContent.mustNotContain("Txt#2")
                 masterScreen.textContent.mustNotContain("Txt#1")
 
-                (masterModel.dataProperties.get()?.find { it.get().id == id2 } === dataProperty2).mustBe(true)
+                (masterModel.data.map { it.find { it.id == id2 } } === dataProperty2).mustBe(true)
             }
 
             it("should not start a new to-do with a recently edited to-do") {
@@ -174,6 +177,7 @@ object UITest {
                     toDoModel.name.get().mustBe("Txt#1")
                     toDoModel.dueDate.get().mustBe(null)
 
+                    toDoModel.toDoId.set(null)
                     toDoModel.name.set("TestTxt1")
                     toDoModel.dueDate.set(today.toMoment())
 
@@ -194,11 +198,13 @@ object UITest {
 
                 val originalSize = toDoRepository.list().size
                 val detailModel = ToDoModel(null.toProperty())
-                detailModel.toDo.set(ToDo("Txt#1"))
+                detailModel.toDoId.set(null)
+                detailModel.name.set("Txt#1")
                 toDoScreen(detailModel)
                 detailModel.save().mustBe(true)
 
-                detailModel.toDo.set(ToDo("Txt#2"))
+                detailModel.toDoId.set(null)
+                detailModel.name.set("Txt#2")
                 detailModel.save().mustBe(true)
                 (toDoRepository.list().size - originalSize).mustBe(2)
 
