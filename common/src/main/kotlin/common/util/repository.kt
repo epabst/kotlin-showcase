@@ -141,6 +141,10 @@ private class AllItems<T : WithID<T>> : RepositoryCriteria<T> {
 
 fun <T : WithID<T>> allItems(): RepositoryCriteria<T> = AllItems()
 
+data class IdSet<T : WithID<T>>(val ids: Collection<ID<T>>) : RepositoryCriteria<T> {
+    override fun invoke(entity: T): Boolean = ids.contains(entity.getID())
+}
+
 interface RepositoryListener<in T> {
     fun onSaved(original: T?, replacementWithID: T)
 
@@ -357,3 +361,5 @@ class SelfSelector<T : WithID<T>> : FieldSelector<T,T> {
     override fun hashCode(): Int = toString().hashCode()
     override fun toString(): String = "SelfSelector"
 }
+
+data class RepositoryQuery<T : WithID<T>,F : Any>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)

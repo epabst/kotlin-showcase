@@ -81,8 +81,6 @@ fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T>
     return listProperty<T,ID<T>>(IdFieldSelector(), criteria)
 }
 
-internal data class RepositoryQuery<T : WithID<T>,F : Any>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
-
 fun <T : WithID<T>,F : Any> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
     return listProperty(selector, criteria).get()
 }
@@ -92,7 +90,11 @@ fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> =
 }
 
 fun <T : WithID<T>,F : Any> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
-    return repositoryCache(this).listProperty(RepositoryQuery(selector, criteria))
+    return listProperty(RepositoryQuery(selector, criteria))
+}
+
+fun <T : WithID<T>,F : Any> Repository<T>.listProperty(repositoryQuery: RepositoryQuery<T, F>): ReadOnlyProperty<List<F>> {
+    return repositoryCache(this).listProperty(repositoryQuery)
 }
 
 fun <T : WithID<T>> Repository<T>.findFirstOrNullProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<T?> {
