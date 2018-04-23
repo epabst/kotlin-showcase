@@ -53,6 +53,10 @@ fun main(args: Array<String>) {
                 inContext("About to draw '${hash.joinToString("/")}'") { console.info("About to draw '${hash.joinToString("/")}'") }
                 val firstHash = hash[0]
                 when (firstHash) {
+//                    "#privateViaLinkSpace" -> {
+//                        val newHash = Factory.privateViaLinkSpaceModel.addIfMissingAndExtractNewHash(hash)
+//                        window.location.hash = newHash
+//                    }
                     "#toDo" -> {
                         setChildWithoutSplash(UI.toDoScreen, divContainer)
                         UI.toDoModel.setFromHash(hash)

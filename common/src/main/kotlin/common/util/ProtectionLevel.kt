@@ -23,22 +23,29 @@ enum class ProtectionLevel(val label: String) {
     DEVICE("Device: Kept only on this device")
 }
 
-data class PrivateViaLinkSpace(val id: ID<PrivateViaLinkSpace>? = null) : WithID<PrivateViaLinkSpace> {
+data class Access(val protection: String, val privateViaLinkSpaceId: ID<PrivateViaLinkSpace>? = null) : Comparable<Access> {
+    constructor(protectionLevel: ProtectionLevel, privateViaLinkSpaceId: ID<PrivateViaLinkSpace>? = null)
+            : this(protectionLevel.name, privateViaLinkSpaceId)
+
+    val protectionLevel: ProtectionLevel get() = ProtectionLevel.valueOf(protection)
+
+    override fun compareTo(other: Access): Int = protectionLevel.compareTo(other.protectionLevel)
+}
+
+data class PrivateViaLinkSpace(val name: String, val id: ID<PrivateViaLinkSpace>? = null) : WithID<PrivateViaLinkSpace> {
     override fun getID(): ID<PrivateViaLinkSpace>? = id
 
     override fun withID(id: ID<PrivateViaLinkSpace>): PrivateViaLinkSpace = copy(id = id)
 }
 
 interface ProtectedWithID<T : ProtectedWithID<T>> : WithID<T> {
-    val protectionLevel: ProtectionLevel
+    val protectedAccess: Access
 
-    val privateViaLinkSpaceId: ID<PrivateViaLinkSpace>
+    fun copy(newAccess: Access): T
 
-    fun copy(protectionLevel: ProtectionLevel): T
-
-    fun replacingProtectionLevel(oldProtectionLevel: ProtectionLevel?, newProtectionLevel: ProtectionLevel): T {
-        return if (oldProtectionLevel == null || protectionLevel == oldProtectionLevel) {
-            copy(newProtectionLevel)
+    fun replacingAccess(oldAccess: Access?, newAccess: Access): T {
+        return if (oldAccess == null || protectedAccess == oldAccess) {
+            copy(newAccess)
         } else {
             @Suppress("UNCHECKED_CAST")
             this as T
