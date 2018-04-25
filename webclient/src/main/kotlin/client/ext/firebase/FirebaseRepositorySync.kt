@@ -127,8 +127,7 @@ fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(
                                                                                 userId: Property<String?>,
                                                                                 privateViaLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>,
                                                                                 toData: (JS) -> T,
-                                                                                firebaseApp: App,
-                                                                                categorizer: (T) -> ProtectionLevel) : Repository<T> {
+                                                                                firebaseApp: App) : Repository<T> {
     val publicRepository = FirebaseAndLocalRepository("public/$relativePath", relativePath, toData, firebaseApp)
     val publicRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("publicChanges/$relativePath", publicRepository, userId)
     val privateViaLinkRepository = PrivateViaLinkFirebaseRepository(privateViaLinkIds, relativePath, toData, firebaseApp)
@@ -138,15 +137,7 @@ fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(
             PUBLIC to publicRepositoryWithChangeLog,
             PRIVATE_VIA_LINK to privateViaLinkRepository,
             PRIVATE to privateRepository,
-            DEVICE to deviceRepository), UndoComponent, categorizer)
-}
-
-fun <T : ProtectedWithID<T>,JS> PublicWithChangeLogAndPrivateFirebaseRepository(relativePath: String,
-                                                                                userId: Property<String?>,
-                                                                                privateViaLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>,
-                                                                                toData: (JS) -> T,
-                                                                                firebaseApp: App) : Repository<T> {
-    return PublicWithChangeLogAndPrivateFirebaseRepository(relativePath, userId, privateViaLinkIds, toData, firebaseApp, { it.protectedAccess.protectionLevel })
+            DEVICE to deviceRepository), UndoComponent, { it.protectedAccess.protectionLevel })
 }
 
 fun <T : ProtectedWithID<T>,JS> PrivateViaLinkFirebaseRepository(privateLinkIds: ReadOnlyProperty<List<ID<PrivateViaLinkSpace>>>, relativePath: String, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
