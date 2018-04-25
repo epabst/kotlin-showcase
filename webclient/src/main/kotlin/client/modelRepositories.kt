@@ -1,11 +1,16 @@
 package client
 
 import client.component.FileBackupComponent
+import client.component.AccessSpaceRepository
 import client.component.UndoComponent
-import client.ext.firebase.FirebaseAndLocalRepository
+import client.ext.firebase.firebaseAndLocalRepository
+import client.util.LocalStorageRepository
 import client.util.handleError
 import common.ToDo
+import common.util.*
+import firebase.app.App
 import net.yested.core.properties.Property
+import net.yested.core.properties.ReadOnlyProperty
 import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
@@ -30,8 +35,9 @@ object Factory {
     private val firebaseApp = firebase.initializeApp(firebaseConfig)
 
     val userId = Property<String?>(null)
-    val toDoRepository = FirebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", "toDoList", { it.toNormal() }, firebaseApp)
-    val allRepositories = listOf(toDoRepository)
+    val accessSpaceRepository = AccessSpaceRepository(userId, firebaseApp)
+    val toDoRepository = firebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", "toDoList", { it.toNormal() }, firebaseApp)
+    val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 
     init {
         firebaseApp.auth().onAuthStateChanged({ user ->

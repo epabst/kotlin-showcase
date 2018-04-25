@@ -1,10 +1,10 @@
 {
   "rules": {
-    "public": {
+    "global": {
       ".read": true,
       ".write": true
     },
-    "publicChanges": {
+    "globalChanges": {
       ".read": true,
       "$name": {
         "$id": {
@@ -15,21 +15,21 @@
         }
       }
     },
-    "privateSharedViaLink": {
-      "$sharedViaLinkId": {
+    "protected": {
+      "$accessSpaceId": {
         ".read": true,
         ".write": true
-      }
-    },
-    "userPrivate": {
-      "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
       }
     },
     "userOwned": {
       "$uid": {
         ".read": true,
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "private": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
         ".write": "$uid === auth.uid"
       }
     }
