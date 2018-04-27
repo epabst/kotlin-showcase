@@ -1,7 +1,8 @@
 package client.component
 
 import client.Factory
-import client.ext.firebase.privateRepository
+import client.ext.firebase.PrivatePathsSpecifier
+import client.ext.firebase.firebaseAndLocalRepository
 import client.util.*
 import common.util.*
 import firebase.app.App
@@ -40,10 +41,6 @@ external interface AccessJS {
 
 fun AccessJS.toNormal(): Access = Access(protection, privateViaLinkSpaceId?.toNormal() ?: accessSpaceId?.toNormal())
 
-fun AccessSpaceRepository(userId: ReadOnlyProperty<String?>, firebaseApp: App): Repository<AccessSpace> {
-    return privateRepository<AccessSpace,AccessSpaceJS>("accessSpaceList", userId, { it.toNormal() }, firebaseApp)
-}
-
 fun Repository<AccessSpace>.populateSpaceIdAndCopyLinkToClipboard(accessProperty: Property<Access>, spaceName: ReadOnlyProperty<String>, destinationHash: String) {
     var access = accessProperty.get()
     if (access.protectionLevel == ProtectionLevel.PROTECTED) {
@@ -80,7 +77,8 @@ private fun copyTextToClipboard(text: String) {
 }
 
 class AccessSpaceModel(firebaseApp: App) {
-    val accessSpaceRepository = AccessSpaceRepository(Factory.userId, firebaseApp)
+    private val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
+    val accessSpaceRepository = firebaseAndLocalRepository<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
     val accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>
             = accessSpaceRepository.listProperty().map { it.map { it.id }.filterNotNull() }
 

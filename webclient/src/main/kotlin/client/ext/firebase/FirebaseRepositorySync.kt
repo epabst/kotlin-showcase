@@ -122,20 +122,10 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithGlobalChangeLogRepository(rel
                                                                              accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
                                                                              toData: (JS) -> T,
                                                                              firebaseApp: App) : Repository<T> {
-    val path = "global/$relativePath"
-    val globalRepository = firebaseAndLocalRepository(listOf(path).toProperty(), { path }, toData, firebaseApp, relativePath)
+    val pathsSpecifier: PathsSpecifier<T> = GlobalPathsSpecifier(relativePath)
+    val globalRepository = firebaseAndLocalRepository(pathsSpecifier, toData, firebaseApp)
     val globalRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId)
     return protectionLevelRepository(relativePath, userId, accessSpaceIds, globalRepositoryWithChangeLog, toData, firebaseApp)
-}
-
-fun <T : ProtectedWithID<T>,JS> protectionLevelRepository(relativePath: String,
-                                                          userId: Property<String?>,
-                                                          accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-                                                          toData: (JS) -> T,
-                                                          firebaseApp: App) : Repository<T> {
-    val path = "global/$relativePath"
-    val globalRepository = firebaseAndLocalRepository(listOf(path).toProperty(), { path }, toData, firebaseApp, relativePath)
-    return protectionLevelRepository(relativePath, userId, accessSpaceIds, globalRepository, toData, firebaseApp)
 }
 
 private fun <JS, T : ProtectedWithID<T>> protectionLevelRepository(relativePath: String,
@@ -144,8 +134,8 @@ private fun <JS, T : ProtectedWithID<T>> protectionLevelRepository(relativePath:
                                                                    globalRepository: Repository<T>,
                                                                    toData: (JS) -> T,
                                                                    firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val protectedRepository = protectedFirebaseRepository(relativePath, accessSpaceIds, toData, firebaseApp)
-    val privateRepository = privateRepository(relativePath, userId, toData, firebaseApp)
+    val protectedRepository = firebaseAndLocalRepository(ProtectedPathsSpecifier(relativePath, accessSpaceIds), toData, firebaseApp)
+    val privateRepository = firebaseAndLocalRepository(PrivatePathsSpecifier(relativePath, userId), toData, firebaseApp)
     val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
     return CompositeRepository(mapOf(
             GLOBAL to globalRepository,
@@ -162,8 +152,8 @@ private fun <JS,T: ProtectedChildWithID<T,P>,P: WithID<P>> protectionLevelChildR
         globalRepository: Repository<T>,
         toData: (JS) -> T,
         firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val protectedRepository = protectedChildFirebaseRepository(relativePath, accessSpaceIds, parentIds, toData, firebaseApp)
-    val privateRepository = privateRepository(relativePath, userId, toData, firebaseApp)
+    val protectedRepository = firebaseAndLocalRepository(ProtectedChildPathsSpecifier(relativePath, accessSpaceIds, parentIds), toData, firebaseApp)
+    val privateRepository = firebaseAndLocalRepository(PrivatePathsSpecifier(relativePath, userId), toData, firebaseApp)
     val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
     return CompositeRepository(mapOf(
             GLOBAL to globalRepository,
@@ -172,39 +162,7 @@ private fun <JS,T: ProtectedChildWithID<T,P>,P: WithID<P>> protectionLevelChildR
             DEVICE to deviceRepository), UndoComponent, { it.protectedAccess.protectionLevel })
 }
 
-fun <T : ProtectedWithID<T>,JS> protectedFirebaseRepository(relativePath: String,
-                                                            accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-                                                            toData: (JS) -> T,
-                                                            firebaseApp: App): FirebaseRepositorySync<T, JS> {
-    val paths = accessSpaceIds.map { it.map { spaceId -> "protected/${spaceId._id}/$relativePath" } }
-    val pathChooser: (T) -> String = { "protected/${it.protectedAccess.accessSpaceId!!._id}/$relativePath" }
-    return firebaseAndLocalRepository(paths, pathChooser, toData, firebaseApp, "protected/$relativePath")
-}
-
-fun <T: ProtectedChildWithID<T,P>,P: WithID<P>,JS> protectedChildFirebaseRepository(relativePath: String,
-                                                                                    accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-                                                                                    parentIds: ReadOnlyProperty<List<ID<P>>>,
-                                                                                    toData: (JS) -> T,
-                                                                                    firebaseApp: App): FirebaseRepositorySync<T, JS> {
-    val paths = accessSpaceIds.zip(parentIds).map { (accessSpaceIds, parentIds) ->
-        accessSpaceIds.flatMap { spaceId -> parentIds.map { "protected/$spaceId/$relativePath/$it" } }
-    }
-    val pathChooser: (T) -> String = { "protected/${it.protectedAccess.accessSpaceId!!}/$relativePath/${it.parentId}" }
-    return firebaseAndLocalRepository(paths, pathChooser, toData, firebaseApp, "protected/$relativePath")
-}
-
-private fun <T : WithID<T>,JS> firebaseAndLocalRepository(paths: ReadOnlyProperty<List<String>>, pathChooser: (T) -> String?, toData: (JS) -> T, firebaseApp: App, localStoragePath: String): FirebaseRepositorySync<T, JS> {
-    val pathsSpecifier: PathsSpecifier<T> = object : PathsSpecifier<T> {
-        override val localStoragePath: String = localStoragePath
-
-        override val databasePaths: ReadOnlyProperty<List<String>> = paths
-
-        override fun chooseDatabasePath(entity: T): String? = pathChooser.invoke(entity)
-    }
-    return firebaseAndLocalRepository(pathsSpecifier, toData, firebaseApp)
-}
-
-private fun <T : WithID<T>,JS> firebaseAndLocalRepository(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
+fun <T : WithID<T>,JS> firebaseAndLocalRepository(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
     val localProtectedRepository = LocalStorageRepository(pathsSpecifier.localStoragePath, toData)
     val initialPaths = pathsSpecifier.databasePaths.get()
     val firebaseRepositorySync = FirebaseRepositorySync(localProtectedRepository, initialPaths, { pathsSpecifier.chooseDatabasePath(it) }, toData, firebaseApp)
@@ -215,11 +173,6 @@ private fun <T : WithID<T>,JS> firebaseAndLocalRepository(pathsSpecifier: PathsS
     return firebaseRepositorySync
 }
 
-fun <T : WithID<T>,JS> privateRepository(relativePath: String, userId: ReadOnlyProperty<String?>, toData: (JS) -> T, firebaseApp: App): Repository<T> {
-    val paths = userId.map { if (it == null) emptyList() else listOf("private/$it/$relativePath") }
-    return firebaseAndLocalRepository(paths, { userId.get()?.let { "private/$it/$relativePath" } }, toData, firebaseApp, "private/$relativePath")
-}
-
 interface PathsSpecifier<T: WithID<T>> {
     val localStoragePath: String
 
@@ -228,7 +181,46 @@ interface PathsSpecifier<T: WithID<T>> {
     fun chooseDatabasePath(entity: T): String?
 }
 
-class PrivatePathsSpecifier<T: WithID<T>>(override val localStoragePath: String, val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
+class GlobalPathsSpecifier<T: WithID<T>>(private val relativePath: String) : PathsSpecifier<T> {
+    override val localStoragePath: String = relativePath
+
+    override val databasePaths: ReadOnlyProperty<List<String>> = listOf("global/$relativePath").toProperty()
+
+    override fun chooseDatabasePath(entity: T): String? = "global/$relativePath"
+}
+
+class ProtectedPathsSpecifier<T: ProtectedWithID<T>>(
+        private val relativePath: String,
+        accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>) : PathsSpecifier<T> {
+
+    override val localStoragePath: String = "protected/$relativePath"
+
+    override val databasePaths: ReadOnlyProperty<List<String>> = accessSpaceIds.map { it.map { spaceId -> "protected/${spaceId._id}/$relativePath" } }
+
+    override fun chooseDatabasePath(entity: T): String? {
+        return "protected/${entity.protectedAccess.accessSpaceId!!._id}/$relativePath"
+    }
+}
+
+class ProtectedChildPathsSpecifier<T: ProtectedChildWithID<T,P>,P: WithID<P>> (
+        val relativePath: String,
+        accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
+        parentIds: ReadOnlyProperty<List<ID<P>>>): PathsSpecifier<T> {
+
+    override val localStoragePath: String = "protected/$relativePath"
+
+    override val databasePaths = accessSpaceIds.zip(parentIds).map { (accessSpaceIds, parentIds) ->
+        accessSpaceIds.flatMap { spaceId -> parentIds.map { "protected/$spaceId/$relativePath/$it" } }
+    }
+
+    override fun chooseDatabasePath(entity: T): String? {
+        return "protected/${entity.protectedAccess.accessSpaceId!!}/$relativePath/${entity.parentId}"
+    }
+}
+
+class PrivatePathsSpecifier<T: WithID<T>>(val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
+    override val localStoragePath: String = "private/$relativePath"
+
     override val databasePaths = userId.map { if (it == null) emptyList() else listOf("private/$it/$relativePath") }
 
     override fun chooseDatabasePath(entity: T): String? = userId.get()?.let { "private/$it/$relativePath" }
