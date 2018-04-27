@@ -19,7 +19,7 @@ import kotlin.browser.window
  */
 open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Repository<T>,
                                                         initialPaths: List<String>,
-                                                        private val pathChooser: (T) -> String,
+                                                        private val pathChooser: (T) -> String?,
                                                         private val toData: (JS) -> T,
                                                         val firebaseApp: App) : NormalizingRepository<T>() {
     private val rawDatabase = firebaseApp.database()
@@ -71,20 +71,20 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
     }
 
     override fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
-        databaseWithLocalStorage.set(referenceFor(replacementWithID), JSON.parse(JSON.stringify(replacementWithID)))
+        referenceFor(replacementWithID)?.let { databaseWithLocalStorage.set(it, JSON.parse(JSON.stringify(replacementWithID))) }
         delegate.save(originalWithID, replacementWithID)
     }
 
     override fun remove(item: T): Boolean {
         val removed = delegate.remove(item)
         if (removed) {
-            databaseWithLocalStorage.remove(referenceFor(item))
+            referenceFor(item)?.let { databaseWithLocalStorage.remove(it) }
         }
         return removed
     }
 
-    private fun referenceFor(entityWithID: T): Reference {
-        return rawDatabase.ref(pathChooser.invoke(entityWithID)).child(entityWithID.getID()!!.toString())
+    private fun referenceFor(entityWithID: T): Reference? {
+        return pathChooser.invoke(entityWithID)?.let { rawDatabase.ref(it).child(entityWithID.getID()!!.toString()) }
     }
 
     override fun addListener(listener: RepositoryListener<T>) {
@@ -193,11 +193,22 @@ fun <T: ProtectedChildWithID<T,P>,P: WithID<P>,JS> protectedChildFirebaseReposit
     return firebaseAndLocalRepository(paths, pathChooser, toData, firebaseApp, "protected/$relativePath")
 }
 
-private fun <T : WithID<T>,JS> firebaseAndLocalRepository(paths: ReadOnlyProperty<List<String>>, pathChooser: (T) -> String, toData: (JS) -> T, firebaseApp: App, localStoragePath: String): FirebaseRepositorySync<T, JS> {
-    val localProtectedRepository = LocalStorageRepository(localStoragePath, toData)
-    val initialPaths = paths.get()
-    val firebaseRepositorySync = FirebaseRepositorySync(localProtectedRepository, initialPaths, pathChooser, toData, firebaseApp)
-    paths.onChange { oldPaths, newPaths ->
+private fun <T : WithID<T>,JS> firebaseAndLocalRepository(paths: ReadOnlyProperty<List<String>>, pathChooser: (T) -> String?, toData: (JS) -> T, firebaseApp: App, localStoragePath: String): FirebaseRepositorySync<T, JS> {
+    val pathsSpecifier: PathsSpecifier<T> = object : PathsSpecifier<T> {
+        override val localStoragePath: String = localStoragePath
+
+        override val databasePaths: ReadOnlyProperty<List<String>> = paths
+
+        override fun chooseDatabasePath(entity: T): String? = pathChooser.invoke(entity)
+    }
+    return firebaseAndLocalRepository(pathsSpecifier, toData, firebaseApp)
+}
+
+private fun <T : WithID<T>,JS> firebaseAndLocalRepository(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
+    val localProtectedRepository = LocalStorageRepository(pathsSpecifier.localStoragePath, toData)
+    val initialPaths = pathsSpecifier.databasePaths.get()
+    val firebaseRepositorySync = FirebaseRepositorySync(localProtectedRepository, initialPaths, { pathsSpecifier.chooseDatabasePath(it) }, toData, firebaseApp)
+    pathsSpecifier.databasePaths.onChange { oldPaths, newPaths ->
         newPaths.minus(oldPaths).forEach { firebaseRepositorySync.addSubscribedPath(it) }
         oldPaths.minus(newPaths).forEach { firebaseRepositorySync.removeSubscribedPath(it) }
     }
@@ -205,32 +216,20 @@ private fun <T : WithID<T>,JS> firebaseAndLocalRepository(paths: ReadOnlyPropert
 }
 
 fun <T : WithID<T>,JS> privateRepository(relativePath: String, userId: ReadOnlyProperty<String?>, toData: (JS) -> T, firebaseApp: App): Repository<T> {
-    val unauthenticatedRepository = LocalStorageRepository("unauthenticatedPrivate/$relativePath", toData)
-    val currentUserId = userId.get()
-    val initialDelegate = privateRepository(relativePath, currentUserId, unauthenticatedRepository, toData, firebaseApp)
-    val userIdRepository = SwitchableRepository(initialDelegate, UndoComponent)
-    userId.onChange { oldUserId, newUserId ->
-        val newRepository = privateRepository(relativePath, newUserId, unauthenticatedRepository, toData, firebaseApp)
-        if (oldUserId == null) {
-            unauthenticatedRepository.list().forEach {
-                newRepository.save(it)
-                unauthenticatedRepository.remove(it)
-            }
-        }
-        userIdRepository.delegate = newRepository
-    }
-    return CompositeRepository(mapOf(true to userIdRepository, false to unauthenticatedRepository), UndoComponent, { userId.get() != null })
+    val paths = userId.map { if (it == null) emptyList() else listOf("private/$it/$relativePath") }
+    return firebaseAndLocalRepository(paths, { userId.get()?.let { "private/$it/$relativePath" } }, toData, firebaseApp, "private/$relativePath")
 }
 
-private fun <JS, T : WithID<T>> privateRepository(relativePath: String,
-                                                  userId: String?,
-                                                  unauthenticatedRepository: LocalStorageRepository<T, JS>,
-                                                  toData: (JS) -> T,
-                                                  firebaseApp: App): NormalizingRepository<T> {
-    return if (userId != null) {
-        val path = "private/$userId/$relativePath"
-        firebaseAndLocalRepository(listOf(path).toProperty(), { path }, toData, firebaseApp, "private/$userId/$relativePath")
-    } else {
-        unauthenticatedRepository
-    }
+interface PathsSpecifier<T: WithID<T>> {
+    val localStoragePath: String
+
+    val databasePaths: ReadOnlyProperty<List<String>>
+
+    fun chooseDatabasePath(entity: T): String?
+}
+
+class PrivatePathsSpecifier<T: WithID<T>>(override val localStoragePath: String, val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
+    override val databasePaths = userId.map { if (it == null) emptyList() else listOf("private/$it/$relativePath") }
+
+    override fun chooseDatabasePath(entity: T): String? = userId.get()?.let { "private/$it/$relativePath" }
 }
