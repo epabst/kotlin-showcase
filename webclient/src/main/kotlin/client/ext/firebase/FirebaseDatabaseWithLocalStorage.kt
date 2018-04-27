@@ -74,7 +74,8 @@ open class FirebaseDatabaseWithLocalStorage(val firebaseDatabase: Database) {
     }
 
     private fun storeValuesToSync() {
-        whenStable({ valuesToSync.map { it.key to it.value } }) {
+        whenStable(valuesToSync, { it.map { it.key to it.value } }) {
+            println("stable so writing to localStorage[$unsyncedLocalStorageKey]")
             localStorage[unsyncedLocalStorageKey] = JSON.stringify(json(*it.toTypedArray()))
         }
     }

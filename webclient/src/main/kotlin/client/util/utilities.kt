@@ -68,16 +68,26 @@ fun <T> Comparator<T>.thenBiasing(selector: (T) -> Boolean): Comparator<T> {
     return thenBy { !selector(it) }
 }
 
-fun <T> whenStable(changingValue: () -> T, callback: (T) -> Unit) {
-    fun whenStable(changingValue: () -> T, priorValue: T, callback: (T) -> Any) {
+private val whenStableVars = mutableListOf<Any>()
+
+fun <V : Any,I> whenStable(mutableVariable: V, toImmutable: (V) -> I, callback: (I) -> Unit) {
+    var priorValue2 = toImmutable.invoke(mutableVariable)
+
+    fun invokeCallbackWhenStable() {
         window.requestAnimationFrame {
-            val newValue = changingValue.invoke()
-            if (newValue == priorValue) {
+            val newValue = toImmutable.invoke(mutableVariable)
+            if (newValue == priorValue2) {
+                whenStableVars.removeAll { it === mutableVariable }
                 callback.invoke(newValue)
             } else {
-                whenStable(changingValue, newValue, callback)
+                priorValue2 = newValue
+                invokeCallbackWhenStable()
             }
         }
     }
-    whenStable(changingValue, changingValue.invoke(), callback)
+
+    if (whenStableVars.none { it === mutableVariable }) {
+        whenStableVars.add(mutableVariable)
+        invokeCallbackWhenStable()
+    }
 }
