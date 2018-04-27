@@ -20,6 +20,24 @@ interface WithID<T : WithID<T>> {
     fun withID(id: ID<T>): T
 }
 
+/**
+ * The parent ID to use for a top-level entity that implements ChildWithID.
+ * This is used in the database, so beware with changing it if data already exists.
+ * It's useful to do this so that the database structure has a consistent structure
+ * for top-level and child entities, simplifying security rules such as in Firebase's real-time database.
+ */
+val noParentId = ID<Nothing>("main")
+
+object NoParent: WithID<Nothing> {
+    override fun getID(): ID<Nothing>? = noParentId
+
+    override fun withID(id: ID<Nothing>): Nothing = throw UnsupportedOperationException("NoParent")
+}
+
+interface ChildWithID<T : WithID<T>, P : WithID<P>> : WithID<T> {
+    val parentId: ID<P>
+}
+
 class IdGenerator {
     private var next: Long = 1
 

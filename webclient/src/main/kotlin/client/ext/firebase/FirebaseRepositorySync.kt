@@ -8,9 +8,7 @@ import common.util.ProtectionLevel.*
 import firebase.app.App
 import firebase.database.DataSnapshot
 import firebase.database.Reference
-import net.yested.core.properties.Property
-import net.yested.core.properties.ReadOnlyProperty
-import net.yested.core.properties.onChange
+import net.yested.core.properties.*
 import kotlin.browser.window
 
 /**
@@ -169,6 +167,25 @@ fun <T : ProtectedWithID<T>,JS> protectedFirebaseRepository(relativePath: String
     accessSpaceIds.onChange { oldIds, newIds ->
         newIds.minus(oldIds).forEach { firebaseRepositorySync.addSubscribedPath("protected/${it._id}/$relativePath") }
         oldIds.minus(newIds).forEach { firebaseRepositorySync.removeSubscribedPath("protected/${it._id}/$relativePath") }
+    }
+    return firebaseRepositorySync
+}
+
+fun <T: ProtectedChildWithID<T,P>,P: WithID<P>,JS> protectedChildFirebaseRepository(relativePath: String,
+                                                                                    accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
+                                                                                    parentIds: ReadOnlyProperty<List<ID<P>>>,
+                                                                                    toData: (JS) -> T,
+                                                                                    firebaseApp: App): FirebaseRepositorySync<T, JS> {
+    val localProtectedRepository = LocalStorageRepository("protected/$relativePath", toData)
+    val paths = accessSpaceIds.zip(parentIds).map { (accessSpaceIds, parentIds) ->
+        accessSpaceIds.flatMap { spaceId -> parentIds.map { "protected/${spaceId._id}/$relativePath/$it" } }
+    }
+    val initialPaths = paths.get()
+    val pathChooser: (T) -> String = { "protected/${it.protectedAccess.accessSpaceId!!._id}/$relativePath/${it.parentId}" }
+    val firebaseRepositorySync = FirebaseRepositorySync(localProtectedRepository, initialPaths, pathChooser, toData, firebaseApp)
+    paths.onChange { oldPaths, newPaths ->
+        newPaths.minus(oldPaths).forEach { firebaseRepositorySync.addSubscribedPath(it) }
+        oldPaths.minus(newPaths).forEach { firebaseRepositorySync.removeSubscribedPath(it) }
     }
     return firebaseRepositorySync
 }
