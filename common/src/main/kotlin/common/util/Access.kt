@@ -49,3 +49,5 @@ interface ProtectedWithID<T : ProtectedWithID<T>> : WithID<T> {
         }
     }
 }
+
+interface ProtectedChildWithID<T: ProtectedChildWithID<T,P>,P: WithID<P>> : ChildWithID<T,P>, ProtectedWithID<T>
