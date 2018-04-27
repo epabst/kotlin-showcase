@@ -152,7 +152,7 @@ private fun <JS,T: ProtectedChildWithID<T,P>,P: WithID<P>> protectionLevelChildR
         globalRepository: Repository<T>,
         toData: (JS) -> T,
         firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val protectedRepository = firebaseAndLocalRepository(ProtectedChildPathsSpecifier(relativePath, accessSpaceIds, parentIds), toData, firebaseApp)
+    val protectedRepository = firebaseAndLocalRepository(ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds).withParentIds(parentIds), toData, firebaseApp)
     val privateRepository = firebaseAndLocalRepository(PrivatePathsSpecifier(relativePath, userId), toData, firebaseApp)
     val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
     return CompositeRepository(mapOf(
@@ -202,20 +202,20 @@ class ProtectedPathsSpecifier<T: ProtectedWithID<T>>(
     }
 }
 
-class ProtectedChildPathsSpecifier<T: ProtectedChildWithID<T,P>,P: WithID<P>> (
-        val relativePath: String,
-        accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-        parentIds: ReadOnlyProperty<List<ID<P>>>): PathsSpecifier<T> {
+class ChildPathsSpecifier<T: ProtectedChildWithID<T,P>,P: WithID<P>>(
+        val delegate: PathsSpecifier<T>,
+        parentIds: ReadOnlyProperty<List<ID<P>>>) : PathsSpecifier<T> {
 
-    override val localStoragePath: String = "protected/$relativePath"
-
-    override val databasePaths = accessSpaceIds.zip(parentIds).map { (accessSpaceIds, parentIds) ->
-        accessSpaceIds.flatMap { spaceId -> parentIds.map { "protected/$spaceId/$relativePath/$it" } }
+    override val localStoragePath: String = delegate.localStoragePath
+    override val databasePaths: ReadOnlyProperty<List<String>> = delegate.databasePaths.zip(parentIds).map { (paths, parentIds) ->
+        paths.flatMap { path -> parentIds.map { "$path/$it" } }
     }
 
-    override fun chooseDatabasePath(entity: T): String? {
-        return "protected/${entity.protectedAccess.accessSpaceId!!}/$relativePath/${entity.parentId}"
-    }
+    override fun chooseDatabasePath(entity: T): String? = delegate.chooseDatabasePath(entity) + "/" + entity.parentId
+}
+
+fun <T: ProtectedChildWithID<T,P>,P: WithID<P>> PathsSpecifier<T>.withParentIds(parentIds: ReadOnlyProperty<List<ID<P>>>): ChildPathsSpecifier<T,P> {
+    return ChildPathsSpecifier(this, parentIds)
 }
 
 class PrivatePathsSpecifier<T: WithID<T>>(val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
