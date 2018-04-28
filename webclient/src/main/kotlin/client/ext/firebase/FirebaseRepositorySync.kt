@@ -129,18 +129,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
         get() = delegate.localStorageKeys
 }
 
-fun <T : ProtectedWithID<T>,JS> protectionLevelWithGlobalChangeLogRepository(relativePath: String,
-                                                                             userId: Property<String?>,
-                                                                             accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-                                                                             toData: (JS) -> T,
-                                                                             firebaseApp: App) : Repository<T> {
-    val global = GlobalPathsSpecifier<T>(relativePath)
-    val protected = ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds)
-    val private = PrivatePathsSpecifier<T>(relativePath, userId)
-    return protectionLevelWithChangesRepository(global, protected, private, userId, relativePath, toData, firebaseApp)
-}
-
-private fun <JS, T : ProtectedWithID<T>> protectionLevelWithChangesRepository(
+fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
         globalPathsSpecifier: PathsSpecifier<T>,
         protectedPathsSpecifier: PathsSpecifier<T>,
         privatePathsSpecifier: PathsSpecifier<T>,

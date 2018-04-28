@@ -1,16 +1,24 @@
 package client
 
+import client.component.AccessSpaceModel
 import client.component.FileBackupComponent
 import client.component.AccessSpaceRepository
 import client.component.UndoComponent
 import client.ext.firebase.firebaseAndLocalRepository
 import client.util.LocalStorageRepository
+import client.ext.firebase.*
 import client.util.handleError
 import common.ToDo
+import client.util.findFirstOrNullProperty
+import client.util.listProperty
+import common.*
 import common.util.*
 import firebase.app.App
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
+import firebase.app.App
+import net.yested.core.properties.*
+import net.yested.core.utils.SortSpecification
 import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
@@ -35,8 +43,10 @@ object Factory {
     private val firebaseApp = firebase.initializeApp(firebaseConfig)
 
     val userId = Property<String?>(null)
-    val accessSpaceRepository = AccessSpaceRepository(userId, firebaseApp)
-    val toDoRepository = firebaseAndLocalRepository<ToDo,ToDoJS>("toDoList", "toDoList", { it.toNormal() }, firebaseApp)
+    val accessSpaceModel = AccessSpaceModel(firebaseApp)
+    val accessSpaceIds = accessSpaceModel.accessSpaceIds
+    val accessSpaceRepository = accessSpaceModel.accessSpaceRepository
+    val toDoRepository = protectionLevelWithGlobalChangeLogRepository<ToDo,ToDoJS>("toDoList", userId, accessSpaceIds, { it.toNormal() }, firebaseApp)
     val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 
     init {
@@ -56,3 +66,15 @@ object Factory {
         UndoComponent.watch(toDoRepository)
     }
 }
+
+fun <T : ProtectedWithID<T>,JS> protectionLevelWithGlobalChangeLogRepository(relativePath: String,
+                                                                             userId: Property<String?>,
+                                                                             accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
+                                                                             toData: (JS) -> T,
+                                                                             firebaseApp: App) : Repository<T> {
+    val global = GlobalPathsSpecifier<T>(relativePath)
+    val protected = ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds)
+    val private = PrivatePathsSpecifier<T>(relativePath, userId)
+    return protectionLevelWithChangesRepository(global, protected, private, userId, relativePath, toData, firebaseApp)
+}
+
