@@ -109,6 +109,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
 
     fun addSubscribedPath(path: String) {
         if (subscribedPaths.add(path)) {
+            println("addSubscribedPath($path)")
             val reference = rawDatabase.ref(path)
             reference.on("child_added", callbackToSave)
             reference.on("child_changed", callbackToSave)
@@ -118,6 +119,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
 
     fun removeSubscribedPath(path: String) {
         if (subscribedPaths.remove(path)) {
+            println("removeSubscribedPath($path)")
             val reference = rawDatabase.ref(path)
             reference.off("child_added", callbackToSave)
             reference.off("child_changed", callbackToSave)
