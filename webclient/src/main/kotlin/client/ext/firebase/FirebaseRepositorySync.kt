@@ -22,6 +22,18 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val delegate: Re
                                                         private val pathChooser: (T) -> String?,
                                                         private val toData: (JS) -> T,
                                                         val firebaseApp: App) : NormalizingRepository<T>() {
+    constructor(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App) : this(
+            LocalStorageRepository(pathsSpecifier.localStoragePath, toData),
+            pathsSpecifier.databasePaths.get(),
+            { pathsSpecifier.chooseDatabasePath(it) },
+            toData,
+            firebaseApp) {
+        pathsSpecifier.databasePaths.onChange { oldPaths, newPaths ->
+            newPaths.minus(oldPaths).forEach { addSubscribedPath(it) }
+            oldPaths.minus(newPaths).forEach { removeSubscribedPath(it) }
+        }
+    }
+
     private val rawDatabase = firebaseApp.database()
     val databaseWithLocalStorage = FirebaseDatabaseWithLocalStorage(rawDatabase)
     private val subscribedPaths = mutableSetOf<String>()
@@ -122,55 +134,38 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithGlobalChangeLogRepository(rel
                                                                              accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
                                                                              toData: (JS) -> T,
                                                                              firebaseApp: App) : Repository<T> {
-    val pathsSpecifier: PathsSpecifier<T> = GlobalPathsSpecifier(relativePath)
-    val globalRepository = firebaseAndLocalRepository(pathsSpecifier, toData, firebaseApp)
-    val globalRepositoryWithChangeLog = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId)
-    return protectionLevelRepository(relativePath, userId, accessSpaceIds, globalRepositoryWithChangeLog, toData, firebaseApp)
+    val global = GlobalPathsSpecifier<T>(relativePath)
+    val protected = ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds)
+    val private = PrivatePathsSpecifier<T>(relativePath, userId)
+    return protectionLevelWithChangesRepository(global, protected, private, userId, relativePath, toData, firebaseApp)
 }
 
-private fun <JS, T : ProtectedWithID<T>> protectionLevelRepository(relativePath: String,
-                                                                   userId: Property<String?>,
-                                                                   accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-                                                                   globalRepository: Repository<T>,
-                                                                   toData: (JS) -> T,
-                                                                   firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val protectedRepository = firebaseAndLocalRepository(ProtectedPathsSpecifier(relativePath, accessSpaceIds), toData, firebaseApp)
-    val privateRepository = firebaseAndLocalRepository(PrivatePathsSpecifier(relativePath, userId), toData, firebaseApp)
-    val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
-    return CompositeRepository(mapOf(
-            GLOBAL to globalRepository,
-            PROTECTED to protectedRepository,
-            PRIVATE to privateRepository,
-            DEVICE to deviceRepository), UndoComponent, { it.protectedAccess.protectionLevel })
-}
-
-private fun <JS,T: ProtectedChildWithID<T,P>,P: WithID<P>> protectionLevelChildRepository(
-        relativePath: String,
+private fun <JS, T : ProtectedWithID<T>> protectionLevelWithChangesRepository(
+        globalPathsSpecifier: PathsSpecifier<T>,
+        protectedPathsSpecifier: PathsSpecifier<T>,
+        privatePathsSpecifier: PathsSpecifier<T>,
         userId: Property<String?>,
-        accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
-        parentIds: ReadOnlyProperty<List<ID<P>>>,
-        globalRepository: Repository<T>,
+        relativePath: String,
         toData: (JS) -> T,
         firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val protectedRepository = firebaseAndLocalRepository(ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds).withParentIds(parentIds), toData, firebaseApp)
-    val privateRepository = firebaseAndLocalRepository(PrivatePathsSpecifier(relativePath, userId), toData, firebaseApp)
-    val deviceRepository = LocalStorageRepository("device/$relativePath", toData)
+    val globalRepository = FirebaseRepositorySync(globalPathsSpecifier, toData, firebaseApp)
+    return protectionLevelRepository(
+            globalRepository = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId),
+            protectedRepository = FirebaseRepositorySync(protectedPathsSpecifier, toData, firebaseApp),
+            privateRepository = FirebaseRepositorySync(privatePathsSpecifier, toData, firebaseApp),
+            deviceRepository = LocalStorageRepository("device/$relativePath", toData))
+}
+
+fun <T : ProtectedWithID<T>> protectionLevelRepository(
+        globalRepository: Repository<T>,
+        protectedRepository: Repository<T>,
+        privateRepository: Repository<T>,
+        deviceRepository: Repository<T>): CompositeRepository<T, ProtectionLevel> {
     return CompositeRepository(mapOf(
             GLOBAL to globalRepository,
             PROTECTED to protectedRepository,
             PRIVATE to privateRepository,
             DEVICE to deviceRepository), UndoComponent, { it.protectedAccess.protectionLevel })
-}
-
-fun <T : WithID<T>,JS> firebaseAndLocalRepository(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App): FirebaseRepositorySync<T, JS> {
-    val localProtectedRepository = LocalStorageRepository(pathsSpecifier.localStoragePath, toData)
-    val initialPaths = pathsSpecifier.databasePaths.get()
-    val firebaseRepositorySync = FirebaseRepositorySync(localProtectedRepository, initialPaths, { pathsSpecifier.chooseDatabasePath(it) }, toData, firebaseApp)
-    pathsSpecifier.databasePaths.onChange { oldPaths, newPaths ->
-        newPaths.minus(oldPaths).forEach { firebaseRepositorySync.addSubscribedPath(it) }
-        oldPaths.minus(newPaths).forEach { firebaseRepositorySync.removeSubscribedPath(it) }
-    }
-    return firebaseRepositorySync
 }
 
 interface PathsSpecifier<T: WithID<T>> {

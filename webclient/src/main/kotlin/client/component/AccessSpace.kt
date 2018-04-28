@@ -1,8 +1,8 @@
 package client.component
 
 import client.Factory
+import client.ext.firebase.FirebaseRepositorySync
 import client.ext.firebase.PrivatePathsSpecifier
-import client.ext.firebase.firebaseAndLocalRepository
 import client.util.*
 import common.util.*
 import firebase.app.App
@@ -10,7 +10,6 @@ import net.yested.core.html.nbsp
 import net.yested.core.html.span
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
-import net.yested.core.properties.map
 import net.yested.core.properties.mapAsDefault
 import net.yested.ext.bootstrap3.*
 import org.w3c.dom.HTMLDivElement
@@ -78,9 +77,8 @@ private fun copyTextToClipboard(text: String) {
 
 class AccessSpaceModel(firebaseApp: App) {
     private val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
-    val accessSpaceRepository = firebaseAndLocalRepository<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
-    val accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>
-            = accessSpaceRepository.listProperty().map { it.map { it.id }.filterNotNull() }
+    val accessSpaceRepository = FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
+    val accessSpaceIds = accessSpaceRepository.idListProperty()
 
     fun addIfMissingAndExtractNewHash(hash: Array<String>): String {
         val accessSpaceId = hash[1].toID<AccessSpace>()!!
