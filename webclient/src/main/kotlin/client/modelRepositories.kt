@@ -2,23 +2,14 @@ package client
 
 import client.component.AccessSpaceModel
 import client.component.FileBackupComponent
-import client.component.AccessSpaceRepository
 import client.component.UndoComponent
-import client.ext.firebase.firebaseAndLocalRepository
-import client.util.LocalStorageRepository
 import client.ext.firebase.*
 import client.util.handleError
 import common.ToDo
-import client.util.findFirstOrNullProperty
-import client.util.listProperty
-import common.*
 import common.util.*
 import firebase.app.App
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
-import firebase.app.App
-import net.yested.core.properties.*
-import net.yested.core.utils.SortSpecification
 import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
