@@ -38,6 +38,14 @@ interface ChildWithID<T : WithID<T>, P : WithID<P>> : WithID<T> {
     val parentId: ID<P>
 }
 
+data class ByParentId<T: ChildWithID<T,P>,P: WithID<P>>(val parentId: ID<P>) : RepositoryCriteria<T> {
+    override fun invoke(entity: T): Boolean = parentId == entity.parentId
+}
+
+data class ByParentIds<T: ChildWithID<T,P>,P: WithID<P>>(val parentIds: Collection<ID<P>>) : RepositoryCriteria<T> {
+    override fun invoke(entity: T): Boolean = parentIds.contains(entity.parentId)
+}
+
 class IdGenerator {
     private var next: Long = 1
 
