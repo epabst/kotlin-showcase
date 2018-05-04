@@ -1,3 +1,6 @@
+.modal {
+  overflow-y: auto !important;
+}
 #page {
   display: flex;
   flex-direction: column;
