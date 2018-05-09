@@ -55,6 +55,7 @@ fun main(args: Array<String>) {
                 when (firstHash) {
 //                    "#accessSpace" -> {
 //                        val newHash = Factory.accessSpaceModel.addIfMissingAndExtractNewHash(hash)
+//                        window.history.clearDestinationBack()
 //                        window.location.hash = newHash
 //                    }
                     "#toDo" -> {
