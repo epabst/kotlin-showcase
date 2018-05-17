@@ -193,7 +193,7 @@ class ProtectedPathsSpecifier<T: ProtectedWithID<T>>(
     }
 }
 
-class ChildPathsSpecifier<T: ProtectedChildWithID<T,P>,P: WithID<P>>(
+class ChildPathsSpecifier<T: ChildWithID<T,P>,P: WithID<P>>(
         val delegate: PathsSpecifier<T>,
         parentIds: ReadOnlyProperty<List<ID<P>>>) : PathsSpecifier<T> {
 
@@ -205,7 +205,7 @@ class ChildPathsSpecifier<T: ProtectedChildWithID<T,P>,P: WithID<P>>(
     override fun chooseDatabasePath(entity: T): String? = delegate.chooseDatabasePath(entity) + "/" + entity.parentId
 }
 
-fun <T: ProtectedChildWithID<T,P>,P: WithID<P>> PathsSpecifier<T>.withParentIds(parentIds: ReadOnlyProperty<List<ID<P>>>): ChildPathsSpecifier<T,P> {
+fun <T: ChildWithID<T,P>,P: WithID<P>> PathsSpecifier<T>.withParentIds(parentIds: ReadOnlyProperty<List<ID<P>>>): ChildPathsSpecifier<T,P> {
     return ChildPathsSpecifier(this, parentIds)
 }
 
