@@ -141,36 +141,6 @@ class UITest {
     }
 
     @Test
-    fun toDoScreenShouldReusePropertyInstancesOnTheScreenAfterAddingAndRemovingOthers() {
-        toDoRepository.list().filter { it.name.startsWith("Txt#") }.forEach { toDoRepository.remove(it) }
-        val toDo = (ToDo("Txt#1", today) as ToDo?).toProperty()
-        toDo.set(ToDo("Txt#2", today))
-
-        val id1 = toDoRepository.save(null, ToDo("Txt#1", today))
-        val id2 = toDoRepository.save(null, ToDo("Txt#2", today))
-
-        val masterModel = ToDosModel(toDoRepository)
-        val dataProperty2 = masterModel.data.mapAsDefault { it.find { it.id == id2 }!! }
-
-        val masterScreen = toDosScreen(masterModel, animate = false)
-        masterScreen.textContent.mustContain("Txt#1")
-        masterScreen.textContent.mustContain("Txt#2")
-        masterScreen.textContent.mustNotContain("Txt#Was2")
-        masterScreen.textContent.mustNotContain("Txt#3")
-
-        toDoRepository.save(null, ToDo("Txt#3", today))
-        toDoRepository.remove(id1)
-        val toDo2 = toDoRepository.find(id2)!!
-        dataProperty2.set(toDo2.copy(name = "Txt#Was2"))
-        masterScreen.textContent.mustContain("Txt#Was2")
-        masterScreen.textContent.mustContain("Txt#3")
-        masterScreen.textContent.mustNotContain("Txt#2")
-        masterScreen.textContent.mustNotContain("Txt#1")
-
-        (masterModel.data.map { it.find { it.id == id2 } } === dataProperty2).mustBe(true)
-    }
-
-    @Test
     fun toDoScreen_shouldNotStartANewToDoWithARecentlyEditedToDo() {
         try {
             val toDo = ToDo("Txt#1")
@@ -183,7 +153,6 @@ class UITest {
             toDoModel.name.get().mustBe("Txt#1")
             toDoModel.dueDate.get().mustBe(null)
 
-            toDoModel.toDoId.set(null)
             toDoModel.name.set("TestTxt1")
             toDoModel.dueDate.set(today.toMoment())
 

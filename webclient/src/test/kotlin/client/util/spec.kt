@@ -6,7 +6,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.fail
 
 val setupMocks = run {
-    val mockAlert: (String) -> Unit = { println("ALERT: $it") }
+    val mockAlert: (String) -> Unit = { error("window.alert: $it") }
     window.asDynamic().alert = mockAlert
 }
 

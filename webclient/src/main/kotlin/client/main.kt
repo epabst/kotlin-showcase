@@ -17,7 +17,7 @@ import kotlin.dom.addClass
 
 val appName = "ZZZAppNameZZZ"
 val appNameForFilesystem = appName.replace(Regex("\\W"), "").toLowerCase()
-val page: HTMLDivElement = document.getElementById("page")!! as HTMLDivElement
+val page: HTMLDivElement = (document.getElementById("page") ?: document.createElement("div")) as HTMLDivElement
 
 fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
     page.addClass("hide-splash")
@@ -26,9 +26,9 @@ fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
 
 object UI {
     val toDoId = Property<ID<ToDo>?>(null)
-    val toDosScreen: HTMLDivElement by lazy { inContext("toDosScreen") { toDosScreen(ToDosModel()) } }
+    val toDosScreen: HTMLDivElement = inContext("toDosScreen") { toDosScreen(ToDosModel()) }
     val toDoModel = ToDoModel(toDoId)
-    val toDoScreen: HTMLDivElement by lazy { inContext("toDoScreen") { toDoScreen(toDoModel) } }
+    val toDoScreen: HTMLDivElement = inContext("toDoScreen") { toDoScreen(toDoModel) }
 }
 
 /**
