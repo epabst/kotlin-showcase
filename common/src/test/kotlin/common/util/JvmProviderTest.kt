@@ -1,6 +1,6 @@
 package common.util
 
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 /**
@@ -24,8 +24,8 @@ class JvmProviderTest {
         "$1".parseCurrency().mustBe(1.0)
         "($1.00)".parseCurrency().mustBe(-1.0)
         "($1)".parseCurrency().mustBe(-1.0)
-        assertFailsWith(IllegalArgumentException::class) { "garbage".parseCurrency() }.message.mustContain("garbage")
-        assertFailsWith(IllegalArgumentException::class) { "(1.00)".parseCurrency() }.message.mustContain("(1.00)")
+        assertFailsWith(IllegalArgumentException::class) { "garbage".parseCurrency() }.message!!.mustContain("garbage")
+        assertFailsWith(IllegalArgumentException::class) { "(1.00)".parseCurrency() }.message!!.mustContain("(1.00)")
         assertFailsWith(IllegalArgumentException::class) { "(1)".parseCurrency() }
         assertFailsWith(IllegalArgumentException::class) { "-$1.00".parseCurrency() }
         assertFailsWith(IllegalArgumentException::class) { "-$1".parseCurrency() }

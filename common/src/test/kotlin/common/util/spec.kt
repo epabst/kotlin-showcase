@@ -1,7 +1,5 @@
 package common.util
 
-import org.hamcrest.CoreMatchers
-import org.hamcrest.MatcherAssert
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
@@ -19,6 +17,8 @@ fun <T> T.mustNotBe(expected: T) {
     assertNotEquals(expected, this)
 }
 
-fun String?.mustContain(expectedSubstring: String) {
-    MatcherAssert.assertThat(this, CoreMatchers.containsString(expectedSubstring))
+fun String.mustContain(expectedSubstring: String) {
+    assert(contains(expectedSubstring)) {
+        "expected '$this' to contain '$expectedSubstring'"
+    }
 }

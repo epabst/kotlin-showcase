@@ -1,6 +1,6 @@
 package common.util
 
-import org.junit.Test
+import kotlin.test.Test
 
 /**
  * A test for [Repository]

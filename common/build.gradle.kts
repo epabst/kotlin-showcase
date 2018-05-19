@@ -22,8 +22,7 @@ dependencies {
     runtime(kotlin("runtime", version = kotlinVer))
     testCompile(kotlin("reflect", version = kotlinVer))
     testCompile(kotlin("runtime", version = kotlinVer))
-    testCompile(kotlin("test", version = kotlinVer))
-    testCompile("org.jetbrains.spek:spek:1.0.25")
+    testCompile(kotlin("test-junit", version = kotlinVer))
 }
 
 tasks {
