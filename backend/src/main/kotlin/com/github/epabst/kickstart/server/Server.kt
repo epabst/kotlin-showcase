@@ -7,4 +7,7 @@ package com.github.epabst.kickstart.server
  * Time: 3:51 PM
  */
 object Server {
+    fun main(args: Array<String>) {
+        println("Backend Server")
+    }
 }
