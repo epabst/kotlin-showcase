@@ -342,7 +342,7 @@ open class InMemoryRepository<T : WithID<T>>(undoProvider: UndoProvider = UndoPr
     }
 }
 
-interface FieldSelector<T : WithID<T>,F : Any> {
+interface FieldSelector<T : WithID<T>, out F> {
     fun invoke(entity: T): F?
     override operator fun equals(other: Any?): Boolean
     override fun hashCode(): Int
@@ -362,4 +362,4 @@ class SelfSelector<T : WithID<T>> : FieldSelector<T,T> {
     override fun toString(): String = "SelfSelector"
 }
 
-data class RepositoryQuery<T : WithID<T>,F : Any>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)
+data class RepositoryQuery<T : WithID<T>, out F>(val selector: FieldSelector<T, F>, val criteria: RepositoryCriteria<T>)

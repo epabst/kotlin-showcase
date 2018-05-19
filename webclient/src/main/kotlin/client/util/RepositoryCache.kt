@@ -11,42 +11,22 @@ import net.yested.core.properties.*
  */
 class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
     private val cache = mutableMapOf<ID<T>, Property<T?>>()
-    private val listCache = mutableMapOf<RepositoryQuery<T,*>,Property<List<*>>>()
+    private val listCache = mutableMapOf<RepositoryQuery<T,*>,QueryResult<T,*>>()
 
     init {
         repository.addListener(object : RepositoryListener<T> {
             override fun onSaved(original: T?, replacementWithID: T) {
                 val id = replacementWithID.getID()!!
                 cache[id]?.set(replacementWithID)
-                listCache.entries.forEach { (query, listProperty) ->
-                    listProperty.modifyList { list ->
-                        val index = if (original != null && query.criteria.invoke(original)) {
-                            list.indexOf(query.selector.invoke(original))
-                        } else {
-                            -1
-                        }
-                        if (query.criteria.invoke(replacementWithID)) {
-                            val newFieldValue = query.selector.invoke(replacementWithID)
-                            if (index >= 0) {
-                                list.set(index, newFieldValue)
-                            } else {
-                                list.add(newFieldValue)
-                            }
-                        } else if (index >= 0) {
-                            list.removeAt(index)
-                        }
-                    }
+                listCache.values.forEach { queryResult ->
+                    queryResult.onSaved(original, replacementWithID)
                 }
             }
 
             override fun onRemoved(item: T) {
                 item.getID()?.let { cache[it]?.set(null) }
-                listCache.entries.forEach { (query, listProperty) ->
-                    if (query.criteria.invoke(item)) {
-                        listProperty.modifyList {
-                            it.remove(query.selector.invoke(item))
-                        }
-                    }
+                listCache.values.forEach { listProperty ->
+                    listProperty.onRemoved(item)
                 }
             }
         })
@@ -59,10 +39,46 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <F : Any> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
-        return listCache.getOrPut(query) {
-            Property(repository.list(query.criteria).map { query.selector.invoke(it) }.distinct().filterNotNull())
-        } as ReadOnlyProperty<List<F>>
+    internal fun <F> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
+        return (listCache.getOrPut(query) {
+            QueryResult(query, repository.list(query.criteria).map { query.selector.invoke(it) }.distinct())
+        } as QueryResult<T,F>).listProperty
+    }
+}
+
+private class QueryResult<T : WithID<T>, F>(private val query: RepositoryQuery<T,F>, initialList: List<F>) {
+    private val _listProperty: Property<List<F>> = Property(initialList)
+
+    val listProperty: ReadOnlyProperty<List<F>> get() = _listProperty
+
+    fun onSaved(original: T?, replacementWithID: T) {
+        _listProperty.modify { list ->
+            val index = if (original != null && query.criteria.invoke(original)) {
+                list.indexOf(query.selector.invoke(original))
+            } else {
+                -1
+            }
+            when {
+                query.criteria.invoke(replacementWithID) -> {
+                    val newFieldValue: F? = query.selector.invoke(replacementWithID)
+                    when {
+                        newFieldValue == null -> list.filterIndexed { i, _ -> i != index }
+                        index >= 0 -> list.mapIndexed { i, item -> if (i == index) newFieldValue else item }
+                        else -> list.plus(newFieldValue)
+                    }
+                }
+                index >= 0 -> list.filterIndexed { i, _ -> i != index }
+                else -> list
+            }
+        }
+    }
+
+    fun onRemoved(item: T) {
+        if (query.criteria.invoke(item)) {
+            _listProperty.modifyList {
+                it.remove(query.selector.invoke(item))
+            }
+        }
     }
 }
 
@@ -78,10 +94,10 @@ fun <T : WithID<T>> Repository<T>.findProperty(id: ID<T>): ReadOnlyProperty<T?> 
 }
 
 fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<ID<T>>> {
-    return listProperty<T,ID<T>>(IdFieldSelector(), criteria)
+    return listProperty(IdFieldSelector(), criteria)
 }
 
-fun <T : WithID<T>,F : Any> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
+fun <T : WithID<T>,F> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
     return listProperty(selector, criteria).get()
 }
 
@@ -89,11 +105,11 @@ fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> =
     return repositoryCache(this).listProperty(RepositoryQuery(SelfSelector(), criteria))
 }
 
-fun <T : WithID<T>,F : Any> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
+fun <T : WithID<T>,F> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
     return listProperty(RepositoryQuery(selector, criteria))
 }
 
-fun <T : WithID<T>,F : Any> Repository<T>.listProperty(repositoryQuery: RepositoryQuery<T, F>): ReadOnlyProperty<List<F>> {
+fun <T : WithID<T>,F> Repository<T>.listProperty(repositoryQuery: RepositoryQuery<T, F>): ReadOnlyProperty<List<F>> {
     return repositoryCache(this).listProperty(repositoryQuery)
 }
 
