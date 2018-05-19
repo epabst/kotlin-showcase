@@ -61,27 +61,6 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldDistinguishBetweenEmptyAndUninitialized() {
-        val localStorageKey = "unitTest"
-        localStorage.removeItem(localStorageKey)
-
-        // should not look at localStorage until a method is called
-        val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
-        localStorage[localRepository.localStorageKey].mustBe(null)
-
-        // should initialize localStorage
-        val id = localRepository.save(null, EntityForTesting("hello"))
-        localStorage[localRepository.localStorageKey].mustNotBe(null)
-
-        localRepository.remove(id) // this should cause it to store an empty list into local storage.
-        localStorage[localRepository.localStorageKey].mustNotBe(null)
-
-        val localRepositoryCopy = LocalStorageRepositoryForTesting(localStorageKey)
-        localRepositoryCopy.list().size.mustBe(0)
-        localStorage[localRepository.localStorageKey].mustNotBe(null)
-    }
-
-    @Test
     fun LocalStorageRepository_shouldNotLoadFromLocalStorageUntilAMethodIsCalledOnTheRepository() {
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
@@ -194,30 +173,6 @@ class LocalStorageRepositoryTest {
         } catch (e: IntentionalException) {
             //expected
             LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(0)
-        }
-    }
-
-    @Test
-    fun LocalStorageRepository_shouldNotStoreIfListenerFailsForRemove() {
-        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-            override fun onRemoved(item: EntityForTesting) {
-                throw IntentionalException()
-            }
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-            }
-        }
-        val localStorageKey = "unitTest"
-        localStorage.removeItem(localStorageKey)
-        val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
-        localRepository.addListener(listener)
-
-        val id = localRepository.save(EntityForTesting("A"))
-        try {
-            localRepository.remove(id)
-            fail("expected failure")
-        } catch (e: IntentionalException) {
-            //expected
-            LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(1)
         }
     }
 
