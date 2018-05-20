@@ -31,7 +31,11 @@ object Factory {
             "projectId" to "ZZZAppIdZZZ",
             "storageBucket" to "",
             "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
-    private val firebaseApp = firebase.initializeApp(firebaseConfig)
+    private val firebaseApp = if ((firebaseConfig["authDomain"] as String?)?.contains("ZZZ") ?: true) {
+        null
+    } else {
+        firebase.initializeApp(firebaseConfig)
+    }
 
     val userId = Property<String?>(null)
     val accessSpaceModel = AccessSpaceModel(firebaseApp)
@@ -41,12 +45,12 @@ object Factory {
     val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 
     init {
-        firebaseApp.auth().onAuthStateChanged({ user ->
+        firebaseApp?.auth()?.onAuthStateChanged({ user ->
             console.log("uid=${user?.uid} isAnonymous=${user?.isAnonymous} displayName=${user?.displayName} email=${user?.email} photoURL=${user?.photoURL}")
             userId.set(user?.uid)
         }, opt_error = { handleError(Exception("Error ${it.code}: ${it.message}")) })
 
-        firebaseApp.auth().signInAnonymously()
+        firebaseApp?.auth()?.signInAnonymously()
 
         if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
             yestedJQuery.get<Any>("initial-data.json") { initialData ->
@@ -62,7 +66,7 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithGlobalChangeLogRepository(rel
                                                                              userId: Property<String?>,
                                                                              accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>,
                                                                              toData: (JS) -> T,
-                                                                             firebaseApp: App) : Repository<T> {
+                                                                             firebaseApp: App?) : Repository<T> {
     val global = GlobalPathsSpecifier<T>(relativePath)
     val protected = ProtectedPathsSpecifier<T>(relativePath, accessSpaceIds)
     val private = PrivatePathsSpecifier<T>(relativePath, userId)

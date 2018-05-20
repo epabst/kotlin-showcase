@@ -138,13 +138,17 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
         userId: Property<String?>,
         relativePath: String,
         toData: (JS) -> T,
-        firebaseApp: App): CompositeRepository<T, ProtectionLevel> {
-    val globalRepository = FirebaseRepositorySync(globalPathsSpecifier, toData, firebaseApp)
-    return protectionLevelRepository(
-            globalRepository = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId),
-            protectedRepository = FirebaseRepositorySync(protectedPathsSpecifier, toData, firebaseApp),
-            privateRepository = FirebaseRepositorySync(privatePathsSpecifier, toData, firebaseApp),
-            deviceRepository = LocalStorageRepository("device/$relativePath", toData))
+        firebaseApp: App?): Repository<T> {
+    if (firebaseApp != null) {
+        val globalRepository = FirebaseRepositorySync(globalPathsSpecifier, toData, firebaseApp)
+        return protectionLevelRepository(
+                globalRepository = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId),
+                protectedRepository = FirebaseRepositorySync(protectedPathsSpecifier, toData, firebaseApp),
+                privateRepository = FirebaseRepositorySync(privatePathsSpecifier, toData, firebaseApp),
+                deviceRepository = LocalStorageRepository("device/$relativePath", toData))
+    } else {
+        return LocalStorageRepository("device/$relativePath", toData)
+    }
 }
 
 fun <T : ProtectedWithID<T>> protectionLevelRepository(

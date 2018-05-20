@@ -75,9 +75,13 @@ private fun copyTextToClipboard(text: String) {
     body.removeChild(element)
 }
 
-class AccessSpaceModel(firebaseApp: App) {
-    private val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
-    val accessSpaceRepository = FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
+class AccessSpaceModel(firebaseApp: App?) {
+    val accessSpaceRepository = if (firebaseApp == null) {
+        EmptyRepository<AccessSpace>()
+    } else {
+        val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
+        FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
+    }
     val accessSpaceIds = accessSpaceRepository.idListProperty()
 
     fun addIfMissingAndExtractNewHash(hash: Array<String>): String {
