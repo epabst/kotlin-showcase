@@ -97,6 +97,10 @@ fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T>
     return listProperty(IdFieldSelector(), criteria)
 }
 
+fun <T : WithID<T>,F> Repository<T>.list(query: RepositoryQuery<T, F>): List<F> {
+    return list(query.selector, query.criteria)
+}
+
 fun <T : WithID<T>,F> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
     return listProperty(selector, criteria).get()
 }
