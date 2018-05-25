@@ -40,6 +40,7 @@ object Factory {
 
     val userId = Property<String?>(null)
     val accessSpaceModel = AccessSpaceModel(firebaseApp)
+    val accessSpaces = accessSpaceModel.accessSpaces
     val accessSpaceIds = accessSpaceModel.accessSpaceIds
     val accessSpaceRepository = accessSpaceModel.accessSpaceRepository
     val toDoRepository = protectionLevelWithGlobalChangeLogRepository<ToDo,ToDoJS>("toDoList", userId, accessSpaceIds, { it.toNormal() }, firebaseApp).cached

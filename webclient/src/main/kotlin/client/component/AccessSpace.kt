@@ -10,6 +10,7 @@ import net.yested.core.html.nbsp
 import net.yested.core.html.span
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
+import net.yested.core.properties.map
 import net.yested.core.properties.mapAsDefault
 import net.yested.ext.bootstrap3.*
 import org.w3c.dom.HTMLDivElement
@@ -48,13 +49,21 @@ private val AccessJS.protectionLevel: ProtectionLevel get() {
     }
 }
 
-fun Repository<AccessSpace>.populateSpaceIdAndCopyLinkToClipboard(accessProperty: Property<Access>, spaceName: ReadOnlyProperty<String>, destinationHash: String) {
-    var access = accessProperty.get()
-    if (access.protectionLevel == ProtectionLevel.PROTECTED) {
-        access = withNewSpaceIfNeeded(access, spaceName.get())
-        accessProperty.set(access)
+fun Repository<AccessSpace>.populateSpaceIdAndCopyLinkToClipboard(accessSummaryProperty: Property<AccessSummary>, spaceName: ReadOnlyProperty<String>, destinationHash: String) {
+    var accessSummary = accessSummaryProperty.get()
+    if (accessSummary.protectionLevel == ProtectionLevel.PROTECTED) {
+        accessSummary = withNewSpaceIfNeeded(accessSummary, spaceName.get())
+        accessSummaryProperty.set(accessSummary)
         val currentLocationHash = window.location.hash
-        copyTextToClipboard(window.location.href.replace(currentLocationHash, AccessSpaceModel.toUrl(access.accessSpaceId!!, destinationHash)))
+        copyTextToClipboard(window.location.href.replace(currentLocationHash, AccessSpaceModel.toUrl(accessSummary.accessSpaceId!!, destinationHash)))
+    }
+}
+
+fun Repository<AccessSpace>.withNewSpaceIfNeeded(accessSummary: AccessSummary, spaceName: String): AccessSummary {
+    return if (accessSummary.protectionLevel != ProtectionLevel.PROTECTED || accessSummary.accessSpaceId != null) {
+        accessSummary
+    } else {
+        accessSummary.copy(accessSpace = saveAndGet(AccessSpace(spaceName)))
     }
 }
 
@@ -71,6 +80,10 @@ fun Repository<AccessSpace>.addIfMissing(accessSpaceId: ID<AccessSpace>) {
     if (!accessSpaceIds.contains(accessSpaceId)) {
         save(AccessSpace("Shared " + PlatformProvider.instance.now().toDisplayDateTimeString(), accessSpaceId))
     }
+}
+
+fun Repository<AccessSpace>.toAccessSummary(access: Access): AccessSummary {
+    return AccessSummary(access.protectionLevel, access.accessSpaceId?.let { find(it) })
 }
 
 private fun copyTextToClipboard(text: String) {
@@ -90,7 +103,8 @@ class AccessSpaceModel(firebaseApp: App?) {
         val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
         FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp).cached
     }
-    val accessSpaceIds = accessSpaceRepository.idListProperty()
+    val accessSpaces = accessSpaceRepository.listProperty()
+    val accessSpaceIds = accessSpaces.map { it.map { it.id }.filterNotNull() }
 
     fun addIfMissingAndExtractNewHash(hash: Array<String>): String {
         val accessSpaceId = hash[1].toID<AccessSpace>()!!
@@ -105,24 +119,33 @@ class AccessSpaceModel(firebaseApp: App?) {
     }
 }
 
-fun BtsFormContext.accessControl(access: Property<Access>,
-                                 selectableAccessList: ReadOnlyProperty<List<Access>>,
+fun BtsFormContext.accessChooser(accessSummary: Property<AccessSummary>,
+                                 selectableAccessSummaryList: ReadOnlyProperty<List<AccessSummary>>,
                                  spaceName: ReadOnlyProperty<String>,
                                  destinationHash: ReadOnlyProperty<String>,
                                  accessSpaceRepository: Repository<AccessSpace>): HTMLDivElement {
     return btsFormItemSimple(state = Property(State.Default), label = "Access Level") {
-        val singleSelectInput = singleSelectInput(access, selectableAccessList) {
-            textContent = it.protectionLevel.label
+        val singleSelectInput = singleSelectInput(accessSummary, selectableAccessSummaryList) { accessSummary ->
+            when {
+                accessSummary.accessSpace == null && accessSummary.protectionLevel == ProtectionLevel.PROTECTED ->
+                    spaceName.onNext {
+                        textContent = accessSummary.protectionLevel.label + ": (new) " + it
+                    }
+                accessSummary.accessSpace == null ->
+                    textContent = accessSummary.protectionLevel.label + ""
+                else ->
+                    textContent = accessSummary.protectionLevel.label + ": " + accessSummary.accessSpace.name
+            }
         }
-        selectableAccessList.onNext { singleSelectInput.disabled = it.size <= 1 }
-        val copied = access.mapAsDefault { false }
+        selectableAccessSummaryList.onNext { singleSelectInput.disabled = it.size <= 1 }
+        val copied = accessSummary.mapAsDefault { false }
         btsButton(size = ButtonSize.Default, look = ButtonLook.Info,
                 onclick = {
                     it.stopImmediatePropagation()
-                    accessSpaceRepository.populateSpaceIdAndCopyLinkToClipboard(access, spaceName, destinationHash.get())
+                    accessSpaceRepository.populateSpaceIdAndCopyLinkToClipboard(accessSummary, spaceName, destinationHash.get())
                     copied.set(true)
                 }) {
-            access.onNext { visible = it.protectionLevel == ProtectionLevel.PROTECTED }
+            accessSummary.onNext { visible = it.protectionLevel == ProtectionLevel.PROTECTED }
             appendText("Copy Link")
         }
         nbsp()

@@ -35,6 +35,11 @@ data class AccessSpace(val name: String, val id: ID<AccessSpace>? = null) : With
     override fun withID(id: ID<AccessSpace>): AccessSpace = copy(id = id)
 }
 
+data class AccessSummary(val protectionLevel: ProtectionLevel, val accessSpace: AccessSpace? = null) {
+    val access: Access get() = Access(protectionLevel, accessSpace?.id)
+    val accessSpaceId: ID<AccessSpace>? = accessSpace?.id
+}
+
 interface ProtectedWithID<T : ProtectedWithID<T>> : WithID<T> {
     val protectedAccess: Access
 
