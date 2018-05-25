@@ -3,6 +3,7 @@ package client.ext.firebase
 import client.component.UndoComponent
 import client.util.LocalStorageRepository
 import client.util.handlingErrors
+import client.util.keys
 import common.util.*
 import common.util.ProtectionLevel.*
 import firebase.app.App
