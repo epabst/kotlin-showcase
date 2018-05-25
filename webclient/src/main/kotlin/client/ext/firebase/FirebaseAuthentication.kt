@@ -52,7 +52,12 @@ fun <T> HTMLElement.authenticationLink(providerWithResources: AuthProviderWithRe
         it.preventDefault()
         val priorUser = Factory.user.get()
         val onReject: (Error) -> Unit = { handleAuthError(it, priorUser, provider, removeFromOldUser, addToNewUser) }
-        if (priorUser == null || priorUser.hasProvider(provider)) {
+        if (priorUser == null) {
+            val dataFromOldUser = removeFromOldUser.invoke()
+            Factory.firebaseApp!!.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
+                addToNewUser.invoke(dataFromOldUser)
+            })
+        } else if (priorUser.hasProvider(provider)) {
             Factory.firebaseApp!!.auth().signInWithPopup(provider).then(onReject = onReject)
         } else {
             priorUser.linkWithPopup(provider).then(onReject = onReject)
