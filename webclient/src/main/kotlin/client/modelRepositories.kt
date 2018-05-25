@@ -5,7 +5,6 @@ import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.*
 import client.util.cached
-import client.util.handleError
 import common.*
 import common.util.*
 import firebase.app.App
