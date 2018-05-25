@@ -5,7 +5,6 @@ import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.*
 import client.util.cached
-import client.util.handleError
 import common.*
 import common.util.*
 import firebase.User
@@ -13,6 +12,7 @@ import firebase.app.App
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
 import net.yested.core.properties.mapAsDefault
+import net.yested.core.properties.onChange
 import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
@@ -50,8 +50,6 @@ object Factory {
     val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 
     init {
-        FirebaseAuthentication.initialize(user)
-
         if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
             yestedJQuery.get<Any>("initial-data.json") { initialData ->
                 FileBackupComponent.initializeData(initialData)
@@ -59,6 +57,35 @@ object Factory {
         }
 
         UndoComponent.watch(toDoRepository)
+
+        val indirectUser = Property<User?>(null)
+        indirectUser.onChange { oldUser, newUser ->
+            // If this is the first time authenticating, including with Firebase anonymous authentication,
+            // move any localStorage data that is not tied to a user ID to be tied to one.
+            // Since non of the Repository instances have a userId yet, no data should be deleted from Firebase.
+            if (oldUser == null) {
+                val dataFromOldUser = removePrivateDataFromOldUser()
+                user.set(newUser)
+                addPrivateDataToNewUser(dataFromOldUser)
+            } else {
+                user.set(newUser)
+            }
+        }
+        FirebaseAuthentication.initialize(indirectUser)
+    }
+
+    fun addPrivateDataToNewUser(accessSpaceList: List<AccessSpace>) {
+        UndoComponent.undoable("Move private data to new user", "Remove private data from new user") {
+            accessSpaceList.forEach { Factory.accessSpaceRepository.save(it) }
+        }
+    }
+
+    fun removePrivateDataFromOldUser(): List<AccessSpace> {
+        return UndoComponent.undoable("Move private data from old user", "Restore private data to old user") {
+            val data = Factory.accessSpaceRepository.list()
+            data.forEach { Factory.accessSpaceRepository.remove(it) }
+            data
+        }
     }
 }
 

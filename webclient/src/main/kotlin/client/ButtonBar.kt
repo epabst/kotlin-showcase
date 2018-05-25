@@ -1,6 +1,7 @@
 package client
 
-import client.component.UndoComponent
+import client.Factory.addPrivateDataToNewUser
+import client.Factory.removePrivateDataFromOldUser
 import client.component.flaticon
 import client.component.visible
 import client.ext.firebase.AuthProviderWithResources
@@ -52,20 +53,7 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
                     val providerWithResources = AuthProviderWithResources(
                             GoogleAuthProvider(),
                             "img/google/btn_google_signin_light_normal_web.png")
-                    authenticationLink(providerWithResources,
-                            removeFromOldUser = {
-                                UndoComponent.undoable("Move data from old user", "Restore data to old user") {
-                                    val data = Factory.accessSpaceRepository.list()
-                                    data.forEach { Factory.accessSpaceRepository.remove(it) }
-                                    data
-                                }
-                            },
-                            addToNewUser = {
-                                UndoComponent.undoable("Move data to new user", "Remove data from new user") {
-                                    it.forEach { Factory.accessSpaceRepository.save(it) }
-                                }
-                            }
-                    )
+                    authenticationLink(providerWithResources, { removePrivateDataFromOldUser() }, { addPrivateDataToNewUser(it) })
                 }
             }
         }
