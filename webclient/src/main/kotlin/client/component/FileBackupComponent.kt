@@ -6,6 +6,7 @@ import client.cordova.*
 import client.util.LocalStorageRepository
 import client.util.handleError
 import client.util.handlingErrors
+import net.yested.core.html.addClass2
 import net.yested.core.html.nbsp
 import net.yested.core.html.span
 import net.yested.ext.bootstrap3.*
@@ -90,7 +91,7 @@ object FileBackupComponent {
     fun HTMLElement.backupButton() {
         btsButton(onclick = { createBackup() }) {
             appendText("Backup")
-            span { addClass("hidden-tn"); nbsp(); appendText("Data") }
+            span { addClass2("hidden-tn"); nbsp(); appendText("Data") }
         }
     }
 }

@@ -16,7 +16,6 @@ import net.yested.ext.bootstrap3.*
 import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLDivElement
 import kotlin.browser.window
-import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -82,7 +81,7 @@ fun toDoScreen(model: ToDoModel): HTMLDivElement {
                 textInput(model.notes) { placeholder = "notes"; size = 60 }
             }
             btsFormItemSimple(state = Property(State.Default), label = "") {
-                addClass("btn-toolbar")
+                addClass2("btn-toolbar")
                 btsButton(look = ButtonLook.Primary, onclick = { model.save() }) { appendText("Save") }
                 btsButton(onclick = { model.cancel() }) { appendText("Cancel") }
                 nbsp(4)

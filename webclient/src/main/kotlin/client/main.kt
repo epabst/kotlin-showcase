@@ -20,7 +20,7 @@ val appNameForFilesystem = appName.replace(Regex("\\W"), "").toLowerCase()
 val page: HTMLDivElement = (document.getElementById("page") ?: document.createElement("div")) as HTMLDivElement
 
 fun setChildWithoutSplash(element: HTMLDivElement, parentDiv: HTMLDivElement) {
-    page.addClass("hide-splash")
+    page.addClass2("hide-splash")
     parentDiv.setChild(element, Fade())
 }
 
@@ -44,7 +44,7 @@ fun main(args: Array<String>) {
 
         //when we have constructed a DOM, we can take a parent element (via div.element)
         //and append it as a child to "page" div in HTML page
-        page with { addClass("container-fluid")
+        page with { addClass2("container-fluid")
             val divContainer: HTMLDivElement = div()
 
             var previousHash = ""

@@ -10,7 +10,6 @@ import net.yested.ext.bootstrap3.ButtonSize
 import net.yested.ext.jquery.backToHash
 import org.w3c.dom.HTMLElement
 import kotlin.browser.window
-import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -28,14 +27,14 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
             col(Col.Width.Tn(12) and Col.Width.Xs(12)) {
                 span { id = "backButton"
                     btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { _ -> window.history.backToHash(backHash.get()) }) {
-                        addClass("nowrap")
+                        addClass2("nowrap")
                         backHash.onNext { visible = it != null }
                         flaticon("arrow-pointing-to-left-1"); appendText("Back")
                     }
                     nbsp(2)
                 }
                 h3 {
-                    addClass("nowrap")
+                    addClass2("nowrap")
                     a {
                         headingHref.onNext { href = it ?: ""; headingHref.onNext { visible = it != null } }
                         heading.onNext { textContent = it }

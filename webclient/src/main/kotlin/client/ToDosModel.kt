@@ -16,7 +16,6 @@ import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import kotlin.browser.window
-import kotlin.dom.addClass
 import kotlin.dom.appendText
 
 /**
@@ -39,28 +38,28 @@ class ToDosModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
 fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
     return Div {
         inContext("buttonBar") { buttonBar(null.toProperty(), "To-Do List".toProperty()) }
-        div { addClass("container-fluid")
+        div { addClass2("container-fluid")
             className = "table-responsive"
             table {
                 className = "table table-striped table-hover table-condensed"
                 thead {
-                    addClass("hidden-xxs hidden-tn")
+                    addClass2("hidden-xxs hidden-tn")
                     tr {
                         th {
                             Col.Width.Sm(8) and Col.Width.Xs(8)
-                            addClass("text-left")
+                            addClass2("text-left")
                             sortControlWithArrow(model.currentSort, compareBy { it.name }, sortNow = true) { appendText("ToDo") }
                         }
                         th {
                             Col.Width.Sm(2) and Col.Width.Xs(2)
-                            addClass("text-right")
+                            addClass2("text-right")
                             sortControlWithArrow(model.currentSort, compareBy { it.dueDate }) {
                                 div { appendText("Due Date") }
                             }
                         }
                         th {
                             Col.Width.Sm(2) and Col.Width.Xs(2)
-                            addClass("text-right")
+                            addClass2("text-right")
                         }
                     }
                 }
@@ -79,9 +78,9 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                         }
                         td {
                             responsiveWidth = Col.Width.Sm(2) and Col.Width.Xs(3)
-                            addClass("hidden-xxs hidden-tn")
+                            addClass2("hidden-xxs hidden-tn")
                             div {
-                                addClass("text-right")
+                                addClass2("text-right")
                                 editOnClick(item) { textContent = (it.dueDate ?: "").toString() }
                             }
                         }
@@ -115,15 +114,15 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                     undoComponent()
                 }
                 col(Col.Width.Tn(7) and Col.Width.Xxs(9) and Col.Width.Xs(9)) {
-                    addClass("text-right hidden-sm hidden-md hidden-lg")
+                    addClass2("text-right hidden-sm hidden-md hidden-lg")
                     backupButton()
                     btsButton(onclick = { window.location.hash = ToDoModel.toUrl(null) }) {
                         appendText("Add")
-                        span { addClass("hidden-tn"); nbsp(); appendText("To-Do") }
+                        span { addClass2("hidden-tn"); nbsp(); appendText("To-Do") }
                     }
                 }
                 col(Col.Width.Sm(7)) {
-                    addClass("text-right hidden-tn hidden-xxs hidden-xs")
+                    addClass2("text-right hidden-tn hidden-xxs hidden-xs")
                     backupButton()
                     btsButton(onclick = { window.location.hash = ToDoModel.toUrl(null) }) {
                         appendText("Add To-Do")

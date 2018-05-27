@@ -1,10 +1,10 @@
 package client.component
 
+import net.yested.core.html.addClass2
+import net.yested.core.html.hasClass2
+import net.yested.core.html.removeClass2
 import net.yested.ext.bootstrap3.ColumnDefinition
 import org.w3c.dom.HTMLElement
-import kotlin.dom.addClass
-import kotlin.dom.hasClass
-import kotlin.dom.removeClass
 
 /**
  * External properties and functions for [net.yested.Component] and [org.w3c.dom.html.HTMLElement]
@@ -13,13 +13,13 @@ import kotlin.dom.removeClass
  * Time: 8:38 PM
  */
 var HTMLElement.visible: Boolean
-    get() = !hasClass("hidden")
+    get() = !hasClass2("hidden")
     set(value) {
         if (value != visible) {
             if (value) {
-                removeClass("hidden")
+                removeClass2("hidden")
             } else {
-                addClass("hidden")
+                addClass2("hidden")
             }
         }
     }
@@ -27,5 +27,5 @@ var HTMLElement.visible: Boolean
 var HTMLElement.responsiveWidth: ColumnDefinition
     get() = error("not implemented")
     set(value) {
-        addClass(value.css)
+        addClass2(value.css)
     }
