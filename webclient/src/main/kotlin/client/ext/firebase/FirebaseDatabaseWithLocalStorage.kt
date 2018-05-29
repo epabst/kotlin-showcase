@@ -74,16 +74,18 @@ open class FirebaseDatabaseWithLocalStorage(private val firebaseDatabase: Databa
                 if (firstOrNull != null) {
                     val value = firstOrNull.value
                     val reference = firebaseDatabase.ref(firstOrNull.key)
+                    val onComplete: (Error?) -> Unit = {
+                        if (it != null) {
+                            valuesFailedToSync.put(reference.path, value)
+                            valuesToSync.remove(reference.path)
+                            handleError(it)
+                        }
+                        syncRemainingToFirebaseAsynchronously()
+                    }
                     if (value != null) {
-                        setWithoutMarkingAsNotSynced(reference, value) {
-                            if (it != null) handleError(it)
-                            syncRemainingToFirebaseAsynchronously()
-                        }
+                        setWithoutMarkingAsNotSynced(reference, value, onComplete)
                     } else {
-                        removeWithoutMarkingAsNotSynced(reference) {
-                            if (it != null) handleError(it)
-                            syncRemainingToFirebaseAsynchronously()
-                        }
+                        removeWithoutMarkingAsNotSynced(reference, onComplete)
                     }
                 }
             }
@@ -92,5 +94,6 @@ open class FirebaseDatabaseWithLocalStorage(private val firebaseDatabase: Databa
 }
 
 private val valuesToSync by lazy { MapInLocalStorage<Json, Any?>("unsynced/firebase/$appNameForFilesystem", { it }) }
+private val valuesFailedToSync by lazy { MapInLocalStorage<Json, Any?>("syncFailures/firebase/$appNameForFilesystem", { it }) }
 
 val Reference.path: String get() = toString().substring(root.toString().length)
