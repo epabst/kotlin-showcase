@@ -67,6 +67,14 @@ interface Repository<T : WithID<T>> {
 
     fun list(criteria: RepositoryCriteria<T>): List<T> = list().filter { criteria.invoke(it) }
 
+    fun <F: Any> list(query: RepositoryQuery<T,F>): List<F> {
+        return list(query.criteria).map { query.selector.invoke(it) }.distinct().filterNotNull()
+    }
+
+    fun <F : Any> list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
+        return list(RepositoryQuery(selector, criteria))
+    }
+
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
     fun save(original: T?, replacement: T): ID<T>
 

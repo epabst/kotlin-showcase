@@ -38,7 +38,15 @@ external interface AccessJS {
     val accessSpaceId: IDJS?
 }
 
-fun AccessJS.toNormal(): Access = Access(protection, privateViaLinkSpaceId?.toNormal() ?: accessSpaceId?.toNormal())
+fun AccessJS.toNormal(): Access = Access(protectionLevel.name, privateViaLinkSpaceId?.toNormal() ?: accessSpaceId?.toNormal())
+
+private val AccessJS.protectionLevel: ProtectionLevel get() {
+    return when (protection) {
+        "PUBLIC" -> ProtectionLevel.GLOBAL
+        "PRIVATE_VIA_LINK" -> ProtectionLevel.PROTECTED
+        else -> ProtectionLevel.valueOf(protection)
+    }
+}
 
 fun Repository<AccessSpace>.populateSpaceIdAndCopyLinkToClipboard(accessProperty: Property<Access>, spaceName: ReadOnlyProperty<String>, destinationHash: String) {
     var access = accessProperty.get()
@@ -77,10 +85,10 @@ private fun copyTextToClipboard(text: String) {
 
 class AccessSpaceModel(firebaseApp: App?) {
     val accessSpaceRepository = if (firebaseApp == null) {
-        EmptyRepository<AccessSpace>()
+        EmptyRepository<AccessSpace>().cached
     } else {
         val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
-        FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp)
+        FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp).cached
     }
     val accessSpaceIds = accessSpaceRepository.idListProperty()
 

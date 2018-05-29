@@ -4,8 +4,9 @@ import client.component.AccessSpaceModel
 import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.*
+import client.util.cached
 import client.util.handleError
-import common.ToDo
+import common.*
 import common.util.*
 import firebase.app.App
 import net.yested.core.properties.Property
@@ -41,7 +42,7 @@ object Factory {
     val accessSpaceModel = AccessSpaceModel(firebaseApp)
     val accessSpaceIds = accessSpaceModel.accessSpaceIds
     val accessSpaceRepository = accessSpaceModel.accessSpaceRepository
-    val toDoRepository = protectionLevelWithGlobalChangeLogRepository<ToDo,ToDoJS>("toDoList", userId, accessSpaceIds, { it.toNormal() }, firebaseApp)
+    val toDoRepository = protectionLevelWithGlobalChangeLogRepository<ToDo,ToDoJS>("toDoList", userId, accessSpaceIds, { it.toNormal() }, firebaseApp).cached
     val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 
     init {

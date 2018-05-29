@@ -18,7 +18,7 @@ class RepositoryCacheTest {
 
     @Test
     fun idListProperty_shouldWorkWhenDeletingOrReaddingAnEntity() {
-        val repository = InMemoryRepository<EntityForTesting>()
+        val repository = InMemoryRepository<EntityForTesting>().cached
         val id1 = repository.save(EntityForTesting("A"))
 
         val property = repository.idListProperty(EntityForTestingByName("A"))
@@ -33,7 +33,7 @@ class RepositoryCacheTest {
 
     @Test
     fun findFirstOrNullProperty_shouldWorkWhenDeletingOrReaddingAnEntity() {
-        val repository = InMemoryRepository<EntityForTesting>()
+        val repository = InMemoryRepository<EntityForTesting>().cached
         val id1 = repository.save(EntityForTesting("A"))
 
         val property = repository.findFirstOrNullProperty(EntityForTestingByName("A"))
@@ -48,7 +48,7 @@ class RepositoryCacheTest {
 
     @Test
     fun findProperty_shouldWorkWhenDeletingAnEntityAndThenUndoing() {
-        val repository = InMemoryRepository<EntityForTesting>()
+        val repository = InMemoryRepository<EntityForTesting>().cached
         UndoComponent.watch(repository)
         val id1 = repository.save(EntityForTesting("A"))
 

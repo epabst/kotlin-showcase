@@ -82,41 +82,62 @@ private class QueryResult<T : WithID<T>, F>(private val query: RepositoryQuery<T
     }
 }
 
-private val repositoryCaches = mutableMapOf<Repository<*>, RepositoryCache<*>>()
+class CachingRepository<T : WithID<T>>(private val repository: Repository<T>) : Repository<T> {
+    private val cache = RepositoryCache(repository)
 
-fun <T : WithID<T>> repositoryCache(repository: Repository<T>): RepositoryCache<T> {
-    @Suppress("UNCHECKED_CAST")
-    return repositoryCaches.getOrPut(repository) { RepositoryCache(repository) } as RepositoryCache<T>
+    override fun list(): List<T> {
+        return listProperty().get()
+    }
+
+    override fun find(id: ID<T>): T? {
+        return findProperty(id).get()
+    }
+
+    fun findProperty(id: ID<T>): ReadOnlyProperty<T?> {
+        return cache.find(id)
+    }
+
+    override fun <F : Any> list(query: RepositoryQuery<T, F>): List<F> {
+        return listProperty(query).get()
+    }
+
+    fun listProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<T>> {
+        return listProperty(RepositoryQuery(SelfSelector(), criteria))
+    }
+
+    fun <F : Any> listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
+        return listProperty(RepositoryQuery(selector, criteria))
+    }
+
+    fun <F : Any> listProperty(repositoryQuery: RepositoryQuery<T, F>): ReadOnlyProperty<List<F>> {
+        return cache.listProperty(repositoryQuery)
+    }
+
+    fun idListProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<ID<T>>> {
+        return listProperty<ID<T>>(IdFieldSelector(), criteria)
+    }
+
+    fun findFirstOrNullProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<T?> {
+        return idListProperty(criteria).flatMapOrNull { it.firstOrNull()?.let { findProperty(it) } }
+    }
+
+    override fun save(original: T?, replacement: T): ID<T> = repository.save(original, replacement)
+
+    override fun remove(id: ID<T>): Boolean = repository.remove(id)
+
+    override fun remove(item: T): Boolean = repository.remove(item)
+
+    override fun generateID(): ID<T> = repository.generateID()
+
+    override fun addListener(listener: RepositoryListener<T>) {
+        repository.addListener(listener)
+    }
+
+    override fun removeListener(listener: RepositoryListener<T>) {
+        repository.removeListener(listener)
+    }
+
+    override val localStorageKeys: Set<String> get() = repository.localStorageKeys
 }
 
-fun <T : WithID<T>> Repository<T>.findProperty(id: ID<T>): ReadOnlyProperty<T?> {
-    return repositoryCache(this).find(id)
-}
-
-fun <T : WithID<T>> Repository<T>.idListProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<ID<T>>> {
-    return listProperty(IdFieldSelector(), criteria)
-}
-
-fun <T : WithID<T>,F> Repository<T>.list(query: RepositoryQuery<T, F>): List<F> {
-    return list(query.selector, query.criteria)
-}
-
-fun <T : WithID<T>,F> Repository<T>.list(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): List<F> {
-    return listProperty(selector, criteria).get()
-}
-
-fun <T : WithID<T>> Repository<T>.listProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<T>> {
-    return repositoryCache(this).listProperty(RepositoryQuery(SelfSelector(), criteria))
-}
-
-fun <T : WithID<T>,F> Repository<T>.listProperty(selector: FieldSelector<T, F>, criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<F>> {
-    return listProperty(RepositoryQuery(selector, criteria))
-}
-
-fun <T : WithID<T>,F> Repository<T>.listProperty(repositoryQuery: RepositoryQuery<T, F>): ReadOnlyProperty<List<F>> {
-    return repositoryCache(this).listProperty(repositoryQuery)
-}
-
-fun <T : WithID<T>> Repository<T>.findFirstOrNullProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<T?> {
-    return idListProperty(criteria).flatMapOrNull { it.firstOrNull()?.let { findProperty(it) } }
-}
+val <T : WithID<T>> Repository<T>.cached: CachingRepository<T> get() = CachingRepository(this)

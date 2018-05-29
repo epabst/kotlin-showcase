@@ -4,9 +4,8 @@ import client.component.FileBackupComponent.backupButton
 import client.component.responsiveWidth
 import client.component.undoComponent
 import client.component.visible
-import client.util.listProperty
+import client.util.CachingRepository
 import common.ToDo
-import common.util.Repository
 import common.util.inContext
 import net.yested.core.html.*
 import net.yested.core.properties.*
@@ -22,7 +21,7 @@ import kotlin.dom.appendText
  * UI for showing a list of ToDos.
  * @author Eric Pabst (epabst@gmail.com)
  */
-class ToDosModel(val repository: Repository<ToDo> = Factory.toDoRepository) {
+class ToDosModel(val repository: CachingRepository<ToDo> = Factory.toDoRepository) {
     val data = repository.listProperty()
     val currentSort = Property<SortSpecification<ToDo>?>(null)
 
