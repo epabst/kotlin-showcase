@@ -17,7 +17,6 @@ import org.w3c.dom.get
 import org.w3c.files.*
 import kotlin.browser.localStorage
 import kotlin.browser.window
-import kotlin.dom.addClass
 import kotlin.dom.appendText
 import kotlin.js.json
 
