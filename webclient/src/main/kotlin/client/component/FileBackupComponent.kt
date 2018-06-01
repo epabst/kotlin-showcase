@@ -45,7 +45,7 @@ object FileBackupComponent {
 
     fun initializeDataFromJson(initialDataJson: dynamic) {
         Factory.allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().forEach { repository ->
-            val entities = initialDataJson[repository.localStorageKey]
+            val entities = initialDataJson[repository.relativePath]
             if (entities != null) {
                 repository.replaceAll(entities)
             }

@@ -114,20 +114,6 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldNotCallCategorizerForRemoveAll() {
-        val repositoryA = InMemoryRepository<EntityForTesting>()
-        val repositoryN = InMemoryRepository<EntityForTesting>()
-        val id = repositoryN.save(EntityForTesting("N"))
-
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
-            throw UnsupportedOperationException("Should not be called")
-        }
-        // shouldn't throw UnsupportedOperationException
-        compositeRepository.removeAll(allItems())
-        repositoryN.find(id).mustBe(null)
-    }
-
-    @Test
     fun itShouldNotNotifyListenersOfRemoveDueToMovingToAnotherRepository() {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()

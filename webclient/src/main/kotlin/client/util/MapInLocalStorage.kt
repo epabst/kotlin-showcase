@@ -15,7 +15,7 @@ import kotlin.js.json
  * @param localStorageKey the key in the browser localStorage
  * @param fromJson transforms a raw JSON object to an object that serializes to the same JSON via JSON.stringify.
  */
-data class MapInLocalStorage<JS,T>(private val localStorageKey: String, val fromJson: (JS) -> T) {
+data class MapInLocalStorage<JS,T>(private val localStorageKey: String, private val fromJson: (JS) -> T) {
     @Suppress("UNCHECKED_CAST")
     private val originalMap: Map<String,T>? by lazy {
         stringToMap(localStorage[localStorageKey], fromJson)
@@ -23,7 +23,7 @@ data class MapInLocalStorage<JS,T>(private val localStorageKey: String, val from
 
     private val _currentMap: MutableMap<String,T> by lazy { originalMap?.toMutableMap() ?: mutableMapOf() }
 
-    val currentMap: Map<String,T> = _currentMap
+    val currentMap: Map<String,T> get() = _currentMap
     val entries: Set<Map.Entry<String, T>> get() = currentMap.entries
     val keys: Set<String> get() = currentMap.keys
     val values: Collection<T> get() = currentMap.values

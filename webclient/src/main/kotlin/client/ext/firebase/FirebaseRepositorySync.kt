@@ -17,23 +17,18 @@ import kotlin.browser.window
  * Date: 1/4/18
  * Time: 11:05 PM
  */
-open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLocalRepository: SwitchableRepository<T>,
-                                                        initialPaths: List<String>,
-                                                        private val pathChooser: (T) -> String?,
-                                                        private val toData: (JS) -> T,
-                                                        val firebaseApp: App) : NormalizingRepository<T>() {
-    constructor(pathsSpecifier: PathsSpecifier<T>, toData: (JS) -> T, firebaseApp: App) : this(
-            SwitchableRepository(LocalStorageRepository(pathsSpecifier.localStoragePath.get(), toData), UndoComponent),
-            pathsSpecifier.databasePaths.get(),
-            { pathsSpecifier.chooseDatabasePath(it) },
-            toData,
-            firebaseApp) {
-        pathsSpecifier.localStoragePath.onChange { _, newPath ->
-            switchableLocalRepository.delegate = LocalStorageRepository(newPath, toData)
-        }
-        pathsSpecifier.databasePaths.onChange { oldPaths, newPaths ->
-            newPaths.minus(oldPaths).forEach { addSubscribedPath(it) }
-            oldPaths.minus(newPaths).forEach { removeSubscribedPath(it) }
+open class FirebaseRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSpecifier<T>, val toData: (JS) -> T, val firebaseApp: App) : NormalizingRepository<T>() {
+    val localStorageRepository = object : LocalStorageRepository<T,JS>(
+            pathsSpecifier.relativePath,
+            pathsSpecifier.databasePaths.map { paths ->
+                pathsSpecifier.deviceLocalStoragePath?.let { paths + it } ?: paths
+            },
+            toData, { pathsSpecifier.chooseDatabasePath(it) ?: pathsSpecifier.deviceLocalStoragePath ?: error("no localStorageKey provided")
+    }) {
+        override fun doRemove(item: T): Boolean {
+            val result1 = super.doRemove(item)
+            val result2 = pathsSpecifier.deviceLocalStoragePath?.let { removeFromLocalStorage(it, item) } ?: false
+            return result1 || result2
         }
     }
 
@@ -44,7 +39,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLo
         window.requestAnimationFrame {
             handlingErrors("child_added or child_changed") {
                 UndoComponent.notUndoable {
-                    switchableLocalRepository.save(snapshot!!.valueWithId())
+                    localStorageRepository.save(snapshot!!.valueWithId())
                 }
             }
         }
@@ -55,15 +50,20 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLo
                 val id = snapshot?.id
                 if (id != null) {
                     UndoComponent.notUndoable {
-                        switchableLocalRepository.remove(id)
+                        localStorageRepository.remove(id)
                     }
                 }
             }
         }
     }
 
+
     init {
-        initialPaths.forEach { addSubscribedPath(it) }
+        pathsSpecifier.databasePaths.get().forEach { addSubscribedPath(it) }
+        pathsSpecifier.databasePaths.onChange { oldPaths, newPaths ->
+            newPaths.minus(oldPaths).forEach { addSubscribedPath(it) }
+            oldPaths.minus(newPaths).forEach { removeSubscribedPath(it) }
+        }
     }
 
     override fun generateID(): ID<T> {
@@ -82,16 +82,16 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLo
     private val DataSnapshot.id: ID<T>? get() = key?.let { ID(it) }
 
     override fun list(): List<T> {
-        return switchableLocalRepository.list()
+        return localStorageRepository.list()
     }
 
     override fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
         referenceFor(replacementWithID)?.let { databaseWithLocalStorage.set(it, JSON.parse(JSON.stringify(replacementWithID))) }
-        switchableLocalRepository.save(originalWithID, replacementWithID)
+        localStorageRepository.save(originalWithID, replacementWithID)
     }
 
     override fun remove(item: T): Boolean {
-        val removed = switchableLocalRepository.remove(item)
+        val removed = localStorageRepository.remove(item)
         if (removed) {
             referenceFor(item)?.let { databaseWithLocalStorage.remove(it) }
         }
@@ -99,15 +99,15 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLo
     }
 
     private fun referenceFor(entityWithID: T): Reference? {
-        return pathChooser.invoke(entityWithID)?.let { rawDatabase.ref(it).child(entityWithID.getID()!!.toString()) }
+        return pathsSpecifier.chooseDatabasePath(entityWithID)?.let { rawDatabase.ref(it).child(entityWithID.getID()!!.toString()) }
     }
 
     override fun addListener(listener: RepositoryListener<T>) {
-        switchableLocalRepository.addListener(listener)
+        localStorageRepository.addListener(listener)
     }
 
     override fun removeListener(listener: RepositoryListener<T>) {
-        switchableLocalRepository.removeListener(listener)
+        localStorageRepository.removeListener(listener)
     }
 
     fun addSubscribedPath(path: String) {
@@ -131,7 +131,7 @@ open class FirebaseRepositorySync<T : WithID<T>, in JS>(private val switchableLo
     }
 
     override val localStorageKeys: Set<String>
-        get() = switchableLocalRepository.localStorageKeys
+        get() = localStorageRepository.localStorageKeys
 }
 
 fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
@@ -142,15 +142,15 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
         relativePath: String,
         toData: (JS) -> T,
         firebaseApp: App?): Repository<T> {
-    if (firebaseApp != null) {
+    return if (firebaseApp != null) {
         val globalRepository = FirebaseRepositorySync(globalPathsSpecifier, toData, firebaseApp)
-        return protectionLevelRepository(
+        protectionLevelRepository(
                 globalRepository = RepositoryWithFirebaseChangeLog("globalChanges/$relativePath", globalRepository, userId),
                 protectedRepository = FirebaseRepositorySync(protectedPathsSpecifier, toData, firebaseApp),
                 privateRepository = FirebaseRepositorySync(privatePathsSpecifier, toData, firebaseApp),
-                deviceRepository = LocalStorageRepository("device/$relativePath", toData))
+                deviceRepository = LocalStorageRepository(relativePath, setOf("device/$relativePath").toProperty(), toData, { "device/$relativePath" }))
     } else {
-        return LocalStorageRepository("device/$relativePath", toData)
+        LocalStorageRepository("device/$relativePath", toData)
     }
 }
 
@@ -167,28 +167,30 @@ fun <T : ProtectedWithID<T>> protectionLevelRepository(
 }
 
 interface PathsSpecifier<T: WithID<T>> {
-    val localStoragePath: ReadOnlyProperty<String>
+    val relativePath: String
 
-    val databasePaths: ReadOnlyProperty<List<String>>
+    val deviceLocalStoragePath: String?
+
+    val databasePaths: ReadOnlyProperty<Set<String>>
 
     fun chooseDatabasePath(entity: T): String?
 }
 
-class GlobalPathsSpecifier<T: WithID<T>>(private val relativePath: String) : PathsSpecifier<T> {
-    override val localStoragePath: ReadOnlyProperty<String> = relativePath.toProperty()
+class GlobalPathsSpecifier<T: WithID<T>>(override val relativePath: String) : PathsSpecifier<T> {
+    override val deviceLocalStoragePath: String? = relativePath
 
-    override val databasePaths: ReadOnlyProperty<List<String>> = listOf("global/$relativePath").toProperty()
+    override val databasePaths: ReadOnlyProperty<Set<String>> = setOf("global/$relativePath").toProperty()
 
     override fun chooseDatabasePath(entity: T): String? = "global/$relativePath"
 }
 
 class ProtectedPathsSpecifier<T: ProtectedWithID<T>>(
-        private val relativePath: String,
+        override val relativePath: String,
         accessSpaceIds: ReadOnlyProperty<List<ID<AccessSpace>>>) : PathsSpecifier<T> {
 
-    override val localStoragePath: ReadOnlyProperty<String> = "protected/$relativePath".toProperty()
+    override val deviceLocalStoragePath: String? = null
 
-    override val databasePaths: ReadOnlyProperty<List<String>> = accessSpaceIds.map { it.map { spaceId -> "protected/${spaceId._id}/$relativePath" } }
+    override val databasePaths: ReadOnlyProperty<Set<String>> = accessSpaceIds.map { it.map { spaceId -> "protected/${spaceId._id}/$relativePath" }.toSet() }
 
     override fun chooseDatabasePath(entity: T): String? {
         return "protected/${entity.protectedAccess.accessSpaceId!!._id}/$relativePath"
@@ -198,10 +200,10 @@ class ProtectedPathsSpecifier<T: ProtectedWithID<T>>(
 class ChildPathsSpecifier<T: ChildWithID<T,P>,P: WithID<P>>(
         val delegate: PathsSpecifier<T>,
         parentIds: ReadOnlyProperty<List<ID<P>>>) : PathsSpecifier<T> {
-
-    override val localStoragePath: ReadOnlyProperty<String> = delegate.localStoragePath
-    override val databasePaths: ReadOnlyProperty<List<String>> = delegate.databasePaths.zip(parentIds).map { (paths, parentIds) ->
-        paths.flatMap { path -> parentIds.map { "$path/$it" } }
+    override val relativePath: String get() = delegate.relativePath
+    override val deviceLocalStoragePath: String? = delegate.deviceLocalStoragePath
+    override val databasePaths: ReadOnlyProperty<Set<String>> = delegate.databasePaths.zip(parentIds).map { (paths, parentIds) ->
+        paths.flatMap { path -> parentIds.map { "$path/$it" } }.toSet()
     }
 
     override fun chooseDatabasePath(entity: T): String? = delegate.chooseDatabasePath(entity) + "/" + entity.parentId
@@ -211,12 +213,10 @@ fun <T: ChildWithID<T,P>,P: WithID<P>> PathsSpecifier<T>.withParentIds(parentIds
     return ChildPathsSpecifier(this, parentIds)
 }
 
-class PrivatePathsSpecifier<T: WithID<T>>(val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
-    override val localStoragePath: ReadOnlyProperty<String> = userId.map {
-        if (it == null) "private/$relativePath" else "private/$it/$relativePath"
-    }
+class PrivatePathsSpecifier<T: WithID<T>>(override val relativePath: String, val userId: ReadOnlyProperty<String?>): PathsSpecifier<T> {
+    override val deviceLocalStoragePath: String? = "private/$relativePath"
 
-    override val databasePaths = userId.map { if (it == null) emptyList() else listOf("private/$it/$relativePath") }
+    override val databasePaths = userId.map { if (it == null) emptySet() else setOf("private/$it/$relativePath") }
 
     override fun chooseDatabasePath(entity: T): String? = userId.get()?.let { "private/$it/$relativePath" }
 }

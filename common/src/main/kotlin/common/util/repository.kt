@@ -320,7 +320,9 @@ open class CompositeRepository<T : WithID<T>,R>(
     override fun doRemove(item: T): Boolean {
         skipNotificationsFromChildrenDueToInternalChange = true
         try {
-            return repositoryMap.values.asSequence().any { it.remove(item) }
+            val category = categorizer.invoke(item)
+            val repositories = repositoryMap[category]?.let { listOf(it) } ?: repositoryMap.values
+            return repositories.asSequence().any { it.remove(item) }
         } finally {
             skipNotificationsFromChildrenDueToInternalChange = false
         }

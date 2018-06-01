@@ -3,6 +3,8 @@ package client.util
 import client.ID
 import client.component.UndoComponent
 import common.util.*
+import net.yested.core.properties.ReadOnlyProperty
+import net.yested.core.properties.toProperty
 import org.w3c.dom.get
 import kotlin.browser.localStorage
 import kotlin.test.*
@@ -228,6 +230,72 @@ class LocalStorageRepositoryTest {
         UndoComponent.undo()
         localRepository.list().size.mustBe(2)
     }
+
+    @Test
+    fun LocalStorageRepository_shouldNotifyRemovalWhenLocalStorageKeyIsRemoved() {
+        val relativePath = "unitTest"
+        localStorage.removeItem(relativePath + "/a")
+        localStorage.removeItem(relativePath + "/b")
+        val localStorageKeysProperty = setOf(relativePath + "/a", relativePath + "/b").toProperty()
+        val localRepository = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
+        localRepository.save(EntityForTesting("Adam"))
+        var removeCount = 0
+        var saveCount = 0
+
+        localRepository.addListener(object : RepositoryListener<EntityForTesting> {
+            override fun onRemoved(item: EntityForTesting) {
+                removeCount++
+            }
+
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                saveCount++
+            }
+        })
+        localRepository.addListener(object : RepositoryListener<EntityForTesting> {
+            override fun onRemoved(item: EntityForTesting) {}
+
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+        })
+
+        localStorageKeysProperty.set(emptySet())
+        removeCount.mustBe(1)
+        saveCount.mustBe(0)
+    }
+
+    @Test
+    fun LocalStorageRepository_shouldNotifyOfSaveWhenLocalStorageKeyIsAdded() {
+        val relativePath = "unitTest"
+        localStorage.removeItem(relativePath + "/a")
+        localStorage.removeItem(relativePath + "/b")
+        val setOfAll = setOf(relativePath + "/a", relativePath + "/b")
+        val localStorageKeysProperty = setOfAll.toProperty()
+        val localRepository = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
+        localRepository.save(EntityForTesting("Adam"))
+
+        localStorageKeysProperty.set(emptySet())
+        val localRepositoryCopy = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
+        var removeCount = 0
+        var saveCount = 0
+
+        localRepositoryCopy.addListener(object : RepositoryListener<EntityForTesting> {
+            override fun onRemoved(item: EntityForTesting) {
+                removeCount++
+            }
+
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+                saveCount++
+            }
+        })
+        localRepositoryCopy.addListener(object : RepositoryListener<EntityForTesting> {
+            override fun onRemoved(item: EntityForTesting) {}
+
+            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+        })
+
+        localStorageKeysProperty.set(setOfAll)
+        removeCount.mustBe(0)
+        saveCount.mustBe(1)
+    }
 }
 
 data class EntityForTesting(val name: String, val id: ID<EntityForTesting>? = null) : WithID<EntityForTesting> {
@@ -243,7 +311,16 @@ interface EntityForTestingJS {
 
 fun EntityForTestingJS.toNormal(): EntityForTesting = EntityForTesting(name, id?.toNormal())
 
-open class LocalStorageRepositoryForTesting(localStorageKey: String) : LocalStorageRepository<EntityForTesting, EntityForTestingJS>(localStorageKey, { it.toNormal() }) {
+open class LocalStorageRepositoryForTesting(relativePath: String,
+                                            localStorageKeysProperty: ReadOnlyProperty<Set<String>>,
+                                            localStorageKeyChooser: (EntityForTesting) -> String)
+    : LocalStorageRepository<EntityForTesting, EntityForTestingJS>(
+        relativePath, localStorageKeysProperty, { it.toNormal() }, localStorageKeyChooser) {
+
+    constructor(localStorageKey: String) : this(localStorageKey, setOf(localStorageKey).toProperty(), { localStorageKey })
+
+    val localStorageKey: String get() = localStorageKeys.first()
+
     companion object : LocalStorageRepositoryForTesting("entityForTesting")
 }
 
