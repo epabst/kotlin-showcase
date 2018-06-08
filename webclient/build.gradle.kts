@@ -79,15 +79,17 @@ tasks {
     val linkCommonSource by creating {
         outputs.upToDateWhen { _ -> file("$projectDir/src/main/kotlin/common").exists() }
         doLast {
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                exec {
-                    commandLine("cmd", "/C", "mklink /D ${rootDir}\\webclient\\src\\main\\kotlin\\common ${rootDir}\\common\\src\\main\\kotlin\\common")
-                    setIgnoreExitValue(true)
-                }
-            } else {
-                ant.withGroovyBuilder {
-                    "symlink"("resource" to "${rootDir}/common/src/main/kotlin/common",
-                            "link" to "$projectDir/src/main/kotlin/common")
+            if (!file("$projectDir/src/main/kotlin/common").exists()) {
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    exec {
+                        commandLine("cmd", "/C", "mklink /D ${rootDir}\\webclient\\src\\main\\kotlin\\common ${rootDir}\\common\\src\\main\\kotlin\\common")
+                        setIgnoreExitValue(true)
+                    }
+                } else {
+                    ant.withGroovyBuilder {
+                        "symlink"("resource" to "${rootDir}/common/src/main/kotlin/common",
+                                "link" to "$projectDir/src/main/kotlin/common")
+                    }
                 }
             }
         }
