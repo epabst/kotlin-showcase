@@ -135,7 +135,7 @@ fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
         globalPathsSpecifier: PathsSpecifier<T>,
         protectedPathsSpecifier: PathsSpecifier<T>,
         privatePathsSpecifier: PathsSpecifier<T>,
-        userId: Property<String?>,
+        userId: ReadOnlyProperty<String?>,
         relativePath: String,
         toData: (JS) -> T,
         firebaseApp: App?): Repository<T> {

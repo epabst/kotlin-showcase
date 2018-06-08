@@ -2,6 +2,7 @@
 @file:[JsModule("firebase") JsNonModule]
 package firebase
 
+import firebase.auth.IUserCredentialPair
 import kotlin.js.*
 
 external interface FirebaseError {
@@ -19,12 +20,12 @@ external open class Promise<T> : Promise_Instance<T> {
 }
 external open class Promise_Instance<T>(resolver: (a: ((a: T) -> Nothing?)? /*= null*/, b: ((a: Error) -> Nothing?)? /*= null*/) -> Any) : firebase.Thenable<T> {
     override fun catch(onReject: ((a: Error) -> Any)?): firebase.Thenable<Any> = definedExternally
-    override fun then(onResolve: ((a: T) -> Any)?, onReject: ((a: Error) -> Any)?): firebase.Promise<Any> = definedExternally
+    override fun then(onResolve: ((a: T) -> Any)?, onReject: ((a: firebase.auth.Error) -> Any)?): firebase.Promise<Any> = definedExternally
 }
 external var SDK_VERSION: String = definedExternally
 external interface Thenable<T> {
     fun catch(onReject: ((a: Error) -> Any)? = definedExternally /* null */): Any
-    fun then(onResolve: ((a: T) -> Any)? = definedExternally /* null */, onReject: ((a: Error) -> Any)? = definedExternally /* null */): firebase.Thenable<Any>
+    fun then(onResolve: ((a: T) -> Any)? = definedExternally /* null */, onReject: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */): firebase.Thenable<Any>
 }
 external interface IProfile {
     var displayName: String?
@@ -36,7 +37,7 @@ external interface User : firebase.UserInfo {
     fun getToken(opt_forceRefresh: Boolean? = definedExternally /* null */): firebase.Promise<Any>
     var isAnonymous: Boolean
     fun link(credential: firebase.auth.AuthCredential): firebase.Promise<Any>
-    fun linkWithPopup(provider: firebase.auth.AuthProvider): firebase.Promise<Any>
+    fun linkWithPopup(provider: firebase.auth.AuthProvider): firebase.Promise<IUserCredentialPair>
     fun linkWithRedirect(provider: firebase.auth.AuthProvider): firebase.Promise<Any>
     var providerData: Array<firebase.UserInfo?>
     fun reauthenticate(credential: firebase.auth.AuthCredential): firebase.Promise<Any>

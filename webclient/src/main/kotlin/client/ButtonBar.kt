@@ -1,7 +1,11 @@
 package client
 
+import client.component.UndoComponent
 import client.component.flaticon
 import client.component.visible
+import client.ext.firebase.AuthProviderWithResources
+import client.ext.firebase.authenticationLink
+import firebase.auth.GoogleAuthProvider
 import net.yested.core.html.*
 import net.yested.core.properties.*
 import net.yested.ext.bootstrap3.*
@@ -42,6 +46,26 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
                     span { headingHref.onNext { visible = it == null }
                         heading.onNext { textContent = it }
                     }
+                }
+                div {
+                    addClass2("pull-right")
+                    val providerWithResources = AuthProviderWithResources(
+                            GoogleAuthProvider(),
+                            "img/google/btn_google_signin_light_normal_web.png")
+                    authenticationLink(providerWithResources,
+                            removeFromOldUser = {
+                                UndoComponent.undoable("Move data from old user", "Restore data to old user") {
+                                    val data = Factory.accessSpaceRepository.list()
+                                    data.forEach { Factory.accessSpaceRepository.remove(it) }
+                                    data
+                                }
+                            },
+                            addToNewUser = {
+                                UndoComponent.undoable("Move data to new user", "Remove data from new user") {
+                                    it.forEach { Factory.accessSpaceRepository.save(it) }
+                                }
+                            }
+                    )
                 }
             }
         }

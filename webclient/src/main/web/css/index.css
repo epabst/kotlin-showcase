@@ -11,6 +11,13 @@
 #buttonBar .btn {
   vertical-align: top;
 }
+#user-img {
+  border-radius: 50%;
+  height: 36px;
+  margin: 0;
+  overflow: hidden;
+  width: 36px;
+}
 body.platform-android #backButton {
   display: none;
 }

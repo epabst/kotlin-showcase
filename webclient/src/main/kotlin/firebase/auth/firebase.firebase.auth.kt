@@ -19,17 +19,19 @@ external interface Auth {
     fun onAuthStateChanged(nextOrObserver: (User?) -> Any, opt_error: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */, opt_completed: (() -> Any)? = definedExternally /* null */): () -> Any
     fun onAuthStateChanged(nextOrObserver: Any = definedExternally, opt_error: ((a: firebase.auth.Error) -> Any)? = definedExternally /* null */, opt_completed: (() -> Any)? = definedExternally /* null */): () -> Any
     fun sendPasswordResetEmail(email: String): firebase.Promise<Any>
-    fun signInAnonymously(): firebase.Promise<Any>
-    fun signInWithCredential(credential: firebase.auth.AuthCredential): firebase.Promise<Any>
-    fun signInWithCustomToken(token: String): firebase.Promise<Any>
-    fun signInWithEmailAndPassword(email: String, password: String): firebase.Promise<Any>
-    fun signInWithPopup(provider: firebase.auth.AuthProvider): firebase.Promise<Any>
-    fun signInWithRedirect(provider: firebase.auth.AuthProvider): firebase.Promise<Any>
+    fun signInAnonymously(): firebase.Promise<IUserCredentialPair>
+    fun signInWithCredential(credential: firebase.auth.AuthCredential): firebase.Promise<IUserCredentialPair>
+    fun signInWithCustomToken(token: String): firebase.Promise<IUserCredentialPair>
+    fun signInWithEmailAndPassword(email: String, password: String): firebase.Promise<IUserCredentialPair>
+    fun signInWithPopup(provider: firebase.auth.AuthProvider): firebase.Promise<IUserCredentialPair>
+    fun signInWithRedirect(provider: firebase.auth.AuthProvider): firebase.Promise<IUserCredentialPair>
     fun signOut(): firebase.Promise<Any>
+    fun useDeviceLanguage()
     fun verifyPasswordResetCode(code: String): firebase.Promise<Any>
 }
 external interface AuthCredential {
     var provider: String
+    val accessToken: String?
 }
 external interface AuthProvider {
     var providerId: String
@@ -46,6 +48,7 @@ external open class EmailAuthProvider_Instance : firebase.auth.AuthProvider {
 external interface Error {
     var code: String
     var message: String
+    val credential: AuthCredential?
 }
 external open class FacebookAuthProvider : FacebookAuthProvider_Instance {
     companion object {
@@ -87,6 +90,6 @@ external open class TwitterAuthProvider_Instance : firebase.auth.AuthProvider {
     override var providerId: String = definedExternally
 }
 external interface IUserCredentialPair {
-    var credential: firebase.auth.AuthCredential?
+    val credential: firebase.auth.AuthCredential?
     var user: firebase.User?
 }

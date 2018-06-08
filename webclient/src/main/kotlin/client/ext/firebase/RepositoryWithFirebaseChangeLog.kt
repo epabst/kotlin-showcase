@@ -2,7 +2,7 @@ package client.ext.firebase
 
 import client.util.handlingErrors
 import common.util.*
-import net.yested.core.properties.Property
+import net.yested.core.properties.ReadOnlyProperty
 import net.yested.ext.moment.Moment
 
 /**
@@ -11,7 +11,7 @@ import net.yested.ext.moment.Moment
  * Date: 1/8/18
  * Time: 11:05 PM
  */
-open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, private val delegate: FirebaseRepositorySync<T, JS>, val userId: Property<String?>) : Repository<T> {
+open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, private val delegate: FirebaseRepositorySync<T, JS>, val userId: ReadOnlyProperty<String?>) : Repository<T> {
     private val firebaseDatabaseWithLocalStorage = delegate.databaseWithLocalStorage
     private val changeLogRef = delegate.firebaseApp.database().ref(path)
 
