@@ -167,11 +167,14 @@ tasks {
         }
         into("$projectDir/node_modules")
     }
-    val installJest = task<NpmTask>("installJest") {
+    val installTestNpmModules = task<NpmTask>("installTestNpmModules") {
         setNpmCommand("install", "jest", "jquery", "bootstrap", "popper.js", "moment", "pickadate", "firebase", "jest-localstorage-mock", "numeral")
     }
     val runJest = task<NodeTask>("runJest") {
-        dependsOn(compileTestKotlin2Js, populateNodeModules, installJest)
+        dependsOn(compileTestKotlin2Js, populateNodeModules)
+        if (!file("$projectDir/node_modules/jest").exists()) {
+            dependsOn(installTestNpmModules)
+        }
         setScript(file("$projectDir/node_modules/jest/bin/jest.js"))
         addArgs(compileTestKotlin2Js.outputFile)
     }
