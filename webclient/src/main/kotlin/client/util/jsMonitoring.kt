@@ -4,6 +4,7 @@ import common.util.inContext
 import kotlin.browser.window
 
 fun handleError(throwable: Throwable) {
+    console.error("ERROR: " + common.util.currentContext + ": ", throwable)
     window.alert(common.util.currentContext + ": " + throwable.toString())
 }
 
