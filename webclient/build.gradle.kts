@@ -30,7 +30,7 @@ dependencies {
 }
 
 tasks {
-    val cleanupLinkCommonSource = task("cleanupLinkCommonSource") {
+    task("cleanCommonLink") {
         if (file("$projectDir/src/main/kotlin/common").exists()) {
             doLast {
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -47,7 +47,6 @@ tasks {
     }
 
     "clean" {
-        dependsOn(cleanupLinkCommonSource)
         doLast {
             file("out").deleteRecursively()
             file("$projectDir/node_modules").listFiles().forEach {
