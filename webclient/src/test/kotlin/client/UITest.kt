@@ -22,6 +22,8 @@ class UITest {
     val toDoRepository = Factory.toDoRepository
     val testToDoIds = ArrayList<ID<ToDo>>()
     init {
+        val stubRequestAnimationFrame: ((Double) -> Unit) -> Int = { it.invoke(0.toDouble()); 0 }
+        window.asDynamic().requestAnimationFrame = stubRequestAnimationFrame
         PlatformProvider.instance = JavascriptProvider
         today = JavascriptProvider.now()
         toDoRepository.addListener(object : RepositoryListener<ToDo> {

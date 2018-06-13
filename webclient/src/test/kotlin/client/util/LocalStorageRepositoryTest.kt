@@ -152,7 +152,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotStoreIfListenerFailsForSave() {
+    fun LocalStorageRepository_shouldStoreEvenIfListenerFailsForSave() {
         val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
             override fun onRemoved(item: EntityForTesting) {
             }
@@ -166,13 +166,12 @@ class LocalStorageRepositoryTest {
         val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
         localRepository.addListener(listener)
 
-        val originalEntity = EntityForTesting("A")
         try {
-            localRepository.save(null, originalEntity)
+            localRepository.save(EntityForTesting("A"))
             fail("expected failure")
         } catch (e: IntentionalException) {
             //expected
-            LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(0)
+            LocalStorageRepositoryForTesting(localStorageKey).list().size.mustBe(1)
         }
     }
 
