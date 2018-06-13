@@ -22,3 +22,7 @@ class MomentDate(val moment: Moment) : ProviderDate {
     override fun toDisplayDateTimeString(): String = moment.format("lll")
     override fun toIsoTimestampString(): String = moment.format()
 }
+
+fun Moment.toProviderDate(): MomentDate = JavascriptProvider.toDate(millisecondsSinceUnixEpoch)
+
+fun ProviderDate.toMoment(): Moment = (this as MomentDate).moment

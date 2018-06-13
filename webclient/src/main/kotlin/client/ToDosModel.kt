@@ -72,7 +72,7 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                             }
                             div {
                                 className = "text-left hidden-lg hidden-md hidden-sm hidden-xs"
-                                editOnClick(item) { textContent = (it.dueDate ?: "").toString() }
+                                editOnClick(item) { textContent = it.dueDate?.toDisplayDateTimeString() ?: "" }
                             }
                         }
                         td {
@@ -80,7 +80,7 @@ fun toDosScreen(model: ToDosModel, animate: Boolean = true): HTMLDivElement {
                             addClass2("hidden-xxs hidden-tn")
                             div {
                                 addClass2("text-right")
-                                editOnClick(item) { textContent = (it.dueDate ?: "").toString() }
+                                editOnClick(item) { textContent = it.dueDate?.toString() ?: "" }
                             }
                         }
                         td {

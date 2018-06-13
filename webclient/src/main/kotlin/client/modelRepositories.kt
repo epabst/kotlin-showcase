@@ -5,6 +5,7 @@ import client.component.FileBackupComponent
 import client.component.UndoComponent
 import client.ext.firebase.*
 import client.util.cached
+import client.util.handleError
 import common.*
 import common.util.*
 import firebase.app.App
@@ -31,7 +32,7 @@ object Factory {
             "projectId" to "ZZZAppIdZZZ",
             "storageBucket" to "",
             "messagingSenderId" to "ZZZFirebaseMessagingSenderIdZZZ")
-    private val firebaseApp = if ((firebaseConfig["authDomain"] as String?)?.contains("ZZZ") ?: true) {
+    private val firebaseApp = if ((firebaseConfig["authDomain"] as String?)?.contains("ZZZ") != false) {
         null
     } else {
         firebase.initializeApp(firebaseConfig)

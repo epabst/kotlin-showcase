@@ -1,7 +1,6 @@
 package common
 
 import common.util.*
-import common.util.RichDate.Companion.today
 
 /**
  * The core model classes.
@@ -9,7 +8,14 @@ import common.util.RichDate.Companion.today
  * Date: 6/9/16
  * Time: 6:27 AM
  */
-data class ToDo(val name: String, val dueDate: RichDate? = null, val note: String? = null, val createDate: RichDate = today(), val id: ID<ToDo>? = null) : ProtectedWithID<ToDo> {
+data class ToDo(val name: String, val dueDateString: String? = null, val note: String? = null, val createDateString: String, val id: ID<ToDo>? = null) : ProtectedWithID<ToDo> {
+    constructor(name: String, dueDate: ProviderDate? = null, note: String? = null, createDate: ProviderDate = PlatformProvider.instance.now(), id: ID<ToDo>? = null) :
+            this(name, dueDate?.toIsoTimestampString(), note, createDate.toIsoTimestampString(), id)
+
+    val dueDate: ProviderDate? get() = dueDateString?.let { PlatformProvider.instance.toDate(it) }
+
+    val createDate: ProviderDate? get() = createDateString?.let { PlatformProvider.instance.toDate(it) }
+
     override fun getID(): ID<ToDo>? = id
 
     override fun withID(id: ID<ToDo>): ToDo = copy(id = id)

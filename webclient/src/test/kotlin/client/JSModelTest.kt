@@ -21,7 +21,7 @@ class JSModelTest {
     @Test
     fun ToDoJS_shouldSerializeAndDeserialize() {
         val toDoId = ID<ToDo>(1234)
-        val originalToDo = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = toDoId)
+        val originalToDo = ToDo("To-Do #1", JavascriptProvider.now(), "some notes", JavascriptProvider.now(), id = toDoId)
         val json = JSON.stringify(originalToDo)
         val toDoJS: ToDoJS = JSON.parse<ToDoJS>(json)
         toDoJS.toNormal().mustBe(originalToDo)
@@ -29,8 +29,8 @@ class JSModelTest {
 
     @Test
     fun ToDoJS_shouldSerializeAndDeserializeAsAnArray() {
-        val toDo1 = ToDo("To-Do #1", RichDate.today(), "some notes", RichDate.today(), id = ID(1234))
-        val toDo2 = ToDo("To-Do #2", RichDate.today(), "other notes", RichDate.today(), id = ID(5678))
+        val toDo1 = ToDo("To-Do #1", JavascriptProvider.now(), "some notes", JavascriptProvider.now(), id = ID(1234))
+        val toDo2 = ToDo("To-Do #2", JavascriptProvider.now(), "other notes", JavascriptProvider.now(), id = ID(5678))
         val originalList = listOf(toDo1, toDo2)
         val json = JSON.stringify(originalList)
         val toDos2: Array<ToDoJS> = JSON.parse<Array<ToDoJS>>(json)

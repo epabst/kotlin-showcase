@@ -18,12 +18,12 @@ import kotlin.test.Test
  */
 @Suppress("unused")
 class UITest {
-    val today: RichDate
+    val today: ProviderDate
     val toDoRepository = Factory.toDoRepository
     val testToDoIds = ArrayList<ID<ToDo>>()
     init {
         PlatformProvider.instance = JavascriptProvider
-        today = RichDate.today()
+        today = JavascriptProvider.now()
         toDoRepository.addListener(object : RepositoryListener<ToDo> {
             override fun onSaved(original: ToDo?, replacementWithID: ToDo) {
                 testToDoIds.add(replacementWithID.id!!)

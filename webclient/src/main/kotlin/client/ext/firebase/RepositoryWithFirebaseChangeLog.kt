@@ -60,7 +60,7 @@ open class RepositoryWithFirebaseChangeLog<T : WithID<T>,JS>(path: String, priva
 
 data class ChangeLogEntry<T : WithID<T>>(val data: T?,
                                          val userId: String,
-                                         val changeDateMillis: Int = Moment.now().millisecondsSinceUnixEpoch.toInt(),
+                                         val changeDateMillis: Double = Moment.now().millisecondsSinceUnixEpoch.toDouble(),
                                          val id: ID<ChangeLogEntry<T>>? = null) : WithID<ChangeLogEntry<T>> {
     override fun getID(): ID<ChangeLogEntry<T>>? = id
 
