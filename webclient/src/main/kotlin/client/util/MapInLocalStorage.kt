@@ -58,6 +58,7 @@ data class MapInLocalStorage<JS,T>(private val localStorageKey: String, val from
 
     fun putAll(newValues: Map<String, T>) {
         _currentMap.putAll(newValues)
+        storeWhenStable()
     }
 }
 
