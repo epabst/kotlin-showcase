@@ -7,6 +7,7 @@ import net.yested.core.properties.ReadOnlyProperty
 import net.yested.core.properties.toProperty
 import org.w3c.dom.get
 import kotlin.browser.localStorage
+import kotlin.browser.window
 import kotlin.test.*
 
 /**
@@ -19,6 +20,8 @@ import kotlin.test.*
 class LocalStorageRepositoryTest {
     init {
         PlatformProvider.instance = JavascriptProvider
+        val stubRequestAnimationFrame: ((Double) -> Unit) -> Int = { it.invoke(0.toDouble()); 0 }
+        window.asDynamic().requestAnimationFrame = stubRequestAnimationFrame
     }
 
     @Test
