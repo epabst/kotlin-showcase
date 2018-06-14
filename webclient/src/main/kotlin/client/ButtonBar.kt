@@ -58,6 +58,12 @@ fun HTMLElement.buttonBar(backHash: ReadOnlyProperty<String?> = null.toProperty(
             }
         }
     }
+    div {
+        addClass2("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg")
+        br()
+        br()
+    }
+    br()
     br()
     br()
     br()
