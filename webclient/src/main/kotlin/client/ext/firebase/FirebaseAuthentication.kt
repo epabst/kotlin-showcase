@@ -3,6 +3,8 @@ package client.ext.firebase
 import client.*
 import client.component.visible
 import client.util.handleError
+import client.util.showUserExpectedError
+import common.util.inContext
 import firebase.Promise
 import firebase.User
 import firebase.auth.AuthProvider
@@ -123,32 +125,34 @@ fun <T> HTMLElement.authenticationLink(providerWithResources: AuthProviderWithRe
 }
 
 private fun <T> handleAuthError(error: Error, priorUser: User?, provider: AuthProvider, removeFromOldUser: () -> T, addToNewUser: (T) -> Unit) {
-    val newCredential = error.credential
-    when (error.code) {
-        "auth/popup-closed-by-user" -> Unit //do nothing
-        "auth/cancelled-popup-request" -> Unit // do nothing
-        "auth/credential-already-in-use" -> {
-            if (newCredential != null) {
-                val dataFromOldUser = if (priorUser?.hasProvider(provider) == false) {
-                    removeFromOldUser.invoke()
-                } else {
-                    null
-                }
-                println("priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
-                Factory.firebaseApp!!.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
-                    if (newUserCredentialPair.user != null) {
-                        Factory.user.set(newUserCredentialPair.user)
-                        dataFromOldUser?.let { addToNewUser.invoke(it) }
-                        priorUser?.delete()
-                        println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
+    inContext("Authentication") {
+        val newCredential = error.credential
+        when (error.code) {
+            "auth/popup-closed-by-user" -> Unit //do nothing
+            "auth/cancelled-popup-request" -> Unit // do nothing
+            "auth/credential-already-in-use" -> {
+                if (newCredential != null) {
+                    val dataFromOldUser = if (priorUser?.hasProvider(provider) == false) {
+                        removeFromOldUser.invoke()
+                    } else {
+                        null
                     }
-                }, {
-                    //put the data back since it failed
-                    dataFromOldUser?.let { addToNewUser.invoke(it) } ?: Unit
-                })
+                    println("priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
+                    Factory.firebaseApp!!.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
+                        if (newUserCredentialPair.user != null) {
+                            Factory.user.set(newUserCredentialPair.user)
+                            dataFromOldUser?.let { addToNewUser.invoke(it) }
+                            priorUser?.delete()
+                            println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
+                        }
+                    }, {
+                        //put the data back since it failed
+                        dataFromOldUser?.let { addToNewUser.invoke(it) } ?: Unit
+                    })
+                }
             }
+            else -> showUserExpectedError(error.message)
         }
-        else -> handleError(Exception("Error ${error.code}: ${error.message}"))
     }
 }
 
