@@ -39,9 +39,6 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
     }
 
     private fun mapInLocalStorage(key: String): MapInLocalStorage<JS, T> {
-        if (!localStorageKeysProperty.get().contains(key)) {
-            error("Access denied.  key=$key is not in the set of local storage keys: ${localStorageKeysProperty.get()}")
-        }
         return mapInLocalStorageByKey.getOrPut(key) { MapInLocalStorage(key, toData) }
     }
 
