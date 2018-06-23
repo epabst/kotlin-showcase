@@ -49,8 +49,13 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
     override fun list(): List<T> = localStorageKeysProperty.get().flatMap { key -> mapInLocalStorage(key).values }
 
     override fun doSave(originalWithID: T?, replacementWithID: T) {
-        console.info("Saving $replacementWithID over original=$originalWithID")
-        mapInLocalStorage(localStorageKeyChooser.invoke(replacementWithID)).put(replacementWithID.getID()!!._id, replacementWithID)
+        val originalKey = originalWithID?.let { localStorageKeyChooser.invoke(it) }
+        val replacementKey = localStorageKeyChooser.invoke(replacementWithID)
+        console.info("$currentContext: Saving $replacementWithID (key=$replacementKey) over original=$originalWithID (key=$originalKey)")
+        if (originalKey != null && originalKey != replacementKey) {
+            mapInLocalStorage(originalKey).remove(originalWithID.getID()!!._id)
+        }
+        mapInLocalStorage(replacementKey).put(replacementWithID.getID()!!._id, replacementWithID)
     }
 
     fun replaceAll(entityJsonArray: Array<JS>) {
@@ -75,7 +80,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
     protected fun removeFromLocalStorage(localStorageKey: String, item: T): Boolean {
         val found = mapInLocalStorage(localStorageKey).remove(item.getID()!!._id) != null
         if (found) {
-            console.info("Removed $item")
+            console.info("$currentContext: Removed $item (key=$localStorageKey)")
         }
         return found
     }

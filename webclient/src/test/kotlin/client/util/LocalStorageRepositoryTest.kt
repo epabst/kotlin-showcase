@@ -299,6 +299,22 @@ class LocalStorageRepositoryTest {
         removeCount.mustBe(0)
         saveCount.mustBe(1)
     }
+
+    @Test
+    fun LocalStorageRepository_shouldRemoveFromOldLocalStorageKeyWhenChangingKeys() {
+        val relativePath = "unitTest"
+        localStorage.removeItem(relativePath + "/a")
+        localStorage.removeItem(relativePath + "/b")
+        val setOfAll = setOf(relativePath + "/a", relativePath + "/b")
+        val localStorageKeysProperty = setOfAll.toProperty()
+        val localRepository = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
+        localRepository.list().size.mustBe(0)
+        val original = localRepository.saveAndGet(EntityForTesting("Adam"))
+        localRepository.save(original, original.copy(name = "Bob"))
+
+        val localRepositoryCopy = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
+        localRepositoryCopy.list().size.mustBe(1)
+    }
 }
 
 data class EntityForTesting(val name: String, val id: ID<EntityForTesting>? = null) : WithID<EntityForTesting> {
