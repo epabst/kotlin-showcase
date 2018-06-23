@@ -50,7 +50,7 @@ open class FirebaseRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSp
                 val id = snapshot?.id
                 if (id != null) {
                     UndoComponent.notUndoable {
-                        localStorageRepository.remove(id)
+                        localStorageRepository.remove(snapshot.valueWithId())
                     }
                 }
             }
