@@ -20,8 +20,8 @@ open class SwitchableRepository<T : WithID<T>>(
                     listeners.forEach { listener ->
                         _delegate.removeListener(listener)
                         delegate.addListener(listener)
-                        _delegate.list().forEach { listener.onRemoved(it) }
-                        delegate.list().forEach { listener.onSaved(null, it) }
+                        _delegate.list().forEach { listener.onVisibilityChanged(it, false) }
+                        delegate.list().forEach { listener.onVisibilityChanged(it, true) }
                     }
                     _delegate = delegate
                 }

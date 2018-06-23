@@ -114,6 +114,8 @@ val inMemoryRepositoryForTesting = InMemoryRepositoryForTesting()
 class CountingListener<in T> : RepositoryListener<T> {
     var onSavedCount: Int = 0
     var onRemovedCount: Int = 0
+    var onHiddenCount: Int = 0
+    var onVisibleCount: Int = 0
 
     override fun onSaved(original: T?, replacementWithID: T) {
         onSavedCount++
@@ -121,5 +123,13 @@ class CountingListener<in T> : RepositoryListener<T> {
 
     override fun onRemoved(item: T) {
         onRemovedCount++
+    }
+
+    override fun onVisibilityChanged(item: T, visible: Boolean) {
+        if (visible) {
+            onVisibleCount++
+        } else {
+            onHiddenCount++
+        }
     }
 }

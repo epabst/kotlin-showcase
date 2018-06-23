@@ -54,6 +54,9 @@ class UndoComponentTest {
             override fun onRemoved(item: EntityForTesting) {
                 console.info("deleted $item")
             }
+
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
+            }
         })
 
         val originalUndoCount = UndoComponent.undoCount
@@ -212,6 +215,9 @@ class UndoComponentTest {
                 if (item.name == "Eve") {
                     repository.list().find { it.name == "Adam" }.mustNotBe(null)
                 }
+            }
+
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
             }
         })
 

@@ -26,13 +26,12 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         localStorageKeysProperty.onChange { oldKeys, newKeys ->
             oldKeys.minus(newKeys).forEach { key ->
                 listeners.forEach { listener ->
-                    // don't check localStorageKeysProperty for this to avoid access denied error
-                    mapInLocalStorageByKey[key]?.values?.forEach { it -> listener.onRemoved(it) }
+                    mapInLocalStorageByKey[key]?.values?.forEach { it -> listener.onVisibilityChanged(it, false) }
                 }
             }
             newKeys.minus(oldKeys).forEach { key ->
                 listeners.forEach { listener ->
-                    mapInLocalStorage(key).values.forEach { it -> listener.onSaved(null, it) }
+                    mapInLocalStorage(key).values.forEach { it -> listener.onVisibilityChanged(it, true) }
                 }
             }
         }

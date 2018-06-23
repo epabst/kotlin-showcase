@@ -33,6 +33,9 @@ class UITest {
 
             override fun onRemoved(item: ToDo) {
             }
+
+            override fun onVisibilityChanged(item: ToDo, visible: Boolean) {
+            }
         })
     }
 

@@ -29,6 +29,18 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
                     listProperty.onRemoved(item)
                 }
             }
+
+            override fun onVisibilityChanged(item: T, visible: Boolean) {
+                if (visible) {
+                    listCache.values.forEach { queryResult ->
+                        queryResult.onSaved(null, item)
+                    }
+                } else {
+                    listCache.values.forEach { queryResult ->
+                        queryResult.onRemoved(item)
+                    }
+                }
+            }
         })
     }
 

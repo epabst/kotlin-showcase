@@ -44,25 +44,15 @@ class LocalStorageRepositoryTest {
 
     @Test
     fun LocalStorageRepository_shouldNotifyListeners() {
-        var onSavedCount = 0
-        var onRemovedCount = 0
-        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                onSavedCount++
-            }
-
-            override fun onRemoved(item: EntityForTesting) {
-                onRemovedCount++
-            }
-        }
+        val listener = CountingListener<EntityForTesting>()
         LocalStorageRepositoryForTesting.addListener(listener)
-        onSavedCount.mustBe(0)
-        onRemovedCount.mustBe(0)
+        listener.onSavedCount.mustBe(0)
+        listener.onRemovedCount.mustBe(0)
 
         val id1 = LocalStorageRepositoryForTesting.save(null, EntityForTesting("A"))
-        onSavedCount.mustBe(1)
+        listener.onSavedCount.mustBe(1)
         LocalStorageRepositoryForTesting.remove(id1)
-        onRemovedCount.mustBe(1)
+        listener.onRemovedCount.mustBe(1)
     }
 
     @Test
@@ -91,6 +81,7 @@ class LocalStorageRepositoryTest {
                 original?.id?.mustBe(replacementWithID.id)
             }
             override fun onRemoved(item: EntityForTesting) {}
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         }
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
@@ -106,54 +97,42 @@ class LocalStorageRepositoryTest {
 
     @Test
     fun LocalStorageRepository_shouldNotNotifyListenersForNoOpSave() {
-        var onSavedCount = 0
-        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                onSavedCount++
-            }
-            override fun onRemoved(item: EntityForTesting) {}
-        }
+        val listener = CountingListener<EntityForTesting>()
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
         val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
         localRepository.addListener(listener)
-        onSavedCount.mustBe(0)
+        listener.onSavedCount.mustBe(0)
 
         val originalEntity = EntityForTesting("A")
         val id1 = localRepository.save(null, originalEntity)
-        onSavedCount.mustBe(1)
+        listener.onSavedCount.mustBe(1)
 
         localRepository.save(originalEntity.withID(id1), EntityForTesting("A"))
-        onSavedCount.mustBe(1)
+        listener.onSavedCount.mustBe(1)
 
         localRepository.save(originalEntity.withID(id1), EntityForTesting("A").withID(id1))
-        onSavedCount.mustBe(1)
+        listener.onSavedCount.mustBe(1)
     }
 
     @Test
     fun LocalStorageRepository_shouldNotNotifylistenersForNoOpRemove() {
-        var onRemovedCount = 0
-        val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
-            override fun onRemoved(item: EntityForTesting) {
-                onRemovedCount++
-            }
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
-        }
+        val listener = CountingListener<EntityForTesting>()
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
         val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
         localRepository.addListener(listener)
-        onRemovedCount.mustBe(0)
+        listener.onRemovedCount.mustBe(0)
 
         val originalEntity = EntityForTesting("A")
         val id1 = localRepository.save(null, originalEntity)
 
         localRepository.remove(id1)
-        onRemovedCount.mustBe(1)
+        listener.onRemovedCount.mustBe(1)
         localRepository.remove(id1)
-        onRemovedCount.mustBe(1)
+        listener.onRemovedCount.mustBe(1)
         localRepository.remove(originalEntity.withID(id1))
-        onRemovedCount.mustBe(1)
+        listener.onRemovedCount.mustBe(1)
     }
 
     @Test
@@ -165,6 +144,7 @@ class LocalStorageRepositoryTest {
             override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
                 throw IntentionalException()
             }
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         }
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
@@ -196,6 +176,7 @@ class LocalStorageRepositoryTest {
                     localRepository.save(EntityForTesting("Apprentice"))
                 }
             }
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         }
         localRepository.addListener(listener)
 
@@ -224,6 +205,7 @@ class LocalStorageRepositoryTest {
 
             override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
             }
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         }
         localRepository.addListener(listener)
 
@@ -242,27 +224,20 @@ class LocalStorageRepositoryTest {
         val localStorageKeysProperty = setOf(relativePath + "/a", relativePath + "/b").toProperty()
         val localRepository = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
         localRepository.save(EntityForTesting("Adam"))
-        var removeCount = 0
-        var saveCount = 0
 
-        localRepository.addListener(object : RepositoryListener<EntityForTesting> {
-            override fun onRemoved(item: EntityForTesting) {
-                removeCount++
-            }
-
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                saveCount++
-            }
-        })
+        val countingListener = CountingListener<EntityForTesting>()
+        localRepository.addListener(countingListener)
         localRepository.addListener(object : RepositoryListener<EntityForTesting> {
             override fun onRemoved(item: EntityForTesting) {}
-
             override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         })
 
         localStorageKeysProperty.set(emptySet())
-        removeCount.mustBe(1)
-        saveCount.mustBe(0)
+        countingListener.onRemovedCount.mustBe(0)
+        countingListener.onSavedCount.mustBe(0)
+        countingListener.onVisibleCount.mustBe(0)
+        countingListener.onHiddenCount.mustBe(1)
     }
 
     @Test
@@ -277,27 +252,20 @@ class LocalStorageRepositoryTest {
 
         localStorageKeysProperty.set(emptySet())
         val localRepositoryCopy = LocalStorageRepositoryForTesting(relativePath, localStorageKeysProperty, { relativePath + "/" + it.name.take(1).toLowerCase() })
-        var removeCount = 0
-        var saveCount = 0
 
-        localRepositoryCopy.addListener(object : RepositoryListener<EntityForTesting> {
-            override fun onRemoved(item: EntityForTesting) {
-                removeCount++
-            }
-
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                saveCount++
-            }
-        })
+        val countingListener = CountingListener<EntityForTesting>()
+        localRepositoryCopy.addListener(countingListener)
         localRepositoryCopy.addListener(object : RepositoryListener<EntityForTesting> {
             override fun onRemoved(item: EntityForTesting) {}
-
             override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {}
+            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {}
         })
 
         localStorageKeysProperty.set(setOfAll)
-        removeCount.mustBe(0)
-        saveCount.mustBe(1)
+        countingListener.onRemovedCount.mustBe(0)
+        countingListener.onSavedCount.mustBe(0)
+        countingListener.onHiddenCount.mustBe(0)
+        countingListener.onVisibleCount.mustBe(1)
     }
 
     @Test
@@ -344,3 +312,27 @@ open class LocalStorageRepositoryForTesting(relativePath: String,
 }
 
 class IntentionalException : RuntimeException("intentional")
+
+
+class CountingListener<in T> : RepositoryListener<T> {
+    var onSavedCount: Int = 0
+    var onRemovedCount: Int = 0
+    var onHiddenCount: Int = 0
+    var onVisibleCount: Int = 0
+
+    override fun onSaved(original: T?, replacementWithID: T) {
+        onSavedCount++
+    }
+
+    override fun onRemoved(item: T) {
+        onRemovedCount++
+    }
+
+    override fun onVisibilityChanged(item: T, visible: Boolean) {
+        if (visible) {
+            onVisibleCount++
+        } else {
+            onHiddenCount++
+        }
+    }
+}

@@ -165,6 +165,8 @@ interface RepositoryListener<in T> {
     fun onSaved(original: T?, replacementWithID: T)
 
     fun onRemoved(item: T)
+
+    fun onVisibilityChanged(item: T, visible: Boolean)
 }
 
 internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID<T>?, replacement: T): T {
@@ -284,6 +286,11 @@ open class CompositeRepository<T : WithID<T>,R>(
                 listeners.forEach { it.onRemoved(item) }
                 doAfterNotify()
             }
+        }
+
+        override fun onVisibilityChanged(item: T, visible: Boolean) {
+            listeners.forEach { it.onVisibilityChanged(item, visible) }
+            doAfterNotify()
         }
     }
 

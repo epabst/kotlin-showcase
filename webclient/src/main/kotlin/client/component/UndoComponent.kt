@@ -138,6 +138,8 @@ object UndoComponent : UndoProvider {
                     }
                 })
             }
+
+            override fun onVisibilityChanged(item: T, visible: Boolean) {}
         })
     }
 }

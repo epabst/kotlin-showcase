@@ -14,7 +14,7 @@ class SwitchableRepositoryTest {
     }
 
     @Test
-    fun itShouldNotifyListenersOfDataChangesDueToSwitchingDelegateRepository() {
+    fun itShouldNotifyListenersOfVisibilityChangesDueToSwitchingDelegateRepository() {
         val listener1 = CountingListener<EntityForTesting>()
         val repository1 = InMemoryRepositoryForTesting()
         val repository2 = InMemoryRepositoryForTesting()
@@ -27,10 +27,14 @@ class SwitchableRepositoryTest {
         switchableRepository.save(EntityForTesting("A"))
         listener1.onRemovedCount.mustBe(0)
         listener1.onSavedCount.mustBe(1)
+        listener1.onHiddenCount.mustBe(0)
+        listener1.onVisibleCount.mustBe(0)
 
         switchableRepository.delegate = repository2
-        listener1.onRemovedCount.mustBe(1)
-        listener1.onSavedCount.mustBe(3)
+        listener1.onRemovedCount.mustBe(0)
+        listener1.onSavedCount.mustBe(1)
+        listener1.onHiddenCount.mustBe(1)
+        listener1.onVisibleCount.mustBe(2)
     }
 
     @Test
