@@ -86,7 +86,12 @@ open class FirebaseRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSp
     }
 
     override fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
-        referenceFor(replacementWithID)?.let { databaseWithLocalStorage.set(it, JSON.parse(JSON.stringify(replacementWithID))) }
+        val originalReference = originalWithID?.let { referenceFor(it) }
+        val replacementReference = referenceFor(replacementWithID)
+        if (originalReference != null && (replacementReference == null || originalReference.path != replacementReference.path)) {
+            databaseWithLocalStorage.remove(originalReference)
+        }
+        replacementReference?.let { databaseWithLocalStorage.set(it, JSON.parse(JSON.stringify(replacementWithID))) }
         localStorageRepository.save(originalWithID, replacementWithID)
     }
 
