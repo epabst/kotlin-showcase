@@ -14,7 +14,7 @@ data class ToDo(val name: String, val dueDateString: String? = null, val note: S
 
     val dueDate: ProviderDate? get() = dueDateString?.let { PlatformProvider.instance.toDate(it) }
 
-    val createDate: ProviderDate? get() = createDateString?.let { PlatformProvider.instance.toDate(it) }
+    val createDate: ProviderDate? get() = PlatformProvider.instance.toDate(createDateString)
 
     override fun getID(): ID<ToDo>? = id
 
