@@ -45,7 +45,9 @@ open class FirebaseDatabaseWithLocalStorage(private val firebaseDatabase: Databa
     }
 
     private fun setWithoutMarkingAsNotSynced(reference: Reference, entity: Any, onComplete: (Error?) -> Any) {
-        val jsonValue = JSON.parse<Any>(JSON.stringify(entity))
+        val jsonString = JSON.stringify(entity)
+        val jsonValue = JSON.parse<Any>(jsonString)
+        println("FirebaseDatabaseWithLocalStorage: setting ${reference.path} to $jsonString")
         reference.set(jsonValue, onComplete = { error ->
             handlingErrors("firebase set") {
                 if (error == null) {
@@ -57,6 +59,7 @@ open class FirebaseDatabaseWithLocalStorage(private val firebaseDatabase: Databa
     }
 
     private fun removeWithoutMarkingAsNotSynced(reference: Reference, onComplete: (a: Error?) -> Any) {
+        println("FirebaseDatabaseWithLocalStorage: removing ${reference.path}")
         reference.remove(onComplete = { error ->
             handlingErrors("firebase remove onComplete") {
                 if (error == null) {
