@@ -11,7 +11,7 @@ import net.yested.core.properties.*
  */
 class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
     private val cache = mutableMapOf<ID<T>, Property<T?>>()
-    private val listCache = mutableMapOf<RepositoryQuery<T,*>,QueryResult<T,*>>()
+    private val listCache = mutableMapOf<RepositoryCriteria<T>,CriteriaCache<T>>()
 
     init {
         repository.addListener(object : RepositoryListener<T> {
@@ -25,20 +25,16 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
 
             override fun onRemoved(item: T) {
                 item.getID()?.let { cache[it]?.set(null) }
-                listCache.values.forEach { listProperty ->
-                    listProperty.onRemoved(item)
+                listCache.values.forEach { queryResult ->
+                    queryResult.onRemoved(item)
                 }
             }
 
             override fun onVisibilityChanged(item: T, visible: Boolean) {
                 if (visible) {
-                    listCache.values.forEach { queryResult ->
-                        queryResult.onSaved(null, item)
-                    }
+                    onSaved(null, item)
                 } else {
-                    listCache.values.forEach { queryResult ->
-                        queryResult.onRemoved(item)
-                    }
+                    onRemoved(item)
                 }
             }
         })
@@ -51,45 +47,41 @@ class RepositoryCache<T : WithID<T>>(val repository: Repository<T>) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal fun <F> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
-        return (listCache.getOrPut(query) {
-            QueryResult(query, repository.list(query.criteria).map { query.selector.invoke(it) }.distinct())
-        } as QueryResult<T,F>).listProperty
+    internal fun <F : Any> listProperty(query: RepositoryQuery<T,F>): ReadOnlyProperty<List<F>> {
+        return listCache.getOrPut(query.criteria) {
+            CriteriaCache(query.criteria, repository.list(query.criteria))
+        }.listProperty(query.selector)
     }
 }
 
-private class QueryResult<T : WithID<T>, F>(private val query: RepositoryQuery<T,F>, initialList: List<F>) {
-    private val _listProperty: Property<List<F>> = Property(initialList)
+private class CriteriaCache<T : WithID<T>>(private val criteria: RepositoryCriteria<T>, initialList: List<T>) {
+    private val listProperty: Property<List<T>> = Property(initialList)
+    private val listPropertyBySelector = mutableMapOf<FieldSelector<T,*>,ReadOnlyProperty<List<*>>>()
 
-    val listProperty: ReadOnlyProperty<List<F>> get() = _listProperty
+    fun <F : Any> listProperty(selector: FieldSelector<T,F>): ReadOnlyProperty<List<F>> {
+        @Suppress("UNCHECKED_CAST")
+        return listPropertyBySelector.getOrPut(selector) {
+            listProperty.map { it.mapNotNull { selector.invoke(it) }.distinct() }
+        } as ReadOnlyProperty<List<F>>
+    }
 
     fun onSaved(original: T?, replacementWithID: T) {
-        _listProperty.modify { list ->
-            val index = if (original != null && query.criteria.invoke(original)) {
-                list.indexOf(query.selector.invoke(original))
-            } else {
-                -1
-            }
-            when {
-                query.criteria.invoke(replacementWithID) -> {
-                    val newFieldValue: F? = query.selector.invoke(replacementWithID)
-                    when {
-                        newFieldValue == null -> list.filterIndexed { i, _ -> i != index }
-                        index >= 0 -> list.mapIndexed { i, item -> if (i == index) newFieldValue else item }
-                        else -> list.plus(newFieldValue)
-                    }
+        if (criteria.invoke(replacementWithID)) {
+            listProperty.modify { list ->
+                if (original != null && criteria.invoke(original)) {
+                    list.map { if (it == original) replacementWithID else it }
+                } else {
+                    list + replacementWithID
                 }
-                index >= 0 -> list.filterIndexed { i, _ -> i != index }
-                else -> list
             }
+        } else if (original != null && criteria.invoke(original)) {
+            listProperty.modify { it.filter { it != original } }
         }
     }
 
     fun onRemoved(item: T) {
-        if (query.criteria.invoke(item)) {
-            _listProperty.modifyList {
-                it.remove(query.selector.invoke(item))
-            }
+        if (criteria.invoke(item)) {
+            listProperty.modify { it.filter { it != item } }
         }
     }
 }
@@ -126,7 +118,7 @@ class CachingRepository<T : WithID<T>>(private val repository: Repository<T>) : 
     }
 
     fun idListProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<List<ID<T>>> {
-        return listProperty<ID<T>>(IdFieldSelector(), criteria)
+        return listProperty(IdFieldSelector(), criteria)
     }
 
     fun findFirstOrNullProperty(criteria: RepositoryCriteria<T> = allItems()): ReadOnlyProperty<T?> {
