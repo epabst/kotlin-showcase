@@ -49,6 +49,8 @@ object FirebaseAuthentication {
  * @param addToNewUser action to add data to a new user when merging an anonymous account into a provider account
  */
 fun <T> HTMLElement.authenticationLink(providerWithResources: AuthProviderWithResources, removeFromOldUser: () -> T, addToNewUser: (T) -> Unit) {
+    if (Factory.firebaseApp == null) return
+
     val provider = providerWithResources.provider
     val authAction: (Event) -> Promise<Any> = {
         it.preventDefault()
@@ -56,11 +58,11 @@ fun <T> HTMLElement.authenticationLink(providerWithResources: AuthProviderWithRe
         val onReject: (Error) -> Unit = { handleAuthError(it, priorUser, provider, removeFromOldUser, addToNewUser) }
         if (priorUser == null) {
             val dataFromOldUser = removeFromOldUser.invoke()
-            Factory.firebaseApp!!.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
+            Factory.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
                 addToNewUser.invoke(dataFromOldUser)
             })
         } else if (priorUser.hasProvider(provider)) {
-            Factory.firebaseApp!!.auth().signInWithPopup(provider).then(onReject = onReject)
+            Factory.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject)
         } else {
             priorUser.linkWithPopup(provider).then(onReject = onReject)
         }
@@ -113,7 +115,7 @@ fun <T> HTMLElement.authenticationLink(providerWithResources: AuthProviderWithRe
                 a {
                     href = "#"
                     appendText("Sign out")
-                    onclick = { Factory.firebaseApp!!.auth().signOut() }
+                    onclick = { Factory.firebaseApp.auth().signOut() }
                 }
             }
         }
