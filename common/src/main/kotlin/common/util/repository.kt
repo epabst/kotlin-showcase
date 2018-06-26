@@ -124,6 +124,12 @@ fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
     list(criteria).forEach { remove(it) }
 }
 
+fun <T : WithID<T>> Repository<T>.removeAllAndList(criteria: RepositoryCriteria<T>): List<T> {
+    val list = list(criteria)
+    list.forEach { remove(it) }
+    return list
+}
+
 class EmptyRepository<T : WithID<T>> : Repository<T> {
     override fun list(): List<T> = emptyList()
 
