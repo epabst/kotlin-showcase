@@ -47,6 +47,10 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
 
     override fun list(): List<T> = localStorageKeysProperty.get().flatMap { key -> mapInLocalStorage(key).values }
 
+    override fun find(id: ID<T>): T? {
+        return localStorageKeysProperty.get().mapNotNull { mapInLocalStorage(it).currentMap[id._id] }.firstOrNull()
+    }
+
     override fun doSave(originalWithID: T?, replacementWithID: T) {
         val originalKey = originalWithID?.let { localStorageKeyChooser.invoke(it) }
         val replacementKey = localStorageKeyChooser.invoke(replacementWithID)
