@@ -60,6 +60,13 @@ fun String?.emptyToNull(): String? {
     return if (this == null || this.isEmpty()) null else this
 }
 
+fun <T> ReadOnlyProperty<T>.printed(label: String = "value"): ReadOnlyProperty<T> {
+    return map {
+        println("new $label: $it")
+        it
+    }
+}
+
 fun <T> biasing(selector: (T) -> Boolean): Comparator<T> {
     return compareBy { !selector(it) }
 }
