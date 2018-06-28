@@ -33,7 +33,7 @@ open class FirebaseRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSp
     }
 
     private val rawDatabase = firebaseApp.database()
-    val databaseWithLocalStorage = FirebaseDatabaseWithLocalStorage(rawDatabase)
+    val databaseWithLocalStorage = firebaseDatabaseWithLocalStorageByApp.getOrPut(firebaseApp) { FirebaseDatabaseWithLocalStorage(rawDatabase) }
     private val subscribedPaths = mutableSetOf<String>()
     private val callbackToSave: (DataSnapshot?, String?) -> Int = { snapshot, _ ->
         window.requestAnimationFrame {
@@ -137,6 +137,10 @@ open class FirebaseRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSp
 
     override val localStorageKeys: Set<String>
         get() = localStorageRepository.localStorageKeys
+
+    companion object {
+        val firebaseDatabaseWithLocalStorageByApp = mutableMapOf<App,FirebaseDatabaseWithLocalStorage>()
+    }
 }
 
 fun <T : ProtectedWithID<T>,JS> protectionLevelWithChangesRepository(
