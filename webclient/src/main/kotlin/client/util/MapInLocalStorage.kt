@@ -38,11 +38,13 @@ data class MapInLocalStorage<JS,T>(private val localStorageKey: String, private 
     }
 
     fun remove(key: String): T? {
-        val value = _currentMap.remove(key)
-        if (value != null) {
+        return if (_currentMap.contains(key)) {
+            val value = _currentMap.remove(key)
             storeWhenStable()
+            value
+        } else {
+            null
         }
-        return value
     }
 
     fun clear() {
