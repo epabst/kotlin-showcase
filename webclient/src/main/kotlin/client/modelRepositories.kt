@@ -43,9 +43,9 @@ object Factory {
     val user = Property<User?>(null)
     val userId = user.mapAsDefault { it?.uid }
     val accessSpaceModel = AccessSpaceModel(firebaseApp)
-    val accessSpaces = accessSpaceModel.accessSpaces
-    val accessSpaceIds = accessSpaceModel.accessSpaceIds
     val accessSpaceRepository = accessSpaceModel.accessSpaceRepository
+    val accessSpaces = accessSpaceRepository.listProperty()
+    val accessSpaceIds = accessSpaceRepository.idListProperty()
     val toDoRepository = protectionLevelWithGlobalChangeLogRepository<ToDo,ToDoJS>("toDoList", userId, accessSpaceIds, { it.toNormal() }, firebaseApp).cached
     val allRepositories = listOf(accessSpaceRepository, toDoRepository)
 

@@ -10,7 +10,6 @@ import net.yested.core.html.nbsp
 import net.yested.core.html.span
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
-import net.yested.core.properties.map
 import net.yested.core.properties.mapAsDefault
 import net.yested.ext.bootstrap3.*
 import org.w3c.dom.HTMLDivElement
@@ -103,8 +102,6 @@ class AccessSpaceModel(firebaseApp: App?) {
         val pathsSpecifier = PrivatePathsSpecifier<AccessSpace>("accessSpaceList", Factory.userId)
         FirebaseRepositorySync<AccessSpace, AccessSpaceJS>(pathsSpecifier, { it.toNormal() }, firebaseApp).cached
     }
-    val accessSpaces = accessSpaceRepository.listProperty()
-    val accessSpaceIds = accessSpaces.map { it.map { it.id }.filterNotNull() }
 
     fun addIfMissingAndExtractNewHash(hash: Array<String>): String {
         val accessSpaceId = hash[1].toID<AccessSpace>()!!
