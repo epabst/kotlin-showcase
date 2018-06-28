@@ -10,6 +10,7 @@ import common.util.ID
 import common.util.WithID
 import net.yested.core.properties.*
 import kotlin.browser.window
+import kotlin.js.Date
 
 /**
  * Map a List to another list, reusing the items from the time before whenever equal to the function result.
@@ -65,6 +66,37 @@ fun <T> ReadOnlyProperty<T>.printed(label: String = "value"): ReadOnlyProperty<T
         println("new $label: $it")
         it
     }
+}
+
+fun <T> ReadOnlyProperty<T>.throttled(maxSpanUpdateCount: Int = 1, spanMillis: Int = 20): ReadOnlyProperty<T> {
+    val result = Property(get())
+    var lastUpdated: Double = 0.toDouble()
+    var recentUpdateCount = 1
+    var throttled = false
+    onNext {
+        if (recentUpdateCount <= maxSpanUpdateCount) {
+            recentUpdateCount++
+            lastUpdated = Date().getTime()
+            result.set(get())
+        } else {
+            val now = Date().getTime()
+            if (now >= lastUpdated + spanMillis) {
+                lastUpdated = now
+                recentUpdateCount = 1
+                throttled = false
+                result.set(get())
+            } else if (!throttled) {
+                throttled = true
+                window.requestAnimationFrame {
+                    lastUpdated = Date().getTime()
+                    recentUpdateCount = 1
+                    throttled = false
+                    result.set(get())
+                }
+            }
+        }
+    }
+    return result
 }
 
 fun <T> biasing(selector: (T) -> Boolean): Comparator<T> {

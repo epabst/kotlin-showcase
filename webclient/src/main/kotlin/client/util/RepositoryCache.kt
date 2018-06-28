@@ -61,7 +61,7 @@ private class CriteriaCache<T : WithID<T>>(private val criteria: RepositoryCrite
     fun <F : Any> listProperty(selector: FieldSelector<T,F>): ReadOnlyProperty<List<F>> {
         @Suppress("UNCHECKED_CAST")
         return listPropertyBySelector.getOrPut(selector) {
-            listProperty.map { it.mapNotNull { selector.invoke(it) }.distinct() }
+            listProperty.map { it.mapNotNull { selector.invoke(it) }.distinct() }.throttled()
         } as ReadOnlyProperty<List<F>>
     }
 
