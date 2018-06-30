@@ -68,9 +68,29 @@ class JavascriptProviderTest {
     }
 
     @Test
-    fun toDate_ISO() {
+    fun toDate_ISO_today() {
+        val isoDateString = PlatformProvider.instance.now().toIsoDateString()
+        val date = PlatformProvider.instance.toDate(isoDateString)
+        date.toIsoDateString().mustBe(isoDateString)
+    }
+
+    @Test
+    fun toDate_ISO_now() {
         val isoTimestampString = PlatformProvider.instance.now().toIsoTimestampString()
         val date = PlatformProvider.instance.toDate(isoTimestampString)
         date.toIsoTimestampString().mustBe(isoTimestampString)
+    }
+
+    @Test
+    fun toDate_date() {
+        val string = PlatformProvider.instance.toDate(2018, 4, 22).toIsoDateString()
+        val date = PlatformProvider.instance.toDate(string)
+        date.toIsoDateString().mustBe(string)
+    }
+
+    @Test
+    fun toIsoDateString() {
+        val date = PlatformProvider.instance.toDate("2018-10-11")
+        date.toIsoDateString().mustBe("2018-10-11")
     }
 }
