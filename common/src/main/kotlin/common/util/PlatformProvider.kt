@@ -41,6 +41,8 @@ interface ProviderDate : Comparable<ProviderDate> {
     val month: Int
     val dayOfMonth: Int
     val millisecondsSinceUnixEpoch: Long
+    fun toIsoDateString(): String
+    fun toLocalizedDateString(): String
     fun toDisplayDateTimeString(): String
     fun toIsoTimestampString(): String
 

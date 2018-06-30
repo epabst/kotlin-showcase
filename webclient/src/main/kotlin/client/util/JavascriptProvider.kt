@@ -42,8 +42,8 @@ object JavascriptProvider : PlatformProvider {
     }
 
     override fun toDate(input: String): MomentDate {
-        val dateFormat = "YYYY-MM-DDT"
-        val moment = if (input.length == dateFormat.length) {
+        val dateFormat = "YYYY-MM-DD"
+        val moment = if (input.length <= dateFormat.length) {
             Moment.parse(input, dateFormat)
         } else {
             // parse as an ISO timestamp
@@ -57,6 +57,7 @@ object JavascriptProvider : PlatformProvider {
         moment.year = year
         moment.month = month
         moment.dayOfMonth = dayOfMonth
+        moment.hour = 0
         return MomentDate(moment)
     }
 }

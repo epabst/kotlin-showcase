@@ -49,4 +49,28 @@ class JavascriptProviderTest {
         1234.2.formatCurrencyForInput().mustBe("1234.20")
         1234.22324.formatCurrencyForInput().mustBe("1234.22")
     }
+
+    @Test
+    fun toDate_YYYY_MM_DD() {
+        val date = PlatformProvider.instance.toDate("2018-02-09")
+        date.year.mustBe(2018)
+        date.month.mustBe(1)
+        date.dayOfMonth.mustBe(9)
+    }
+
+    @Test
+    fun toDate_YYYY_M_D() {
+        val date = PlatformProvider.instance.toDate("2018-2-9")
+        date.year.mustBe(2018)
+        date.month.mustBe(1)
+        date.dayOfMonth.mustBe(9)
+        date.toMoment().hour.mustBe(0)
+    }
+
+    @Test
+    fun toDate_ISO() {
+        val isoTimestampString = PlatformProvider.instance.now().toIsoTimestampString()
+        val date = PlatformProvider.instance.toDate(isoTimestampString)
+        date.toIsoTimestampString().mustBe(isoTimestampString)
+    }
 }

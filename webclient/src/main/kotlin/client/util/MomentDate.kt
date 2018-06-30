@@ -18,7 +18,9 @@ class MomentDate(val moment: Moment) : ProviderDate {
         get() = moment.dayOfMonth
     override val millisecondsSinceUnixEpoch: Long
         get() = moment.millisecondsSinceUnixEpoch
-    override fun toString(): String = moment.format("ll")
+    override fun toString(): String = toLocalizedDateString()
+    override fun toIsoDateString(): String = moment.format()
+    override fun toLocalizedDateString(): String = moment.format("ll")
     override fun toDisplayDateTimeString(): String = moment.format("lll")
     override fun toIsoTimestampString(): String = moment.format()
 }

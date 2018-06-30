@@ -63,7 +63,7 @@ object JvmProvider : PlatformProvider {
         // first try ISO Timestamp
         var parsedDate = SimpleDateFormat.getDateTimeInstance().parse(input, parsePosition)
         if (parsePosition.index == 0) {
-            parsedDate = SimpleDateFormat("yyyy-MM-dd").parse(input, parsePosition)
+            parsedDate = JvmDate.yyyymmddInstance.parse(input, parsePosition)
         }
         if (parsePosition.index == 0) {
             parsedDate = SimpleDateFormat("MM/dd/yyyy").parse(input)
@@ -105,14 +105,19 @@ class JvmDate(private val calendar: Calendar) : ProviderDate {
 
     override fun hashCode(): Int = calendar.hashCode()
 
-    override fun toString(): String = shortDateInstance.format(calendar.time)
+    override fun toIsoDateString(): String = yyyymmddInstance.format(calendar.time)
+
+    override fun toString(): String = toLocalizedDateString()
+
+    override fun toLocalizedDateString(): String = localizedDateFormat.format(calendar.time)
 
     override fun toDisplayDateTimeString(): String = dateTimeInstance.format(calendar.time)
 
     override fun toIsoTimestampString(): String = dateTimeInstance.format(calendar.time)
 
     companion object {
-        private val shortDateInstance = DateFormat.getDateInstance(DateFormat.SHORT)
+        val yyyymmddInstance = SimpleDateFormat("yyyy-MM-dd")
+        private val localizedDateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
         private val dateTimeInstance = DateFormat.getDateTimeInstance()
     }
 }
