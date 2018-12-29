@@ -19,12 +19,22 @@ which exports the current state of the data.
 
 # How to Prepare to Build webclient
 
-* Before building webclient, first build https://github.com/jean79/yested_fw using "mvn clean install".
+* Before building webclient, first build yested_fw:
+```bash
+cd ..
+git clone https://github.com/jean79/yested_fw
+cd yested_fw
+git reset --hard origin/improvements 
+mvn clean install
+```
 * To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
  
 # How to Build webclient
 
 First run "./gradlew build" in this top-level directory.
+
+Note: If using Windows, either run gradle as administrator the first time or manually run 
+  mklink /D %CD%\webclient\src\main\kotlin\common %CD%\kotlin-showcase\common\src\main\kotlin\common
 
 # How to Run webclient from IntelliJ (v. 2017.1)
 
