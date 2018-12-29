@@ -40,14 +40,6 @@ class JvmProviderTest {
     }
 
     @Test
-    fun formatCurrencyDiffMustFormatCorrectly() {
-        1234.2.formatCurrencyDiff().mustBe("+1,234.20")
-        1234.22324.formatCurrencyDiff().mustBe("+1,234.22")
-        (-1234.22324).formatCurrencyDiff().mustBe("-1,234.22")
-        (0.00).formatCurrencyDiff().mustBe("+0.00")
-    }
-
-    @Test
     fun formatCurrencyForInputMustFormatCorrectly() {
         1234.2.formatCurrencyForInput().mustBe("1234.20")
         1234.22324.formatCurrencyForInput().mustBe("1234.22")
