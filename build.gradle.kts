@@ -19,8 +19,5 @@ allprojects {
         mavenLocal()
         mavenCentral()
         jcenter()
-        maven {
-            url = uri("http://nexus.yested.net/nexus/content/repositories/releases/")
-        }
     }
 }
