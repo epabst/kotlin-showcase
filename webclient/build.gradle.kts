@@ -141,7 +141,7 @@ tasks {
         from("$projectDir/src/main/web")
         include("index.html")
         into("$projectDir/build/public")
-        filter { it.replace("../../../out/production/classes/", "").replace("webclient.js", "js/index.js?" + Math.random()) }
+        filter { it.replace("../../out/production/classes/", "").replace("webclient.js", "js/index.js?" + Math.random()) }
         dependsOn(extractJsLibs)
     }
 

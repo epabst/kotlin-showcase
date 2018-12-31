@@ -39,8 +39,10 @@ Note: If using Windows, either run gradle as administrator the first time or man
 # How to Run webclient from IntelliJ (v. 2017.1)
 
 In IntelliJ, right-click on webclient/src/main/web/index.html and "Open in Browser".  Voila!
+Note: This way works with Source Maps for debugging. 
 
 Alternative: If that doesn't work, go to webclient/build/public/index.html and "Open in Browser".
+Note: This one works with Source Maps for debugging. 
 
 # How to Run webclient tests from IntelliJ (v. 2017.1)
 
