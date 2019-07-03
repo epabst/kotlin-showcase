@@ -1,1 +1,2 @@
-rootProject.name = 'mpp'
+rootProject.name = 'kotlin-showcase'
+include("mobile")

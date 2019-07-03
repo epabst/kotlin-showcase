@@ -19,7 +19,7 @@ tasks {
     }
 
     val copyWebClientExceptHtml by creating(Copy::class) {
-        from("${project(":webclient").projectDir}/build/public")
+        from("${projectDir}/../build/public")
         include("**/*")
         exclude("index.html")
         into("www")
@@ -31,7 +31,7 @@ tasks {
     // This allows sharing code between the two modules and enables using KotlinJS
 
     val copyWebClientHtml by creating(Copy::class) {
-        from("${project(":webclient").projectDir}/build/public")
+        from("${projectDir}/../build/public")
         include("index.html")
         into("www")
         filter { line -> line.replace(Regex("<!--CORDOVA (.*?)-->"), "\$1") }

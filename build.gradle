@@ -8,12 +8,14 @@ plugins {
     id 'org.jetbrains.kotlin.multiplatform' version '1.3.40'
 }
 repositories {
+    mavenLocal()
     jcenter()
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     mavenCentral()
 }
 def ktor_version = '1.1.3'
 def logback_version = '1.2.3'
+def artifactName = rootProject.name
 
 kotlin {
     jvm()
@@ -50,6 +52,19 @@ kotlin {
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
+                implementation "net.yested:Yested-js:1.0-SNAPSHOT"
+                implementation npm("jquery", "3.4.1")
+                implementation npm("bootstrap", "3.4.1")
+                implementation npm("bootstrap-xxs", "1.0.0-sirap-rc.0")
+                implementation npm("popper.js", "1.15.0")
+                // moment is used by some Yested code.
+                implementation npm("moment", "2.24.0")
+                // pickadate is used by some Yested code.
+                implementation npm("pickadate", "3.6.4")
+                implementation npm("firebase", "6.2.0") //todo go back to 4.8.1??
+                implementation npm("numeral", "2.0.6")
+                // Older browser shim, needed by YConsole and possibly others in the future.
+                implementation npm("requestanimationframe", "0.0.23")
             }
         }
         jsTest {
@@ -71,3 +86,50 @@ task run(type: JavaExec, dependsOn: [jvmJar]) {
     classpath(configurations.jvmRuntimeClasspath, jvmJar)
     args = []
 }
+
+task copyDependenciesToPublic(type: Copy) {
+    def regex = ~/(?:src|href)=\"..\/..\/(build\/js\/node_modules)\/([^\"]+)\"/
+    file("src/jsMain/web/index.html").readLines().each { String line ->
+        def matcher = regex.matcher(line)
+        if (matcher.find()) {
+            from(matcher.group(1))
+            include(matcher.group(2))
+            doLast {
+                assert(file("build/public/lib/${matcher.group(2)}").exists())
+            }
+        }
+    }
+    from("build/libs")
+    include("${artifactName}.js")
+    into("build/public/lib")
+    dependsOn(jsBrowserWebpack)
+    doLast {
+        assert(file("build/public/lib/${artifactName}.js").exists())
+    }
+}
+
+task copyWebToPublicExceptHtml(type: Copy) {
+    from('src/jsMain/web')
+    include("**/*")
+    exclude("index.html")
+    into("build/public")
+}
+
+task copyHtmlToPublic(type: Copy) {
+    from("src/jsMain/web")
+    include("index.html")
+    into("build/public")
+    filter {
+        it.replace("../../build/js/node_modules/", "lib/").replace("../../build/libs/${artifactName}.js", "lib/${artifactName}.js?" + Math.random())
+    }
+}
+
+task copyToPublic {
+    dependsOn(copyHtmlToPublic, copyWebToPublicExceptHtml, copyDependenciesToPublic)
+    doLast {
+        assert(file("build/public/css/index.css").exists())
+        assert(file("build/public/index.html").exists())
+    }
+}
+
+assemble.dependsOn(copyToPublic)
