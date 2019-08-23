@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.40'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.3.50'
 }
 repositories {
     mavenLocal()
@@ -88,6 +88,7 @@ task run(type: JavaExec, dependsOn: [jvmJar]) {
 }
 
 task copyDependenciesToPublic(type: Copy) {
+    dependsOn(jsBrowserWebpack)
     def regex = ~/(?:src|href)=\"..\/..\/(build\/js\/node_modules)\/([^\"]+)\"/
     file("src/jsMain/web/index.html").readLines().each { String line ->
         def matcher = regex.matcher(line)
@@ -99,10 +100,10 @@ task copyDependenciesToPublic(type: Copy) {
             }
         }
     }
-    from("build/libs")
-    include("${artifactName}.js")
+    from("build/distributions")
+    include("${artifactName}-${version}.js")
+    rename { it.replace("${artifactName}-${version}.js", "${artifactName}.js") }
     into("build/public/lib")
-    dependsOn(jsBrowserWebpack)
     doLast {
         assert(file("build/public/lib/${artifactName}.js").exists())
     }
@@ -120,7 +121,7 @@ task copyHtmlToPublic(type: Copy) {
     include("index.html")
     into("build/public")
     filter {
-        it.replace("../../build/js/node_modules/", "lib/").replace("../../build/libs/${artifactName}.js", "lib/${artifactName}.js?" + Math.random())
+        it.replace("../../build/js/node_modules/", "lib/").replace("../../build/distributions/${artifactName}-${version}.js", "lib/${artifactName}.js?" + Math.random())
     }
 }
 
