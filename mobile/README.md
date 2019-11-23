@@ -18,7 +18,7 @@ To build and run it, follow these steps:
 2) cd into `mobile` and run:
 
 ```bash
-$ cordova platform add android --save
+$ cordova platform add android@5 --save
 $ cordova build android
 ```                      
 Install platforms/android/build/outputs/apk/android-debug.apk onto your Android device. 
