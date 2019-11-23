@@ -23,7 +23,7 @@ cd ..
 git clone https://github.com/jean79/yested_fw
 cd yested_fw
 git reset --hard origin/improvements 
-mvn clean install
+./gradlew clean publishToMavenLocal
 ```
 * To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
  
