@@ -3,6 +3,7 @@ apply {
 }
 
 tasks {
+    val build = getByName("build")
     val clean = getByName("clean")
     clean.doLast {
         file("platforms/android/assets/www").deleteRecursively()
@@ -89,21 +90,9 @@ tasks {
         archiveName = "PhoneGap.zip"
         destinationDir = buildDir
     }
+    makeZip.dependsOn(prepareMobile)
+    build.dependsOn(makeZip)
     makeZip.doFirst {
         assert(file("config.xml").exists())
-        dependsOn(prepareMobile)
-    }
-
-    val afterPrepare by creating(Copy::class) {
-        from("platforms/android")
-        include("AndroidManifest.xml")
-        into("$buildDir")
-        doLast {
-            copy {
-                from("${buildDir}")
-                include("AndroidManifest.xml")
-                into("platforms/android")
-            }
-        }
     }
 }
