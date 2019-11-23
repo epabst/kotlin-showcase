@@ -9,12 +9,12 @@ import common.*
 import common.util.*
 import firebase.User
 import firebase.app.App
+import globals.jQuery
 import net.yested.core.properties.Property
 import net.yested.core.properties.ReadOnlyProperty
 import net.yested.core.properties.mapAsDefault
 import net.yested.core.properties.onChange
 import net.yested.ext.jquery.get
-import net.yested.ext.jquery.yestedJQuery
 import org.w3c.dom.get
 import kotlin.browser.localStorage
 import kotlin.js.json
@@ -52,7 +52,7 @@ object Factory {
 
     init {
         if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
-            yestedJQuery.get<Any>("initial-data.json") { initialData ->
+            jQuery.get<Any>("initial-data.json") { initialData ->
                 FileBackupComponent.initializeData(initialData)
             }
         }
