@@ -49,7 +49,7 @@ tasks {
         into("www")
         filter { line -> line.replace("www/", "") }
     }
-    
+
     val genIcon by creating(Exec::class) {
         workingDir = file(".")
         commandLine("cordova-gen-icon")
@@ -62,7 +62,6 @@ tasks {
             file("www/config.xml").delete()
         }
     }
-    "genIcon" { dependsOn(genIcon) }
 
     val prepareMobile by creating {
         dependsOn(copyWebClientExceptHtml)
@@ -107,5 +106,4 @@ tasks {
             }
         }
     }
-    "afterPrepare" { dependsOn(afterPrepare) }
 }
