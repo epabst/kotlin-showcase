@@ -15,18 +15,6 @@ You can supply initial data in src/jsMain/web/initial-data.json,
 whether manually or by copying in the output from the backup button in the app 
 which exports the current state of the data. 
 
-# How to Prepare to Build
-
-* Before building, first build yested_fw:
-```bash
-cd ..
-git clone https://github.com/jean79/yested_fw
-cd yested_fw
-git reset --hard origin/improvements 
-./gradlew clean publishToMavenLocal
-```
-* To be able to debug Kotlin in the browser, go to "File->Settings->Kotlin Compiler" and check the box "Generate source maps".
- 
 # How to Build
 
 First run "./gradlew build" in this top-level directory.
@@ -59,15 +47,9 @@ Build the mobile app and make sure it has basic functionality.
 # Credit
 Thank you to the following frameworks, tools, libraries, and languages:
 * Kotlin - http://kotlinlang.org/
-* Yested - https://github.com/jean79/yested_fw
 * Twitter Bootstrap - http://getbootstrap.com/
-* JQuery - http://jquery.com/
-* Moment.js - http://momentjs.com/
-* NumeralJS - http://numeraljs.com/
 * pickadate.js - http://amsul.ca/pickadate.js/ 
 * Javascript - http://javascript.com/
 * Cordova - http://cordova.apache.org/
 * Gradle - https://gradle.org/
 * Phonegap Build - https://build.phonegap.com/
-* QUnit test framework - http://qunitjs.com/
-* Spek test framework from JetBrains - http://spekframework.org/
