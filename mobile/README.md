@@ -9,12 +9,11 @@ A hybrid mobile app that uses cordova to wrap the webclient into a mobile app fo
 $ sudo npm install -g cordova
 ```
 
-## Running mobile app
+## Running mobile app on Android
 
 To build and run it, follow these steps:
 
-1) First build the webclient (see ../README.md) 
-(don't forget to compile the webclient module in IntelliJ to generate lib/kotlin.js)
+1) First build the top-level project (see ../README.md) 
 
 2) cd into `mobile` and run:
 

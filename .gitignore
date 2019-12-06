@@ -2,6 +2,7 @@
 .gradle/
 .settings/
 .shelf/
+.firebase/
 bin/
 *.log
 proguard/
@@ -17,6 +18,6 @@ target/
 tmp/
 015_copy_app_to_synced_folder.js
 gen/
-mobile/www/
-/webclient/node_modules/
-/webclient/src/main/kotlin/common
+/mobile/www/
+!/mobile/www/img/logo.*
+!/mobile/www/.keepdir
