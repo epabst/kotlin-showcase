@@ -61,6 +61,9 @@ kotlin {
                 implementation kotlin('stdlib-js')
                 implementation "net.yested:Yested-js:1.0-SNAPSHOT"
                 implementation npm("jquery", "3.4.1")
+                implementation npm("text-encoding", "0.7.0") // used by ktor-client-js
+                implementation "io.ktor:ktor-client-core:$ktor_version"
+                implementation "io.ktor:ktor-client-js:$ktor_version"
                 implementation npm("bootstrap", "3.4.1")
                 implementation npm("bootstrap-xxs", "1.0.0-sirap-rc.0")
                 implementation npm("popper.js", "1.15.0")
