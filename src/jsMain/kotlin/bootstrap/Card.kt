@@ -1,37 +1,24 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION", "unused")
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
+import react.RProps
 
-external open class CardTitle<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardSubtitle<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardBody<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardLink<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardText<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardHeader<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardFooter<As : React.ElementType> : BsPrefixComponent<As>
-external open class CardImgOverlay<As : React.ElementType> : BsPrefixComponent<As>
-external interface CardProps {
-    var bg: dynamic /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
-    var text: dynamic /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' | 'white' | 'muted' */
-    var border: dynamic /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
+abstract external class CardTitle<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardSubtitle<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardBody<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardLink<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardText<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardHeader<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardFooter<As : React.ElementType> : BsPrefixComponent<As, RProps>
+abstract external class CardImgOverlay<As : React.ElementType> : BsPrefixComponent<As, RProps>
+external interface CardProps : RProps {
+    var bg: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
+    var text: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' | 'white' | 'muted' */
+    var border: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
     var body: Boolean? get() = definedExternally; set(value) = definedExternally
 }
-external open class Card<As : React.ElementType> : BsPrefixComponent<As, CardProps> {
+abstract external class Card<As : React.ElementType> : BsPrefixComponent<As, CardProps> {
     companion object {
         var Img: Any
         var Title: Any

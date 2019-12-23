@@ -1,23 +1,10 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION", "unused")
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
+import react.RProps
 
-external interface FormCheckProps {
+external interface FormCheckProps : RProps {
     var bsCustomPrefix: String? get() = definedExternally; set(value) = definedExternally
     var innerRef: React.LegacyRef<FormCheckProps /* this */>? get() = definedExternally; set(value) = definedExternally
     var id: String? get() = definedExternally; set(value) = definedExternally
@@ -26,12 +13,12 @@ external interface FormCheckProps {
     var title: String? get() = definedExternally; set(value) = definedExternally
     var label: React.ReactNode? get() = definedExternally; set(value) = definedExternally
     var custom: Boolean? get() = definedExternally; set(value) = definedExternally
-    var type: dynamic /* 'checkbox' | 'radio' | 'switch' */
+    var type: String /* 'checkbox' | 'radio' | 'switch' */
     var isValid: Boolean? get() = definedExternally; set(value) = definedExternally
     var isInvalid: Boolean? get() = definedExternally; set(value) = definedExternally
     var feedback: React.ReactNode? get() = definedExternally; set(value) = definedExternally
 }
-external open class FormCheck<As : React.ElementType> : BsPrefixComponent<As, FormCheckProps> {
+abstract external class FormCheck<As : React.ElementType> : BsPrefixComponent<As, FormCheckProps> {
     companion object {
         var Input: Any
         var Label: Any

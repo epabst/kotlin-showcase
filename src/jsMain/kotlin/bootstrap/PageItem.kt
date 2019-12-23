@@ -1,30 +1,17 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION", "unused")
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
+import react.RProps
 
-external interface PageItemProps {
+external interface PageItemProps : RProps {
     var disabled: Boolean? get() = definedExternally; set(value) = definedExternally
     var active: Boolean? get() = definedExternally; set(value) = definedExternally
     var activeLabel: String? get() = definedExternally; set(value) = definedExternally
 }
-external open class PageItem : BsPrefixComponent<Any, PageItemProps>
-external open class First : PageItem
-external open class Prev : PageItem
-external open class Ellipsis : PageItem
-external open class Next : PageItem
-external open class Last : PageItem
+abstract external class PageItem : BsPrefixComponent<React.Any, PageItemProps>
+abstract external class First : PageItem
+abstract external class Prev : PageItem
+abstract external class Ellipsis : PageItem
+abstract external class Next : PageItem
+abstract external class Last : PageItem

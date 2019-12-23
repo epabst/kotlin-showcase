@@ -1,24 +1,11 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION", "unused")
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
+import react.RProps
 
-external interface ToggleButtonProps {
-    var type: dynamic /* 'checkbox' | 'radio' */
+external interface ToggleButtonProps : RProps {
+    var type: String /* 'checkbox' | 'radio' */
     var name: String? get() = definedExternally; set(value) = definedExternally
     var checked: Boolean? get() = definedExternally; set(value) = definedExternally
     var disabled: Boolean? get() = definedExternally; set(value) = definedExternally
@@ -26,4 +13,4 @@ external interface ToggleButtonProps {
     var value: Any
     var inputRef: React.LegacyRef<ToggleButtonProps /* this */>? get() = definedExternally; set(value) = definedExternally
 }
-external open class ToggleButton<As : React.ElementType> : BsPrefixComponent<As, ToggleButtonProps>
+abstract external class ToggleButton<As : React.ElementType> : BsPrefixComponent<As, ToggleButtonProps>
