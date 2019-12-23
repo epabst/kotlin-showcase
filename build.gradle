@@ -68,17 +68,19 @@ kotlin {
                 implementation npm("text-encoding", "0.7.0") // used by ktor-client-js
                 implementation "io.ktor:ktor-client-core:$ktor_version"
                 implementation "io.ktor:ktor-client-js:$ktor_version"
-                implementation npm("bootstrap", "3.4.1")
-                implementation npm("bootstrap-xxs", "1.0.0-sirap-rc.0")
-                implementation npm("popper.js", "1.15.0")
+                implementation npm("react-bootstrap", "1.0.0-beta.16")
+                implementation npm("bootstrap-css-only", "4.3.1")
+//                implementation npm("popper.js", "1.15.0")
                 // moment is used by some Yested code.
                 implementation npm("moment", "2.24.0")
                 // pickadate is used by some Yested code.
                 implementation npm("pickadate", "3.6.4")
                 implementation npm("firebase", "6.2.0") //todo go back to 4.8.1??
                 implementation npm("numeral", "2.0.6")
+                implementation "org.jetbrains:kotlin-react-router-dom:$react_router_dom_version"
+                implementation npm("react-router-dom", "5.1.2")
                 // Older browser shim, needed by YConsole and possibly others in the future.
-                implementation npm("requestanimationframe", "0.0.23")
+//                implementation npm("requestanimationframe", "0.0.23")
             }
         }
         jsTest {
@@ -135,7 +137,14 @@ task copyHtmlToPublic(type: Copy) {
     include("index.html")
     into("build/public")
     filter {
-        it.replace("../../build/js/node_modules/", "lib/").replace("../../build/distributions/${artifactName}-${version}.js", "lib/${artifactName}.js?" + Math.random())
+        it.replace("../../build/js/node_modules/", "lib/")
+                .replace("distributions/${artifactName}-${version}.js", "distributions/${artifactName}.js")
+                .replace("../../build/distributions/${artifactName}.js", "lib/${artifactName}.js?" + Math.random())
+    }
+    doLast {
+        file("build/public/index.html").readLines().each { String line ->
+            assert(!line.contains("../"))
+        }
     }
 }
 
