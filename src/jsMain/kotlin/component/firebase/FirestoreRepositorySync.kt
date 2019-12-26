@@ -10,6 +10,7 @@ import firebase.firestore.DocumentSnapshot
 import firebase.firestore.QueryDocumentSnapshot
 import firebase.requireFirestore
 import kotlinx.coroutines.await
+import kotlinx.coroutines.withTimeout
 
 /**
  * A [Repository] that synchronizes with a [firebase.firestore.FirebaseFirestore].
@@ -17,7 +18,7 @@ import kotlinx.coroutines.await
  * Date: 1/4/18
  * Time: 11:05 PM
  */
-open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSpecifier<T>, val toData: (JS) -> T, val firebaseApp: App) : NormalizingRepository<T>() {
+open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSpecifier<T>, val toData: (JS) -> T, firebaseApp: App) : NormalizingRepository<T>() {
     private val inMemoryRepository = InMemoryRepository<T>(UndoComponent)
     private val database = firebaseApp.firestore()
     private val firstCollection = pathsSpecifier.databasePaths.firstOrNull()?.let { database.collection(it) }
@@ -83,7 +84,7 @@ open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsS
         return removed
     }
 
-    internal fun referenceFor(entityWithID: T): DocumentReference? {
+    internal suspend fun referenceFor(entityWithID: T): DocumentReference? {
         return pathsSpecifier.chooseDatabasePath(entityWithID)?.let { database.collection(it).doc(entityWithID.getID()!!.toString()) }
     }
 
@@ -133,7 +134,7 @@ interface PathsSpecifier<T: WithID<T>> {
 
     fun onChangeDatabasePaths(onChangeDatabasePaths: (oldPaths: Set<String>, newPaths: Set<String>) -> Unit)
 
-    fun chooseDatabasePath(entity: T): String?
+    suspend fun chooseDatabasePath(entity: T): String?
 }
 
 typealias DatabasePathsListener = (oldPaths: Set<String>, newPaths: Set<String>) -> Unit
@@ -145,7 +146,7 @@ class GlobalPathsSpecifier<T: WithID<T>>(override val relativePath: String, appN
     override suspend fun chooseDatabasePath(entity: T): String? = relativePath
 }
 
-class PrivatePathsSpecifier<T: WithID<T>>(override val relativePath: String, firebaseAuth: Auth?) : PathsSpecifier<T> {
+class PrivatePathsSpecifier<T: WithID<T>>(override val relativePath: String, private val firebaseAuth: Auth?) : PathsSpecifier<T> {
     private var _userId: String? = null
     private var _databasePaths: Set<String> = emptySet()
     private val databasePathListeners = mutableListOf<DatabasePathsListener>()
@@ -178,5 +179,11 @@ class PrivatePathsSpecifier<T: WithID<T>>(override val relativePath: String, fir
         databasePathListeners.add(onChangeDatabasePaths)
     }
 
-    override fun chooseDatabasePath(entity: T): String? = userId?.let { "private/$it/$relativePath" }
+    override suspend fun chooseDatabasePath(entity: T): String? {
+        if (firebaseAuth == null) {
+            return null
+        }
+        val userId = withTimeout(7000) { firebaseAuth.waitForUser() }.uid
+        return "private/$userId/$relativePath"
+    }
 }

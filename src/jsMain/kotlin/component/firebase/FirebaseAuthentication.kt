@@ -14,6 +14,8 @@ import kotlinx.html.title
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * A link that enables signing into a Google account.
@@ -30,13 +32,28 @@ object FirebaseAuthentication {
     }
 }
 
-fun Auth.onUserChanged(onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
+fun Auth.onUserChanged(onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit): () -> Any {
     var oldUser: User? = null
-    onAuthStateChanged({ newUser ->
+    return onAuthStateChanged({ newUser ->
         onAuthStateChanged(oldUser, newUser)
         oldUser = newUser
         Unit
     })
+}
+
+suspend fun Auth.waitForUser(): User {
+    val user1 = currentUser
+    if (user1 != null) return user1
+    lateinit var listener: () -> Any
+    val user = suspendCoroutine<User> { continuation ->
+        listener = onUserChanged { _, newUser ->
+            if (newUser != null) {
+                continuation.resume(newUser)
+            }
+        }
+    }
+    listener.invoke()
+    return user
 }
 
 interface AuthenticationLinkProps : RProps {
