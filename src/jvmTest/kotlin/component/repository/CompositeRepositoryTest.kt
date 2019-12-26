@@ -1,6 +1,8 @@
 package component.repository
 
-import common.util.*
+import common.util.mustBe
+import common.util.mustNotBe
+import kotlinx.coroutines.runBlocking
 import platform.JvmProvider
 import platform.PlatformProvider
 import kotlin.test.Test
@@ -17,7 +19,7 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldDelegateToTheCorrectRepository() {
+    fun itShouldDelegateToTheCorrectRepository() = runTest {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
         val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
@@ -33,11 +35,11 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldHaveListIncludeAllRepositories() {
+    fun itShouldHaveListIncludeAllRepositories() = runTest {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         compositeRepository.save(EntityForTesting("George"))
         compositeRepository.save(EntityForTesting("Xander"))
@@ -45,7 +47,7 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldFindUsingFindRatherThanList() {
+    fun itShouldFindUsingFindRatherThanList() = runTest {
         val repositoryA = object : InMemoryRepository<EntityForTesting>() {
             override fun find(id: ID<EntityForTesting>): EntityForTesting? {
                 return null
@@ -56,19 +58,19 @@ class CompositeRepositoryTest {
                 return EntityForTesting("Xander")
             }
         }
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         compositeRepository.find(repositoryN.generateID()).mustNotBe(null)
     }
 
     @Test
-    fun itShouldNotifyListeners() {
+    fun itShouldNotifyListeners() = runTest {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         compositeRepository.addListener(listener)
         listener.onSavedCount.mustBe(0)
@@ -81,12 +83,12 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldNotifyListenersWhenItemAddedToChildRepository() {
+    fun itShouldNotifyListenersWhenItemAddedToChildRepository() = runTest {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         compositeRepository.addListener(listener)
         listener.onSavedCount.mustBe(0)
@@ -99,12 +101,12 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldHandleSaveThatMovesItToAnotherRepository() {
+    fun itShouldHandleSaveThatMovesItToAnotherRepository() = runTest {
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
 
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         val entityA = compositeRepository.saveAndGet(EntityForTesting("A"))
         repositoryA.find(entityA.getID()!!).mustNotBe(null)
@@ -117,13 +119,13 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldNotNotifyListenersOfRemoveDueToMovingToAnotherRepository() {
+    fun itShouldNotNotifyListenersOfRemoveDueToMovingToAnotherRepository() = runTest {
         val listener = CountingListener<EntityForTesting>()
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
 
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN)) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
         val entityA = compositeRepository.saveAndGet(EntityForTesting("A"))
 
@@ -137,14 +139,14 @@ class CompositeRepositoryTest {
     }
 
     @Test
-    fun itShouldWrapInASingleUndoableTheRemovingAndAddingWhenMovingToAnotherRepository() {
+    fun itShouldWrapInASingleUndoableTheRemovingAndAddingWhenMovingToAnotherRepository() = runTest {
         var undoableCount = 0
         val repositoryA = InMemoryRepository<EntityForTesting>()
         val repositoryN = InMemoryRepository<EntityForTesting>()
         val entityA = repositoryA.saveAndGet(EntityForTesting("A"))
 
         val undoProvider: UndoProvider = object : UndoProvider {
-            override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+            override suspend fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: suspend () -> T): T {
                 undoableCount++
                 //should not have moved yet
                 repositoryA.find(entityA.getID()!!).mustNotBe(null)
@@ -155,13 +157,13 @@ class CompositeRepositoryTest {
                 return result
             }
 
-            override fun <T> notUndoable(function: () -> T): T {
+            override suspend fun <T> notUndoable(function: suspend () -> T): T {
                 return function()
             }
         }
 
-        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN), undoProvider) { entity ->
-            if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
+        val compositeRepository = CompositeRepository(mapOf('a' to repositoryA, 'n' to repositoryN), undoProvider) {
+            entity -> if (entity.name[0].toLowerCase() < 'n') 'a' else 'n'
         }
 
         undoableCount.mustBe(0)
@@ -170,3 +172,5 @@ class CompositeRepositoryTest {
         undoableCount.mustBe(1)
     }
 }
+
+fun runTest(block: suspend () -> Unit): Unit = runBlocking { block() }

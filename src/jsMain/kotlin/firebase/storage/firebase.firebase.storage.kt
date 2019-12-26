@@ -1,10 +1,10 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "DEPRECATION", "unused", "PropertyName")
 @file:[JsModule("firebase/storage") JsNonModule]
 package firebase.storage
 
 import kotlin.js.*
 
-external interface FullMetadata : firebase.storage.UploadMetadata {
+external interface FullMetadata : UploadMetadata {
     var bucket: String
     var downloadURLs: Array<String>
     var fullPath: String
@@ -17,18 +17,18 @@ external interface FullMetadata : firebase.storage.UploadMetadata {
 }
 external interface Reference {
     var bucket: String
-    fun child(path: String): firebase.storage.Reference
+    fun child(path: String): Reference
     fun delete(): Promise<Any>
     var fullPath: String
     fun getDownloadURL(): Promise<Any>
     fun getMetadata(): Promise<Any>
     var name: String
-    var parent: firebase.storage.Reference?
-    fun put(blob: Any, metadata: firebase.storage.UploadMetadata? = definedExternally /* null */): firebase.storage.UploadTask
-    var root: firebase.storage.Reference
-    var storage: firebase.storage.Storage
+    var parent: Reference?
+    fun put(blob: Any, metadata: UploadMetadata? = definedExternally /* null */): UploadTask
+    var root: Reference
+    var storage: Storage
     override fun toString(): String
-    fun updateMetadata(metadata: firebase.storage.SettableMetadata): Promise<Any>
+    fun updateMetadata(metadata: SettableMetadata): Promise<Any>
 }
 external interface ICustomMetadata {
     @nativeGetter
@@ -48,8 +48,8 @@ external interface Storage {
     var app: firebase.app.App
     var maxOperationRetryTime: Number
     var maxUploadRetryTime: Number
-    fun ref(path: String? = definedExternally /* null */): firebase.storage.Reference
-    fun refFromURL(url: String): firebase.storage.Reference
+    fun ref(path: String? = definedExternally /* null */): Reference
+    fun refFromURL(url: String): Reference
     fun setMaxOperationRetryTime(time: Number): Any
     fun setMaxUploadRetryTime(time: Number): Any
 }
@@ -65,24 +65,24 @@ external interface ITaskState {
     var SUCCESS: String
 }
 external var TaskState: ITaskState = definedExternally
-external interface UploadMetadata : firebase.storage.SettableMetadata {
+external interface UploadMetadata : SettableMetadata {
     var md5Hash: String?
 }
 external interface UploadTask {
     fun cancel(): Boolean
     fun catch(onRejected: (a: Error) -> Any): Promise<Any>
-    fun on(event: firebase.storage.ITaskEvent, nextOrObserver: Any? = definedExternally /* null */, error: (a: Error) -> Any? = definedExternally /* null */, complete: () -> Any? = definedExternally /* null */): Function<*>
+    fun on(event: ITaskEvent, nextOrObserver: Any? = definedExternally /* null */, error: (a: Error) -> Any? = definedExternally /* null */, complete: () -> Any? = definedExternally /* null */): Function<*>
     fun pause(): Boolean
     fun resume(): Boolean
-    var snapshot: firebase.storage.UploadTaskSnapshot
-    fun then(onFulfilled: (a: firebase.storage.UploadTaskSnapshot) -> Any? = definedExternally /* null */, onRejected: (a: Error) -> Any? = definedExternally /* null */): Promise<Any>
+    var snapshot: UploadTaskSnapshot
+    fun then(onFulfilled: (a: UploadTaskSnapshot) -> Any? = definedExternally /* null */, onRejected: (a: Error) -> Any? = definedExternally /* null */): Promise<Any>
 }
 external interface UploadTaskSnapshot {
     var bytesTransferred: Number
     var downloadURL: String?
-    var metadata: firebase.storage.FullMetadata
-    var ref: firebase.storage.Reference
-    var state: firebase.storage.ITaskState
-    var task: firebase.storage.UploadTask
+    var metadata: FullMetadata
+    var ref: Reference
+    var state: ITaskState
+    var task: UploadTask
     var totalBytes: Number
 }

@@ -7,6 +7,7 @@ import platform.toProviderDate
 import react.*
 import react.router.dom.RouteResultHistory
 import component.repository.ID
+import platform.launchHandlingErrors
 import todo.model.Factory
 import todo.model.ToDo
 import util.emptyToNull
@@ -42,7 +43,9 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
     private fun save(event: React.SubmitEvent) {
         if (event.currentTarget?.checkValidity() == true && state.name.isNotBlank()) {
             val updatedToDo = ToDo(state.name, state.dueDate?.toProviderDate(), state.notes.emptyToNull(), id = state.original?.id)
-            Factory.toDoRepository.save(updatedToDo)
+            launchHandlingErrors("save $updatedToDo") {
+                Factory.toDoRepository.save(updatedToDo)
+            }
             props.history.goBack()
         }
         setState {
@@ -56,7 +59,9 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
 
     private fun delete() {
         state.original?.id?.let { toDoId ->
-            Factory.toDoRepository.remove(toDoId)
+            launchHandlingErrors("delete $toDoId") {
+                Factory.toDoRepository.remove(toDoId)
+            }
         }
         props.history.goBack()
     }

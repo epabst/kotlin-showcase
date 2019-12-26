@@ -78,19 +78,19 @@ interface Repository<T : WithID<T>> {
     }
 
     /** @return original.getID() or else replacement.getID() or else [generateID]. */
-    fun save(original: T?, replacement: T): ID<T>
+    suspend fun save(original: T?, replacement: T): ID<T>
 
     /** @return entity.getID() or else [generateID]. */
-    fun save(entity: T): ID<T> {
+    suspend fun save(entity: T): ID<T> {
         val original = entity.getID()?.let { find(it) }
         return save(original, entity)
     }
 
-    fun saveAndGet(entity: T): T {
+    suspend fun saveAndGet(entity: T): T {
         return entity.withID(save(entity))
     }
 
-    fun remove(id: ID<T>): Boolean {
+    suspend fun remove(id: ID<T>): Boolean {
         val item = find(id)
         if (item != null) {
             return remove(item)
@@ -99,11 +99,17 @@ interface Repository<T : WithID<T>> {
         }
     }
 
-    fun remove(item: T): Boolean {
+    suspend fun remove(item: T): Boolean {
         return item.getID()?.let { remove(it) } ?: false
     }
 
     fun find(id: ID<T>): T? = list().find { it.getID() == id }
+
+    suspend fun updateAll(criteria: RepositoryCriteria<T>, modify: (T) -> T) {
+        list(criteria).forEach {
+            save(it, modify(it))
+        }
+    }
 
     fun generateID(): ID<T>
 
@@ -122,11 +128,11 @@ interface Repository<T : WithID<T>> {
     val localStorageKeys: Set<String>
 }
 
-fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
+suspend fun <T : WithID<T>> Repository<T>.removeAll(criteria: RepositoryCriteria<T>) {
     list(criteria).forEach { remove(it) }
 }
 
-fun <T : WithID<T>> Repository<T>.removeAllAndList(criteria: RepositoryCriteria<T>): List<T> {
+suspend fun <T : WithID<T>> Repository<T>.removeAllAndList(criteria: RepositoryCriteria<T>): List<T> {
     val list = list(criteria)
     list.forEach { remove(it) }
     return list
@@ -135,9 +141,9 @@ fun <T : WithID<T>> Repository<T>.removeAllAndList(criteria: RepositoryCriteria<
 class EmptyRepository<T : WithID<T>> : Repository<T> {
     override fun list(): List<T> = emptyList()
 
-    override fun save(original: T?, replacement: T): ID<T> = throw UnsupportedOperationException("read-only")
+    override suspend fun save(original: T?, replacement: T): ID<T> = throw UnsupportedOperationException("read-only")
 
-    override fun remove(id: ID<T>): Boolean = false
+    override suspend fun remove(id: ID<T>): Boolean = false
 
     override fun generateID(): ID<T> = throw UnsupportedOperationException("read-only")
 
@@ -174,11 +180,15 @@ interface Closeable {
 }
 
 interface RepositoryListener<in T> {
-    fun onSaved(original: T?, replacementWithID: T)
+    suspend fun beforeSaving(original: T?, replacementWithID: T) {}
 
-    fun onRemoved(item: T)
+    suspend fun beforeRemoving(item: T) {}
 
-    fun onVisibilityChanged(item: T, visible: Boolean)
+    suspend fun onSaved(original: T?, replacementWithID: T) {}
+
+    suspend fun onRemoved(item: T) {}
+
+    suspend fun onVisibilityChanged(item: T, visible: Boolean) {}
 }
 
 internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID<T>?, replacement: T): T {
@@ -197,7 +207,7 @@ internal fun <T : WithID<T>> putIntoList(mutableList: ArrayList<T>, replacementW
 }
 
 abstract class NormalizingRepository<T : WithID<T>> : Repository<T> {
-    final override fun save(original: T?, replacement: T): ID<T> {
+    final override suspend fun save(original: T?, replacement: T): ID<T> {
         val originalID = original?.getID() ?: replacement.getID()
         val replacementWithID = getOrGenerateID(originalID, replacement)
         val newID = replacementWithID.getID()!!
@@ -208,7 +218,7 @@ abstract class NormalizingRepository<T : WithID<T>> : Repository<T> {
         return newID
     }
 
-    abstract fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T)
+    abstract suspend fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T)
 }
 
 abstract class NotifyingRepository<T : WithID<T>>(val undoProvider: UndoProvider) : NormalizingRepository<T>() {
@@ -216,20 +226,24 @@ abstract class NotifyingRepository<T : WithID<T>>(val undoProvider: UndoProvider
 
     protected val listeners: List<RepositoryListener<T>> get() = _listeners
 
-    override fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
+    override suspend fun doSaveAndNotify(originalID: ID<T>?, originalWithID: T?, replacementWithID: T) {
         undoProvider.undoable(
                 if (originalID == null) "Added $replacementWithID" else "Updated $replacementWithID",
                 if (originalID == null) "Deleted $replacementWithID" else "Reverted $originalWithID") {
+            listeners.forEach { it.beforeSaving(originalWithID, replacementWithID) }
             doSave(originalWithID, replacementWithID)
             listeners.forEach { it.onSaved(originalWithID, replacementWithID) }
             doAfterNotify()
         }
     }
 
-    abstract fun doSave(originalWithID: T?, replacementWithID: T)
+    abstract suspend fun doSave(originalWithID: T?, replacementWithID: T)
 
-    final override fun remove(item: T): Boolean {
+    final override suspend fun remove(item: T): Boolean {
+        val id = item.getID()
+        if (id != null && find(id) == null) return false
         return undoProvider.undoable("Deleted $item", "Restored $item") {
+            listeners.forEach { it.beforeRemoving(item) }
             val didRemoval = doRemove(item)
             if (didRemoval) {
                 listeners.forEach { it.onRemoved(item) }
@@ -239,7 +253,7 @@ abstract class NotifyingRepository<T : WithID<T>>(val undoProvider: UndoProvider
         }
     }
 
-    abstract fun doRemove(item: T): Boolean
+    abstract suspend fun doRemove(item: T): Boolean
 
     open fun doAfterNotify() {}
 
@@ -290,7 +304,7 @@ private class ListMaintainingListener<T : WithID<T>>(initialList: List<T>,
             _priorList = value
         }
 
-    override fun onSaved(original: T?, replacementWithID: T) {
+    override suspend fun onSaved(original: T?, replacementWithID: T) {
         if (criteria.invoke(replacementWithID)) {
             priorList = if (original != null && criteria.invoke(original)) {
                 priorList.map { if (it == original) replacementWithID else it }
@@ -302,13 +316,13 @@ private class ListMaintainingListener<T : WithID<T>>(initialList: List<T>,
         }
     }
 
-    override fun onRemoved(item: T) {
+    override suspend fun onRemoved(item: T) {
         if (criteria.invoke(item)) {
             priorList = priorList.filter { it != item }
         }
     }
 
-    override fun onVisibilityChanged(item: T, visible: Boolean) {
+    override suspend fun onVisibilityChanged(item: T, visible: Boolean) {
         if (visible) {
             onSaved(null, item)
         } else {
@@ -318,7 +332,7 @@ private class ListMaintainingListener<T : WithID<T>>(initialList: List<T>,
 }
 
 interface UndoProvider {
-    fun <T : WithID<T>, F> undoableSave(original: T?, replacementWithID: T, function: () -> F): F {
+    suspend fun <T : WithID<T>, F> undoableSave(original: T?, replacementWithID: T, function: suspend () -> F): F {
         val isUpdate = original != null && original.getID() != null
         val pastTenseDescription = if (isUpdate) "Updated $original" else "Added $replacementWithID"
         val undoPastTenseDescription = if (isUpdate) "Reverted $original" else "Deleted $replacementWithID"
@@ -326,17 +340,17 @@ interface UndoProvider {
     }
 
 
-    fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T
+    suspend fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: suspend () -> T): T
 
-    fun <T> notUndoable(function: () -> T): T
+    suspend fun <T> notUndoable(function: suspend () -> T): T
 
     companion object {
         val empty: UndoProvider = object : UndoProvider {
-            override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+            override suspend fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: suspend () -> T): T {
                 return function()
             }
 
-            override fun <T> notUndoable(function: () -> T): T {
+            override suspend fun <T> notUndoable(function: suspend () -> T): T {
                 return function()
             }
         }
@@ -351,21 +365,33 @@ open class CompositeRepository<T : WithID<T>,R>(
     var skipNotificationsFromChildrenDueToInternalChange = false
 
     private val childrenListener: RepositoryListener<T> = object : RepositoryListener<T> {
-        override fun onSaved(original: T?, replacementWithID: T) {
+        override suspend fun beforeSaving(original: T?, replacementWithID: T) {
+            if (!skipNotificationsFromChildrenDueToInternalChange) {
+                listeners.forEach { it.beforeSaving(original, replacementWithID) }
+            }
+        }
+
+        override suspend fun beforeRemoving(item: T) {
+            if (!skipNotificationsFromChildrenDueToInternalChange) {
+                listeners.forEach { it.beforeRemoving(item) }
+            }
+        }
+
+        override suspend fun onSaved(original: T?, replacementWithID: T) {
             if (!skipNotificationsFromChildrenDueToInternalChange) {
                 listeners.forEach { it.onSaved(original, replacementWithID) }
                 doAfterNotify()
             }
         }
 
-        override fun onRemoved(item: T) {
+        override suspend fun onRemoved(item: T) {
             if (!skipNotificationsFromChildrenDueToInternalChange) {
                 listeners.forEach { it.onRemoved(item) }
                 doAfterNotify()
             }
         }
 
-        override fun onVisibilityChanged(item: T, visible: Boolean) {
+        override suspend fun onVisibilityChanged(item: T, visible: Boolean) {
             listeners.forEach { it.onVisibilityChanged(item, visible) }
             doAfterNotify()
         }
@@ -381,7 +407,7 @@ open class CompositeRepository<T : WithID<T>,R>(
         return repositoryMap.values.asSequence().map { it.find(id) }.find { it != null }
     }
 
-    override fun doSave(originalWithID: T?, replacementWithID: T) {
+    override suspend fun doSave(originalWithID: T?, replacementWithID: T) {
         skipNotificationsFromChildrenDueToInternalChange = true
         try {
             val originalCategory = originalWithID?.let { categorizer.invoke(it) }
@@ -401,7 +427,7 @@ open class CompositeRepository<T : WithID<T>,R>(
         }
     }
 
-    override fun doRemove(item: T): Boolean {
+    override suspend fun doRemove(item: T): Boolean {
         skipNotificationsFromChildrenDueToInternalChange = true
         try {
             val category = categorizer.invoke(item)
@@ -423,13 +449,13 @@ open class InMemoryRepository<T : WithID<T>>(undoProvider: UndoProvider = UndoPr
 
     override fun list(): List<T> = list.toList()
 
-    override fun doSave(originalWithID: T?, replacementWithID: T) {
+    override suspend fun doSave(originalWithID: T?, replacementWithID: T) {
         putIntoList(list, replacementWithID, originalWithID?.getID())
     }
 
     override fun generateID(): ID<T> = ID(idGenerator.generateID().toString())
 
-    override fun doRemove(item: T): Boolean {
+    override suspend fun doRemove(item: T): Boolean {
         val index = list.indexOfFirst { it.getID() == item.getID() }
         if (index >= 0) {
             list.removeAt(index)

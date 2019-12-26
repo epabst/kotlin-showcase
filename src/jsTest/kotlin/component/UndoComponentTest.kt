@@ -1,12 +1,16 @@
 package component
 
-import kotlin.test.*
-import platform.JavascriptProvider
-import common.util.*
-import platform.PlatformProvider
+import common.util.mustBe
+import common.util.mustNotBe
 import component.repository.EntityForTesting
 import component.repository.LocalStorageRepositoryForTesting
 import component.repository.RepositoryListener
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asPromise
+import kotlinx.coroutines.async
+import platform.JavascriptProvider
+import platform.PlatformProvider
+import kotlin.test.Test
 
 /**
  * A test for [UndoComponent].
@@ -24,7 +28,7 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldAllowCreateUndoRedoUndoRedo() {
+    fun itShouldAllowCreateUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
         val newId = repository.save(null, EntityForTesting("George"))
         repository.find(newId).mustNotBe(null)
@@ -48,17 +52,17 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldAllowDeleteUndoRedoUndoRedo() {
+    fun itShouldAllowDeleteUndoRedoUndoRedo() = runTest {
         repository.addListener(object : RepositoryListener<EntityForTesting> {
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+            override suspend fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
                 console.info(if (original == null) "created $replacementWithID" else "updated to $replacementWithID")
             }
 
-            override fun onRemoved(item: EntityForTesting) {
+            override suspend fun onRemoved(item: EntityForTesting) {
                 console.info("deleted $item")
             }
 
-            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
+            override suspend fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
             }
         })
 
@@ -87,7 +91,7 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldAllowUpdateUndoRedoUndoRedo() {
+    fun itShouldAllowUpdateUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
         val originalValue = EntityForTesting("George")
         val newId = repository.save(null, originalValue)
@@ -115,7 +119,7 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldAllowBatchUndoRedoUndoRedo() {
+    fun itShouldAllowBatchUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
         val originalValue = EntityForTesting("George")
         val newId = repository.save(null, originalValue)
@@ -154,7 +158,7 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldSupportNotAllowingUndoing() {
+    fun itShouldSupportNotAllowingUndoing() = runTest {
         val originalValue = EntityForTesting("George")
         val newId = repository.save(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
@@ -172,7 +176,7 @@ class UndoComponentTest {
     }
 
     @Test
-    fun itShouldHandleUpdatingTheSameEntityTwice() {
+    fun itShouldHandleUpdatingTheSameEntityTwice() = runTest {
         val originalValue = EntityForTesting("George")
         val newId = repository.save(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
@@ -194,7 +198,7 @@ class UndoComponentTest {
 
 
     @Test
-    fun itShouldIgnoreANoOpUndoable() {
+    fun itShouldIgnoreANoOpUndoable() = runTest {
         val originalUndoCount = UndoComponent.undoCount
 
         UndoComponent.undoable("no-op", "no-op") {
@@ -204,23 +208,22 @@ class UndoComponentTest {
         (UndoComponent.undoCount - originalUndoCount).mustBe(0)
     }
 
-
     @Test
-    fun itShouldUndoCommandsInReverseOrderAndRedoInOriginalOrder() {
+    fun itShouldUndoCommandsInReverseOrderAndRedoInOriginalOrder() = runTest {
         repository.addListener(object : RepositoryListener<EntityForTesting> {
-            override fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
+            override suspend fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
                 if (replacementWithID.name == "Adam") {
                     repository.list().find { it.name == "Eve" }.mustBe(null)
                 }
             }
 
-            override fun onRemoved(item: EntityForTesting) {
+            override suspend fun onRemoved(item: EntityForTesting) {
                 if (item.name == "Eve") {
                     repository.list().find { it.name == "Adam" }.mustNotBe(null)
                 }
             }
 
-            override fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
+            override suspend fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
             }
         })
 
@@ -232,3 +235,5 @@ class UndoComponentTest {
         UndoComponent.redo()
     }
 }
+
+fun <T> runTest(block: suspend () -> T): dynamic = GlobalScope.async { block() }.asPromise()

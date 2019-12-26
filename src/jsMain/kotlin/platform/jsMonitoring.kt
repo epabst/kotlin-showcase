@@ -7,17 +7,7 @@ fun showUserExpectedError(message: String) {
     window.alert(message)
 }
 
-fun handleError(throwable: Throwable) {
+actual fun handleError(throwable: Throwable) {
     console.error("ERROR: " + currentContext + ": ", throwable)
     window.alert(currentContext + ": " + throwable.toString())
-}
-
-fun handlingErrors(contextName: String, f: ()->Any) {
-    return inContext(contextName) {
-        try {
-            f()
-        } catch (e: Throwable) {
-            handleError(e)
-        }
-    }
 }

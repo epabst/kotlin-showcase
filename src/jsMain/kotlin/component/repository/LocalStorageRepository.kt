@@ -11,14 +11,33 @@ import kotlin.random.Random
  * Time: 6:19 AM
  */
 open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
-                                                                                  localStorageKeys: Set<String>,
-                                                                                  private val toData: (JS) -> T,
-                                                                                  private val localStorageKeyChooser: (T) -> String) : NotifyingRepository<T>(UndoComponent) {
+                                                    localStorageKeys: Set<String>,
+                                                    private val toData: (JS) -> T,
+                                                    private val localStorageKeyChooser: (T) -> String) : NotifyingRepository<T>(UndoComponent) {
     constructor(localStorageKey: String, toData: (JS) -> T) :
-            this(localStorageKey, setOf(localStorageKey), toData, { localStorageKey })
+            this(localStorageKey, localStorageKey, toData)
 
-    private var _localStorageKeys: Set<String> = localStorageKeys
-    private val mapInLocalStorageByKey = mutableMapOf<String, MapInLocalStorage<JS, T>>()
+    constructor(relativePath: String, localStorageKey: String, toData: (JS) -> T) :
+            this(relativePath, setOf(localStorageKey), toData, { localStorageKey })
+
+    private var _localStorageKeys = localStorageKeys
+    private val mapInLocalStorageByKey = mutableMapOf<String,MapInLocalStorage<JS,T>>()
+
+    suspend fun setLocalStorageKeys(localStorageKeys: Set<String>) {
+        val oldKeys = this.localStorageKeys
+        val newKeys = localStorageKeys
+        oldKeys.minus(newKeys).forEach { key ->
+            listeners.forEach { listener ->
+                mapInLocalStorageByKey[key]?.values?.forEach { listener.onVisibilityChanged(it, false) }
+            }
+        }
+        newKeys.minus(oldKeys).forEach { key ->
+            listeners.forEach { listener ->
+                mapInLocalStorage(key).values.forEach { listener.onVisibilityChanged(it, true) }
+            }
+        }
+        _localStorageKeys = localStorageKeys
+    }
 
     private fun mapInLocalStorage(key: String): MapInLocalStorage<JS, T> {
         return mapInLocalStorageByKey.getOrPut(key) { MapInLocalStorage(key, toData) }
@@ -34,7 +53,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         return localStorageKeys.mapNotNull { mapInLocalStorage(it).currentMap[id._id] }.firstOrNull()
     }
 
-    override fun doSave(originalWithID: T?, replacementWithID: T) {
+    override suspend fun doSave(originalWithID: T?, replacementWithID: T) {
         val originalKey = originalWithID?.let { localStorageKeyChooser.invoke(it) }
         val replacementKey = localStorageKeyChooser.invoke(replacementWithID)
         console.info("$currentContext: Saving $replacementWithID (key=$replacementKey) over original=$originalWithID (key=$originalKey)")
@@ -44,11 +63,13 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         mapInLocalStorage(replacementKey).put(replacementWithID.getID()!!._id, replacementWithID)
     }
 
-    fun replaceAll(entityJsonArray: Array<JS>) {
+    suspend fun replaceAll(entityJsonArray: Array<JS>) {
         @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
         val newIdsAndValuesByKey: Map<String, List<Pair<String,T>>> = entityJsonArray.map { toIdAndData(it) }.groupBy { localStorageKeyChooser.invoke(it.second) }
         val priorEntities = list()
+        listeners.forEach { listener -> priorEntities.forEach { listener.beforeRemoving(it) } }
         localStorageKeys.forEach { mapInLocalStorage(it).clear() }
+        listeners.forEach { listener -> newIdsAndValuesByKey.forEach { it.value.forEach { listener.beforeSaving(null, it.second) } } }
         newIdsAndValuesByKey.forEach { entry -> mapInLocalStorage(entry.key).putAll(entry.value.toMap()) }
         listeners.forEach { listener -> priorEntities.forEach { listener.onRemoved(it) } }
         listeners.forEach { listener -> newIdsAndValuesByKey.forEach { it.value.forEach { listener.onSaved(null, it.second) } } }
@@ -59,7 +80,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         return value.getID()!!._id to value
     }
 
-    override fun doRemove(item: T): Boolean {
+    override suspend fun doRemove(item: T): Boolean {
         return removeFromLocalStorage(localStorageKeyChooser.invoke(item), item)
     }
 
@@ -71,19 +92,5 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         return found
     }
 
-    override var localStorageKeys: Set<String>
-        get() = _localStorageKeys
-        set(value) {
-            _localStorageKeys.minus(value).forEach { key ->
-                listeners.forEach { listener ->
-                    mapInLocalStorageByKey[key]?.values?.forEach { it -> listener.onVisibilityChanged(it, false) }
-                }
-            }
-            value.minus(_localStorageKeys).forEach { key ->
-                listeners.forEach { listener ->
-                    mapInLocalStorage(key).values.forEach { it -> listener.onVisibilityChanged(it, true) }
-                }
-            }
-            _localStorageKeys = value
-        }
+    override val localStorageKeys: Set<String> get() = _localStorageKeys
 }

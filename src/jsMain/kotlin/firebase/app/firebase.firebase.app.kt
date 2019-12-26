@@ -8,6 +8,7 @@ external interface App {
     fun auth(): firebase.auth.Auth
     fun database(): firebase.database.Database
     fun delete(): firebase.Promise<Any>
+    fun firestore(): firebase.firestore.FirebaseFirestore
     var name: String
     var options: Any
     fun storage(): firebase.storage.Storage

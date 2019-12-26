@@ -10,6 +10,7 @@ import react.router.dom.RouteResultHistory
 import react.router.dom.routeLink
 import component.repository.Closeable
 import component.repository.onListChanged
+import platform.launchHandlingErrors
 import todo.model.Factory
 import todo.model.ToDo
 
@@ -41,7 +42,7 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
         resources.forEach { it.close() }
     }
 
-    private fun delete(todo: ToDo) {
+    private suspend fun delete(todo: ToDo) {
         Factory.toDoRepository.remove(todo)
     }
 
@@ -76,7 +77,7 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
                             child(Col::class) {
                                 child(Button::class) {
                                     attrs.variant = "secondary"
-                                    attrs.onClick = { it.stopPropagation(); delete(toDo) }
+                                    attrs.onClick = { it.stopPropagation(); launchHandlingErrors("delete $toDo") { delete(toDo) } }
                                     +"Delete"
                                 }
                             }

@@ -21,7 +21,7 @@ object UndoComponent : UndoProvider {
     val undoCount: Int get() = undoCommands.size
     val redoCount: Int get() = redoCommands.size
 
-    fun undo() {
+    suspend fun undo() {
         notUndoable {
             val undoCommandsCopy = undoCommands
             val index = undoCommandsCopy.size - 1
@@ -33,7 +33,7 @@ object UndoComponent : UndoProvider {
         }
     }
 
-    fun redo() {
+    suspend fun redo() {
         notUndoable {
             val redoCommandsCopy = redoCommands
             val index = redoCommandsCopy.size - 1
@@ -62,7 +62,7 @@ object UndoComponent : UndoProvider {
      * Without doing this, each repository action (save or remove)
      * will each be individually undoable.
      */
-    override fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: () -> T): T {
+    override suspend fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: suspend () -> T): T {
         if (commandRecorder == NormalCommandRecorder) {
             val undoableGroup = UndoableGroup(pastTenseDescription, undoPastTenseDescription)
             commandRecorder = undoableGroup
@@ -81,7 +81,7 @@ object UndoComponent : UndoProvider {
         }
     }
 
-    override fun <T> notUndoable(function: () -> T): T {
+    override suspend fun <T> notUndoable(function: suspend () -> T): T {
         val originalRecorder = commandRecorder
         commandRecorder = NoOpCommandRecorder
         try {
@@ -99,10 +99,10 @@ object UndoComponent : UndoProvider {
     /** Watch changes to a given Repository for the purposes of undoing. */
     fun <T : WithID<T>> watch(repository: Repository<T>) {
         repository.addListener(object : RepositoryListener<T> {
-            override fun onSaved(original: T?, replacementWithID: T) {
+            override suspend fun onSaved(original: T?, replacementWithID: T) {
                 val isUpdate = original != null && original.getID() != null
                 commandRecorder.addUndoCommandIfAppropriate(object : Command(if (isUpdate) "Reverted $original" else "Deleted $replacementWithID") {
-                    override fun executeAndGetOpposite(): Command {
+                    override suspend fun executeAndGetOpposite(): Command {
                         if (isUpdate) {
                             repository.save(replacementWithID, original!!)
                         } else {
@@ -110,7 +110,7 @@ object UndoComponent : UndoProvider {
                         }
                         val undoCommand = this
                         return object : Command(if (isUpdate) "Updated $original" else "Added $replacementWithID") {
-                            override fun executeAndGetOpposite(): Command {
+                            override suspend fun executeAndGetOpposite(): Command {
                                 repository.save(original, replacementWithID)
                                 return undoCommand
                             }
@@ -119,13 +119,13 @@ object UndoComponent : UndoProvider {
                 })
             }
 
-            override fun onRemoved(item: T) {
+            override suspend fun onRemoved(item: T) {
                 commandRecorder.addUndoCommandIfAppropriate(object : Command("Restored $item") {
-                    override fun executeAndGetOpposite(): Command {
+                    override suspend fun executeAndGetOpposite(): Command {
                         repository.save(null, item)
                         val undoCommand = this
                         return object : Command("Deleted $item") {
-                            override fun executeAndGetOpposite(): Command {
+                            override suspend fun executeAndGetOpposite(): Command {
                                 repository.remove(item)
                                 return undoCommand
                             }
@@ -134,7 +134,7 @@ object UndoComponent : UndoProvider {
                 })
             }
 
-            override fun onVisibilityChanged(item: T, visible: Boolean) {}
+            override suspend fun onVisibilityChanged(item: T, visible: Boolean) {}
         })
     }
 }
@@ -144,7 +144,7 @@ object UndoComponent : UndoProvider {
 //}
 
 abstract class Command(val pastTenseDescription: String) {
-    abstract fun executeAndGetOpposite(): Command
+    abstract suspend fun executeAndGetOpposite(): Command
 
     override fun toString(): String = pastTenseDescription
 }
@@ -171,16 +171,19 @@ private class UndoableGroup(private val redoPastTenseDescription: String, undoPa
 
     override fun addUndoCommandIfAppropriate(undoCommand: Command) {
         undoCommands.add(0, undoCommand)
+        if (undoCommands.size > 100) {
+            console.warn("undoGroupSize=${undoCommands.size}")
+        }
     }
 
     fun isEmpty(): Boolean = undoCommands.isEmpty()
 
     /** Run all undoCommands and return the redo. */
-    override fun executeAndGetOpposite(): Command {
+    override suspend fun executeAndGetOpposite(): Command {
         val redoCommands = undoCommands.map { it.executeAndGetOpposite() }.reversed()
         val undoCommand = this
         return object : Command(redoPastTenseDescription) {
-            override fun executeAndGetOpposite(): Command {
+            override suspend fun executeAndGetOpposite(): Command {
                 redoCommands.forEach { it.executeAndGetOpposite() }
                 return undoCommand
             }

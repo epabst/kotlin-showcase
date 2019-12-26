@@ -30,11 +30,11 @@ object FileBackupComponent {
         return JSON.stringify(json(*backupItems))
     }
 
-    fun initializeData(initialData: Any) {
+    suspend fun initializeData(initialData: Any) {
         initializeDataFromJson(if (initialData is String) JSON.parse(initialData) else initialData)
     }
 
-    fun initializeDataFromJson(initialDataJson: dynamic) {
+    suspend fun initializeDataFromJson(initialDataJson: dynamic) {
         Factory.allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().forEach { repository ->
             val entities = initialDataJson[repository.relativePath]
             if (entities != null) {
