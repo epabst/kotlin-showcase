@@ -111,13 +111,15 @@ interface Repository<T : WithID<T>> {
         }
     }
 
-    fun generateID(): ID<T>
+    suspend fun generateID(): ID<T>
 
-    fun withID(replacement: T, id: ID<T> = generateID()): T {
-        if (replacement.getID() != null) {
-            return replacement
+    suspend fun generateID(entityWithoutId: T): ID<T> = generateID()
+
+    suspend fun withID(replacement: T, id: ID<T>): T {
+        return if (replacement.getID() != null) {
+            replacement
         } else {
-            return replacement.withID(id)
+            replacement.withID(id)
         }
     }
 
@@ -145,7 +147,7 @@ class EmptyRepository<T : WithID<T>> : Repository<T> {
 
     override suspend fun remove(id: ID<T>): Boolean = false
 
-    override fun generateID(): ID<T> = throw UnsupportedOperationException("read-only")
+    override suspend fun generateID(): ID<T> = throw UnsupportedOperationException("read-only")
 
     override fun addListener(listener: RepositoryListener<T>) = Unit // no-op
 
@@ -191,8 +193,8 @@ interface RepositoryListener<in T> {
     suspend fun onVisibilityChanged(item: T, visible: Boolean) {}
 }
 
-internal fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID<T>?, replacement: T): T {
-    val newID: ID<T> = originalID ?: generateID()
+internal suspend fun <T : WithID<T>> Repository<T>.getOrGenerateID(originalID: ID<T>?, replacement: T): T {
+    val newID: ID<T> = originalID ?: generateID(replacement)
     val replacementWithID = withID(replacement, newID)
     return replacementWithID
 }
@@ -438,7 +440,13 @@ open class CompositeRepository<T : WithID<T>,R>(
         }
     }
 
-    override fun generateID(): ID<T> = repositoryMap.values.firstOrNull()!!.generateID()
+    override suspend fun generateID(): ID<T> = repositoryMap.values.firstOrNull()!!.generateID()
+
+    override suspend fun generateID(entityWithoutId: T): ID<T> {
+        val category = categorizer.invoke(entityWithoutId)
+        val repositories = repositoryMap[category]?.let { listOf(it) } ?: repositoryMap.values
+        return repositories.firstOrNull()?.generateID(entityWithoutId) ?: generateID()
+    }
 
     override val localStorageKeys: Set<String>
         get() = repositoryMap.values.flatMap { it.localStorageKeys }.toSet()
@@ -453,7 +461,7 @@ open class InMemoryRepository<T : WithID<T>>(undoProvider: UndoProvider = UndoPr
         putIntoList(list, replacementWithID, originalWithID?.getID())
     }
 
-    override fun generateID(): ID<T> = ID(idGenerator.generateID().toString())
+    override suspend fun generateID(): ID<T> = ID(idGenerator.generateID().toString())
 
     override suspend fun doRemove(item: T): Boolean {
         val index = list.indexOfFirst { it.getID() == item.getID() }

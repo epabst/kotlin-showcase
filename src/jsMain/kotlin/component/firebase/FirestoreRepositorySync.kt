@@ -43,8 +43,13 @@ open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsS
         pathsSpecifier.databasePaths.forEach { addSubscribedPath(it) }
     }
 
-    override fun generateID(): ID<T> {
+    override suspend fun generateID(): ID<T> {
         return ID((firstCollection ?: throw Error("At least one collection must be present")).doc().id)
+    }
+
+    override suspend fun generateID(entityWithoutId: T): ID<T> {
+        val databasePath = pathsSpecifier.chooseDatabasePath(entityWithoutId)
+        return if (databasePath != null) ID(database.collection(databasePath).doc().id) else generateID()
     }
 
     private fun DocumentSnapshot.valueWithId(): T {

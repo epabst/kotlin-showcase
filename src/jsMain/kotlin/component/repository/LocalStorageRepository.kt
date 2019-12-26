@@ -43,7 +43,7 @@ open class LocalStorageRepository<T : WithID<T>,JS>(val relativePath: String,
         return mapInLocalStorageByKey.getOrPut(key) { MapInLocalStorage(key, toData) }
     }
 
-    override fun generateID(): ID<T> {
+    override suspend fun generateID(): ID<T> {
         return ID(Random.nextLong().toString())
     }
 
