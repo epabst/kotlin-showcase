@@ -33,4 +33,4 @@ external interface IDJS {
     val _id: String?
 }
 
-fun <E : WithID<E>> IDJS.toNormal(): ID<E>? = (id.toNormal()?.toString() ?: _id) ?.let { ID(it) }
+fun <E : WithID<E>> IDJS.toNormal(): ID<E> = (id.toNormal()?.toString() ?: _id) ?.let { ID<E>(it) } ?: error("required ID not present")

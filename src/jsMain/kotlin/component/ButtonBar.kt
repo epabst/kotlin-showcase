@@ -3,6 +3,7 @@ package component
 import bootstrap.*
 import component.firebase.AuthProviderWithResources
 import component.firebase.authenticationLink
+import firebase.app.App
 import firebase.auth.GoogleAuthProvider
 import kotlinx.html.id
 import react.RBuilder
@@ -19,6 +20,7 @@ import util.navbar
 interface ButtonBarProps : RProps {
     var heading: String?
     var history: RouteResultHistory?
+    var firebaseApp: App?
 }
 
 interface ButtonBarState : RState
@@ -51,7 +53,7 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                                 val providerWithResources = AuthProviderWithResources(
                                         GoogleAuthProvider(),
                                         "img/google/btn_google_signin_light_normal_web.png")
-                                authenticationLink(providerWithResources, { Unit }, { Unit }) { _, _ -> }
+                                authenticationLink(providerWithResources, props.firebaseApp, { Unit }, { Unit }, { _, _ -> })
                             }
                         }
                     }

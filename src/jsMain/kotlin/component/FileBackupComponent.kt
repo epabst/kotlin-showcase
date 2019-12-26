@@ -1,15 +1,15 @@
 package component
 
 import bootstrap.Button
-import todo.model.Factory
-import todo.appNameForFilesystem
-import cordova.*
-import platform.JavascriptProvider
 import component.repository.LocalStorageRepository
+import component.repository.Repository
+import cordova.*
+import org.w3c.dom.get
+import org.w3c.files.Blob
+import org.w3c.files.BlobPropertyBag
+import platform.JavascriptProvider
 import platform.handleError
 import platform.handlingErrors
-import org.w3c.dom.get
-import org.w3c.files.*
 import react.RBuilder
 import kotlin.browser.localStorage
 import kotlin.browser.window
@@ -21,10 +21,10 @@ import kotlin.js.json
  * Date: 12/14/17
  * Time: 10:29 PM
  */
-object FileBackupComponent {
+class FileBackupComponent(val appNameForFilesystem: String, val allRepositories: List<Repository<*>>) {
 
     private fun getBackupDataAsString(): String {
-        val backupItems = Factory.allRepositories.flatMap { it.localStorageKeys }.map {
+        val backupItems = allRepositories.flatMap { it.localStorageKeys }.map {
             Pair(it, localStorage[it]?.let { JSON.parse<Any>(it) })
         }.toTypedArray()
         return JSON.stringify(json(*backupItems))
@@ -35,7 +35,7 @@ object FileBackupComponent {
     }
 
     suspend fun initializeDataFromJson(initialDataJson: dynamic) {
-        Factory.allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().forEach { repository ->
+        allRepositories.filterIsInstance<LocalStorageRepository<*, *>>().forEach { repository ->
             val entities = initialDataJson[repository.relativePath]
             if (entities != null) {
                 repository.replaceAll(entities)
@@ -78,12 +78,12 @@ object FileBackupComponent {
             }
         }
     }
+}
 
-    fun RBuilder.backupButton() {
-        child(Button::class) {
-            attrs.onClick = { createBackup() }
-            attrs.variant = "secondary"
-            +"Backup"
-        }
+fun RBuilder.backupButton(fileBackupComponent: FileBackupComponent) {
+    child(Button::class) {
+        attrs.onClick = { fileBackupComponent.createBackup() }
+        attrs.variant = "secondary"
+        +"Backup"
     }
 }

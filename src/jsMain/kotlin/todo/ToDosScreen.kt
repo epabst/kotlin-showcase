@@ -2,7 +2,7 @@ package todo
 
 import bootstrap.*
 import component.ButtonBar
-import component.FileBackupComponent.backupButton
+import component.backupButton
 import react.*
 import react.dom.br
 import react.dom.div

@@ -1,6 +1,5 @@
 package component.firebase
 
-import todo.model.Factory
 import platform.showUserExpectedError
 import platform.inContext
 import firebase.User
@@ -27,8 +26,8 @@ open class AuthProviderWithResources(val provider: AuthProvider, val authenticat
 
 object FirebaseAuthentication {
 
-    fun initialize(onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
-        Factory.firebaseApp?.auth()?.onUserChanged(onAuthStateChanged)
+    fun initialize(app: App?, onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
+        app?.auth()?.onUserChanged(onAuthStateChanged)
     }
 }
 
@@ -139,7 +138,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
                             null
                         }
                         println("priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
-                        Factory.firebaseApp!!.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
+                        props.firebaseApp.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
                             if (newUserCredentialPair.user != null) {
                                 props.onAuthStateChanged.invoke(priorUser, newUserCredentialPair.user)
                                 dataFromOldUser?.let { props.addToNewUser.invoke(it) }
@@ -165,15 +164,16 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
  * @param addToNewUser action to add data to a new user when merging an anonymous account into a provider account
  */
 fun <T> RBuilder.authenticationLink(providerWithResources: AuthProviderWithResources,
+                                    app: App?,
                                     removeFromOldUser: () -> T,
                                     addToNewUser: (T) -> Unit,
                                     onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
-    if (Factory.firebaseApp == null) return
+    if (app == null) return
 
     child(AuthenticationLink::class) {
         attrs.removeFromOldUser = { removeFromOldUser.invoke() as Any }
         attrs.addToNewUser = { addToNewUser.invoke(it.unsafeCast<T>()) }
-        attrs.firebaseApp = Factory.firebaseApp
+        attrs.firebaseApp = app
         attrs.providerWithResources = providerWithResources
         attrs.onAuthStateChanged = onAuthStateChanged
     }
