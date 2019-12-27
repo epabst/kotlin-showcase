@@ -13,6 +13,10 @@ class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
         get() = date.getMonth()
     override val dayOfMonth: Int
         get() = date.getDate()
+    override val hours: Int
+        get() = date.getHours()
+    override val minutes: Int
+        get() = date.getMinutes()
     override val millisecondsSinceUnixEpoch: Long
         get() = date.getTime().toLong()
     override fun toString(): String = toLocalizedDateString()
@@ -24,4 +28,4 @@ class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
 
 fun kotlin.js.Date.toProviderDate(): JavascriptDate = JavascriptDate(this)
 
-fun ProviderDate.toDate(): kotlin.js.Date = (this as JavascriptDate).date
+fun ProviderDate.toJsDate(): kotlin.js.Date = (this as JavascriptDate).date

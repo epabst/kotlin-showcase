@@ -47,7 +47,7 @@ object JavascriptProvider : PlatformProvider {
         }
     }
 
-    override fun toDate(year: Int, month: Int, dayOfMonth: Int): ProviderDate {
-        return JavascriptDate(Date(year, month, dayOfMonth))
+    override fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
+        return JavascriptDate(Date(year, month, dayOfMonth, hours, minutes))
     }
 }

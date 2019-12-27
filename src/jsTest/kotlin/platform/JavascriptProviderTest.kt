@@ -64,7 +64,7 @@ class JavascriptProviderTest {
         date.year.mustBe(2018)
         date.month.mustBe(1)
         date.dayOfMonth.mustBe(9)
-        date.toDate().getHours().mustBe(0)
+        date.toJsDate().getHours().mustBe(0)
     }
 
     @Test

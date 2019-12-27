@@ -22,7 +22,7 @@ interface PlatformProvider {
 
     fun toDate(input: String): ProviderDate
 
-    fun toDate(year: Int, month: Int, dayOfMonth: Int): ProviderDate
+    fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int = 0, minutes: Int = 0): ProviderDate
 
     companion object {
         /** This must be set before methods will work. */
@@ -41,6 +41,8 @@ interface ProviderDate : Comparable<ProviderDate> {
     val month: Int
     val dayOfMonth: Int
     val millisecondsSinceUnixEpoch: Long
+    val hours: Int
+    val minutes: Int
     fun toIsoDateString(): String
     fun toLocalizedDateString(): String
     fun toDisplayDateTimeString(): String
