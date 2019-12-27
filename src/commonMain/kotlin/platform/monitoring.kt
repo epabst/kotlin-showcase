@@ -8,16 +8,14 @@ import kotlinx.coroutines.launch
 var currentContext: String = "start-up"
 
 inline fun <T> inContext(contextName: String, f: ()->T): T {
-    val contextBefore = "before $contextName"
-    currentContext = contextBefore
+    val contextBefore = currentContext
+    currentContext = contextName
     val result: T
     try {
         result = f()
     } finally {
-        val contextDuring = "during $contextName"
-        currentContext = if (currentContext != contextBefore) "$contextDuring, $currentContext" else contextDuring
+        currentContext = contextBefore
     }
-    currentContext = "after $contextName"
     return result
 }
 
