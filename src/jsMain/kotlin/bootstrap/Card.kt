@@ -2,6 +2,7 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
+import org.w3c.dom.HTMLDivElement
 import react.RProps
 
 abstract external class CardTitle<As : React.ElementType> : BsPrefixComponent<As, RProps>
@@ -12,22 +13,20 @@ abstract external class CardText<As : React.ElementType> : BsPrefixComponent<As,
 abstract external class CardHeader<As : React.ElementType> : BsPrefixComponent<As, RProps>
 abstract external class CardFooter<As : React.ElementType> : BsPrefixComponent<As, RProps>
 abstract external class CardImgOverlay<As : React.ElementType> : BsPrefixComponent<As, RProps>
-external interface CardProps : RProps {
+external interface CardProps : HTMLElementProps<HTMLDivElement> {
     var bg: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
     var text: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' | 'white' | 'muted' */
     var border: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' */
     var body: Boolean? get() = definedExternally; set(value) = definedExternally
 }
 abstract external class Card<As : React.ElementType> : BsPrefixComponent<As, CardProps> {
-    companion object {
-        var Img: Any
-        var Title: Any
-        var Subtitle: Any
-        var Body: Any
-        var Link: Any
-        var Text: Any
-        var Header: Any
-        var Footer: Any
-        var ImgOverlay: Any
-    }
+    abstract class Img<As : React.ElementType> : BsPrefixComponent<As, RProps>
+    abstract class ImgOverlay<As : React.ElementType> : BsPrefixComponent<As, RProps>
+    abstract class Body<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
+    abstract class Header<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
+    abstract class Title<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
+    abstract class Subtitle<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
+    abstract class Text<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
+    abstract class Link<As : React.ElementType> : BsPrefixComponent<As, RProps>
+    abstract class Footer<As : React.ElementType> : BsPrefixComponent<As, HTMLElementProps<HTMLDivElement>>
 }

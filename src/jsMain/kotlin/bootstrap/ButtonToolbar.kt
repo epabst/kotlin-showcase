@@ -2,9 +2,9 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import react.RProps
+import org.w3c.dom.HTMLDivElement
 
-external interface ButtonToolbarProps : RProps {
+external interface ButtonToolbarProps : HTMLElementProps<HTMLDivElement> {
     var role: String? get() = definedExternally; set(value) = definedExternally
 }
 abstract external class ButtonToolbar : BsPrefixComponent<React.ElementType /* 'div' */, ButtonToolbarProps>

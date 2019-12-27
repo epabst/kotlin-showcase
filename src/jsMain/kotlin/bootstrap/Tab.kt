@@ -4,7 +4,7 @@ package bootstrap
 
 external interface TabProps : React.ComponentPropsWithRef<Any> {
     var eventKey: Any? get() = definedExternally; set(value) = definedExternally
-    var title: React.ReactNode
+    var title: String
     var disabled: Boolean? get() = definedExternally; set(value) = definedExternally
     var tabClassName: String? get() = definedExternally; set(value) = definedExternally
 }

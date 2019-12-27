@@ -2,9 +2,9 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import react.RProps
+import org.w3c.dom.HTMLDivElement
 
-external interface ListGroupItemProps : RProps {
+external interface ListGroupItemProps : HTMLElementProps<HTMLDivElement> {
     var action: Boolean? get() = definedExternally; set(value) = definedExternally
     var active: Boolean? get() = definedExternally; set(value) = definedExternally
     var disabled: Boolean? get() = definedExternally; set(value) = definedExternally

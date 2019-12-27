@@ -8,9 +8,5 @@ external interface AccordionProps : RProps {
     var activeKey: String? get() = definedExternally; set(value) = definedExternally
     var defaultActiveKey: String? get() = definedExternally; set(value) = definedExternally
 }
-abstract external class Accordion<As : React.ElementType> : BsPrefixComponent<As, AccordionProps> {
-    companion object {
-        var Toggle: Any
-        var Collapse: Any
-    }
-}
+
+abstract external class Accordion<As : React.ElementType> : BsPrefixComponent<As, AccordionProps>

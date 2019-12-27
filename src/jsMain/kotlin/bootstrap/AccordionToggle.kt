@@ -5,6 +5,7 @@ package bootstrap
 import react.RProps
 
 external interface AccordionToggleProps : RProps {
+    var `as`: String
     var eventKey: String
     var onClick: ((event: React.SyntheticEvent? /* = null */) -> Unit)? get() = definedExternally; set(value) = definedExternally
 }

@@ -3,7 +3,9 @@ package bootstrap
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.events.Event
+import react.Component
 import react.RProps
+import react.RState
 
 abstract external class React {
     interface ElementType
@@ -12,8 +14,8 @@ abstract external class React {
     interface HTMLAttributes<T : HTMLElement>
     interface ComponentPropsWithRef<T> : RProps
     interface SyntheticEvent
-    interface HTMLProps<T : HTMLElement>
-    interface ForwardRefExoticComponent<T>
+    interface HTMLProps<T : HTMLElement> : RProps
+    abstract class ForwardRefExoticComponent<T : RProps>(props: T) : Component<T, RState>
     interface ClassAttributes<T>
     interface ReactElement
     interface OlHTMLAttributes<T>

@@ -9,7 +9,7 @@ import react.RBuilder
 import react.RElementBuilder
 import kotlin.reflect.KClass
 
-typealias FormControlBuilder<T> = RElementBuilder<ControlProps<T>>
+typealias FormControlBuilder<T> = RElementBuilder<FormControlProps<T>>
 
 private fun <T : HTMLElement> formControlClass() = Form.Control::class.unsafeCast<KClass<Form.Control<T>>>()
 
@@ -20,24 +20,17 @@ fun RBuilder.selectControl(handler: FormControlBuilder<HTMLSelectElement>.() -> 
     }
 }
 
-fun RBuilder.textInputControl(handler: FormControlBuilder<HTMLInputElement>.() -> Unit) {
+fun RBuilder.inputFormControl(handler: FormControlBuilder<HTMLInputElement>.() -> Unit) {
     child(formControlClass<HTMLInputElement>()) {
         attrs.`as` = "input"
         handler()
     }
 }
 
-fun RBuilder.dateInputControl(handler: FormControlBuilder<HTMLInputElement>.() -> Unit) {
-    child(formControlClass<HTMLInputElement>()) {
-        attrs.`as` = "input"
-        handler()
-    }
-}
-
-var ControlProps<HTMLInputElement>.onAnyChange: ((React.ChangeEvent<HTMLInputElement>) -> Unit)?
+var FormControlProps<HTMLInputElement>.onAnyChange: ((React.ChangeEvent<HTMLInputElement>) -> Unit)?
     get() = onChange
     set(value) { onChange = value; onKeyUp = value }
 
-var <T : HTMLElement> ControlProps<T>.onAnyChange: ((React.ChangeEvent<T>) -> Unit)?
+var <T : HTMLElement> FormControlProps<T>.onAnyChange: ((React.ChangeEvent<T>) -> Unit)?
     get() = onChange
     set(value) { onChange = value }

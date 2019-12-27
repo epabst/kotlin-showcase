@@ -2,14 +2,14 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import react.RProps
+import org.w3c.dom.HTMLDivElement
 
 external interface ResponsiveProps {
     var span: dynamic /* true | 'auto' | Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' */
     var offset: dynamic /* Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' */
     var order: dynamic /* Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' */
 }
-external interface ColProps : RProps {
+external interface ColProps : HTMLElementProps<HTMLDivElement> {
     var xs: dynamic /* true | 'auto' | Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | ResponsiveSpec */
     var sm: dynamic /* true | 'auto' | Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | ResponsiveSpec */
     var md: dynamic /* true | 'auto' | Number | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | ResponsiveSpec */

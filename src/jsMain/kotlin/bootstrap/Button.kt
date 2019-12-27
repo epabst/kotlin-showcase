@@ -3,13 +3,12 @@
 package bootstrap
 
 import org.w3c.dom.HTMLButtonElement
-import react.RProps
 
 external interface ButtonProps : HTMLElementProps<HTMLButtonElement> {
     var active: Boolean? get() = definedExternally; set(value) = definedExternally
     var block: Boolean? get() = definedExternally; set(value) = definedExternally
     var variant: String /* 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'dark' | 'light' | 'link' | 'outline-primary' | 'outline-secondary' | 'outline-success' | 'outline-danger' | 'outline-warning' | 'outline-info' | 'outline-dark' | 'outline-light' */
-    var size: String /* 'sm' | 'lg' */
+    var size: String? /* 'sm' | 'lg' */
     var type: String /* 'button' | 'reset' | 'submit' */
     var href: String? get() = definedExternally; set(value) = definedExternally
     var disabled: Boolean? get() = definedExternally; set(value) = definedExternally

@@ -16,5 +16,4 @@ external interface AlertProps : React.HTMLProps<HTMLDivElement> {
     var closeLabel: String? get() = definedExternally; set(value) = definedExternally
     var transition: React.ElementType? get() = definedExternally; set(value) = definedExternally
 }
-@JsName("default")
-external var Alert: React.ForwardRefExoticComponent<AlertProps>
+abstract external class Alert : React.ForwardRefExoticComponent<AlertProps>

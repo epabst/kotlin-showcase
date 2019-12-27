@@ -2,10 +2,11 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
+import org.w3c.dom.HTMLDivElement
 import react.RProps
 
 abstract external class NavbarText<As : React.ElementType> : BsPrefixComponent<As, RProps>
-external interface NavbarProps : RProps {
+external interface NavbarProps : HTMLElementProps<HTMLDivElement> {
     var variant: String /* 'light' | 'dark' */
     var expand: dynamic /* Boolean | 'sm' | 'md' | 'lg' | 'xl' */
     var bg: String? get() = definedExternally; set(value) = definedExternally
