@@ -1,5 +1,7 @@
 package component.firebase
 
+import bootstrap.*
+import firebase.Unsubscribe
 import platform.showUserExpectedError
 import platform.inContext
 import firebase.User
@@ -8,7 +10,6 @@ import firebase.auth.Auth
 import firebase.auth.AuthProvider
 import firebase.auth.Error
 import kotlinx.html.id
-import kotlinx.html.js.onClickFunction
 import kotlinx.html.title
 import org.w3c.dom.events.Event
 import react.*
@@ -24,17 +25,10 @@ import kotlin.coroutines.suspendCoroutine
  */
 open class AuthProviderWithResources(val provider: AuthProvider, val authenticateUrl: String)
 
-object FirebaseAuthentication {
-
-    fun initialize(app: App?, onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
-        app?.auth()?.onUserChanged(onAuthStateChanged)
-    }
-}
-
-fun Auth.onUserChanged(onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit): () -> Any {
+fun Auth.onUserChanged(onUserChanged: (oldUser: User?, newUser: User?) -> Unit): Unsubscribe {
     var oldUser: User? = null
     return onAuthStateChanged({ newUser ->
-        onAuthStateChanged(oldUser, newUser)
+        onUserChanged(oldUser, newUser)
         oldUser = newUser
         Unit
     })
@@ -57,9 +51,11 @@ suspend fun Auth.waitForUser(): User {
 
 interface AuthenticationLinkProps : RProps {
     var firebaseApp: App
-    var onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit
+    /** the provider along with necessary resources for link */
     var providerWithResources: AuthProviderWithResources
+    /** action to remove data from an old user when merging an anonymous account into a provider account */
     var removeFromOldUser: () -> Any
+    /** action to add data to a new user when merging an anonymous account into a provider account */
     var addToNewUser: (Any) -> Unit
 }
 
@@ -67,59 +63,70 @@ interface AuthenticationLinkState : RState {
     var user: User?
 }
 
+/** Provides a fully implemented link with button to sign-in, user profile image, display name, etc. */
 class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<AuthenticationLinkProps, AuthenticationLinkState>(props) {
+
+    private var unsubscribe: Unsubscribe? = null
+
+    override fun componentDidMount() {
+        unsubscribe = props.firebaseApp.auth().onUserChanged { _, newUser ->
+            setState { user = newUser }
+        }
+    }
+
+    override fun componentWillUnmount() {
+        unsubscribe?.invoke()
+    }
 
     override fun RBuilder.render() {
         val user = state.user
-        val authAction: (Event) -> Unit = {
-            it.preventDefault()
+        val authAction: (Event?) -> Unit = {
+            it?.preventDefault()
             val provider = props.providerWithResources.provider
-            val priorUser = user
-            val onReject: (Error) -> Unit = { error -> handleAuthError(error, priorUser, provider) }
-            if (priorUser == null) {
-                val dataFromOldUser = props.removeFromOldUser.invoke()
-                props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
-                    props.addToNewUser.invoke(dataFromOldUser)
-                })
-            } else if (priorUser.hasProvider(provider)) {
-                props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject)
-            } else {
-                priorUser.linkWithPopup(provider).then(onReject = onReject)
-            }
-        }
-        a(href = "#") {
-            attrs.onClickFunction = authAction
-            val imgClass = if (user == null || !user.hasProvider(props.providerWithResources.provider)) "" else "hidden"
-            img(src = props.providerWithResources.authenticateUrl, classes = imgClass) {}
-        }
-        val divClass = if (user?.anyPhotoURL != null) "" else "hidden"
-        div(classes = "dropdown $divClass") {
-            a(href = "#", classes = "dropdown-toggle") {
-                attrs["data-toggle"] = "dropdown"
-                img(src = user?.anyPhotoURL ?: "") {
-                    attrs.id = "user-img"
-                    attrs.title = user?.anyDisplayName ?: ""
+            val onReject: (Error) -> Unit = { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
+            when {
+                user == null -> {
+                    val dataFromOldUser = props.removeFromOldUser.invoke()
+                    props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
+                        props.addToNewUser.invoke(dataFromOldUser)
+                    })
+                }
+                user.hasProvider(provider) -> {
+                    props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {})
+                }
+                else -> {
+                    user.linkWithPopup(provider).then(onReject = onReject, onResolve = {})
                 }
             }
-            ul(classes = "dropdown-menu, dropdown-menu-right") {
-                li(classes = "dropdown-header") {
-                    user?.anyEmail?.let { +it }
+        }
+        if (user == null || !user.hasProvider(props.providerWithResources.provider)) {
+            child(Button::class) {
+                attrs.variant = "link"
+                attrs.onClick = authAction
+                img(src = props.providerWithResources.authenticateUrl) {}
+            }
+        } else if (user.anyPhotoURL != null) {
+            child(Dropdown::class) {
+                child(Dropdown.Toggle::class) {
+                    attrs.variant = "link"
+                    img(src = user.anyPhotoURL ?: "") {
+                        attrs.id = "user-img"
+                        attrs.title = user.anyDisplayName ?: ""
+                    }
                 }
-                li {
-                    a(href = "#") {
+                child(Dropdown.Menu::class) {
+                    child(Dropdown.Header::class) {
+                        user.anyEmail?.let { +it }
+                    }
+                    child(Dropdown.Item::class) {
                         +"Switch Account"
-                        attrs.onClickFunction = authAction
+                        attrs.onClick = authAction
                     }
-                }
-                li {
-                    a(href = "#") {
+                    child(Dropdown.Item::class) {
                         +"Sign out"
-                        attrs.onClickFunction = { props.firebaseApp.auth().signOut() }
+                        attrs.onClick = { props.firebaseApp.auth().signOut() }
                     }
                 }
-            }
-            a(href = "#") {
-                attrs.onClickFunction = authAction
             }
         }
     }
@@ -140,7 +147,6 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
                         println("priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
                         props.firebaseApp.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
                             if (newUserCredentialPair.user != null) {
-                                props.onAuthStateChanged.invoke(priorUser, newUserCredentialPair.user)
                                 dataFromOldUser?.let { props.addToNewUser.invoke(it) }
                                 priorUser?.delete()
                                 println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
@@ -164,18 +170,14 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
  * @param addToNewUser action to add data to a new user when merging an anonymous account into a provider account
  */
 fun <T> RBuilder.authenticationLink(providerWithResources: AuthProviderWithResources,
-                                    app: App?,
+                                    app: App,
                                     removeFromOldUser: () -> T,
-                                    addToNewUser: (T) -> Unit,
-                                    onAuthStateChanged: (oldUser: User?, newUser: User?) -> Unit) {
-    if (app == null) return
-
+                                    addToNewUser: (T) -> Unit) {
     child(AuthenticationLink::class) {
         attrs.removeFromOldUser = { removeFromOldUser.invoke() as Any }
         attrs.addToNewUser = { addToNewUser.invoke(it.unsafeCast<T>()) }
         attrs.firebaseApp = app
         attrs.providerWithResources = providerWithResources
-        attrs.onAuthStateChanged = onAuthStateChanged
     }
 }
 
