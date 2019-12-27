@@ -19,6 +19,8 @@ data class ID<T : WithID<T>>(val _id: String) {
 }
 
 interface WithID<T : WithID<T>> {
+    val requiredId: ID<T> get() = getID() ?: error("$this must have an ID to be used")
+
     fun getID(): ID<T>?
 
     fun withID(id: ID<T>): T
