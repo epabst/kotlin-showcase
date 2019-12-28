@@ -18,7 +18,10 @@ import kotlinx.coroutines.withTimeout
  * Date: 1/4/18
  * Time: 11:05 PM
  */
-open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsSpecifier<T>, val toData: (JS) -> T, firebaseApp: App) : NormalizingRepository<T>() {
+open class FirestoreRepositorySync<T : WithID<T>>(val pathsSpecifier: PathsSpecifier<T>,
+                                                  val parser: JsonParser<T>,
+                                                  firebaseApp: App) : NormalizingRepository<T>() {
+
     private val inMemoryRepository = InMemoryRepository<T>(UndoComponent)
     private val database = firebaseApp.firestore()
     private val firstCollection = pathsSpecifier.databasePaths.firstOrNull()?.let { database.collection(it) }
@@ -26,14 +29,14 @@ open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsS
     private val callbackToSave: (QueryDocumentSnapshot) -> Unit = { snapshot ->
         launchHandlingErrors("added or modified") {
             UndoComponent.notUndoable {
-                inMemoryRepository.save(snapshot.valueWithId())
+                inMemoryRepository.save(snapshot.parse(parser))
             }
         }
     }
     private val callbackToRemove: (QueryDocumentSnapshot) -> Unit = { snapshot ->
         launchHandlingErrors("removed") {
             UndoComponent.notUndoable {
-                inMemoryRepository.remove(snapshot.valueWithId())
+                inMemoryRepository.remove(snapshot.parse(parser))
             }
         }
     }
@@ -51,14 +54,6 @@ open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsS
     override suspend fun generateID(entityWithoutId: T): ID<T> {
         val databasePath = pathsSpecifier.chooseDatabasePath(entityWithoutId)
         return if (databasePath != null) ID(database.collection(databasePath).doc().id) else generateID()
-    }
-
-    private fun DocumentSnapshot.valueWithId(): T {
-        return value().withID(ID(id))
-    }
-
-    private fun DocumentSnapshot.value(): T {
-        return toData(data()!!.unsafeCast<JS>())
     }
 
     override fun list(): List<T> {
@@ -123,6 +118,10 @@ open class FirestoreRepositorySync<T : WithID<T>, JS>(val pathsSpecifier: PathsS
 
     override val localStorageKeys: Set<String>
         get() = inMemoryRepository.localStorageKeys
+}
+
+fun <E : WithID<E>> DocumentSnapshot.parse(parser: JsonParser<E>): E {
+    return parser.fromJson(data()!!).withID(ID(id))
 }
 
 interface PathsSpecifier<T: WithID<T>> {
