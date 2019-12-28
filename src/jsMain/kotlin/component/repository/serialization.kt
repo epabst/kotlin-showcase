@@ -34,7 +34,3 @@ external interface IDJS {
 }
 
 fun <E : WithID<E>> IDJS.toNormal(): ID<E> = (id.toNormal()?.toString() ?: _id) ?.let { ID<E>(it) } ?: error("required ID not present")
-
-interface JsonParser<E : WithID<E>> {
-    fun fromJson(json: Any): E
-}

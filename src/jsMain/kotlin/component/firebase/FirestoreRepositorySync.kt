@@ -5,9 +5,7 @@ import component.UndoComponent
 import component.repository.*
 import firebase.app.App
 import firebase.auth.Auth
-import firebase.firestore.DocumentReference
-import firebase.firestore.DocumentSnapshot
-import firebase.firestore.QueryDocumentSnapshot
+import firebase.firestore.*
 import firebase.requireFirestore
 import kotlinx.coroutines.await
 import kotlinx.coroutines.withTimeout
@@ -120,8 +118,22 @@ open class FirestoreRepositorySync<T : WithID<T>>(val pathsSpecifier: PathsSpeci
         get() = inMemoryRepository.localStorageKeys
 }
 
+interface JsonParser<E : WithID<E>> {
+    fun fromJson(json: DocumentData): E
+}
+
 fun <E : WithID<E>> DocumentSnapshot.parse(parser: JsonParser<E>): E {
     return parser.fromJson(data()!!).withID(ID(id))
+}
+
+fun <E : WithID<E>> Query.addListener(parser: JsonParser<E>, block: (List<E>) -> Unit): Closeable {
+    val release = onSnapshot(onNext = { snapshot ->
+        console.log("got a Firestore snapshot size=${snapshot.size}")
+        block.invoke(snapshot.docs.map { parser.fromJson(it.data()) })
+    })
+    return object : Closeable {
+        override fun close() = release.invoke()
+    }
 }
 
 interface PathsSpecifier<T: WithID<T>> {
