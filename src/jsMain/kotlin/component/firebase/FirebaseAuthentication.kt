@@ -4,11 +4,11 @@ import bootstrap.*
 import firebase.Unsubscribe
 import platform.showUserExpectedError
 import platform.inContext
-import firebase.User
+import firebase.app.User
 import firebase.app.App
 import firebase.auth.Auth
+import firebase.auth.AuthError
 import firebase.auth.AuthProvider
-import firebase.auth.Error
 import kotlinx.html.id
 import kotlinx.html.title
 import org.w3c.dom.events.Event
@@ -83,19 +83,19 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
         val authAction: (Event?) -> Unit = {
             it?.preventDefault()
             val provider = props.providerWithResources.provider
-            val onReject: (Error) -> Unit = { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
+            val onReject: (Throwable) -> Unit = { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
             when {
                 user == null -> {
                     val dataFromOldUser = props.removeFromOldUser.invoke()
-                    props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {
+                    props.firebaseApp.auth().signInWithPopup(provider).then(onRejected = onReject, onFulfilled = {
                         props.addToNewUser.invoke(dataFromOldUser)
                     })
                 }
                 user.hasProvider(provider) -> {
-                    props.firebaseApp.auth().signInWithPopup(provider).then(onReject = onReject, onResolve = {})
+                    props.firebaseApp.auth().signInWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
                 }
                 else -> {
-                    user.linkWithPopup(provider).then(onReject = onReject, onResolve = {})
+                    user.linkWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
                 }
             }
         }
@@ -131,7 +131,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) : RComponent<Authentica
         }
     }
 
-    private fun handleAuthError(error: Error, priorUser: User?, provider: AuthProvider) {
+    private fun handleAuthError(error: AuthError, priorUser: User?, provider: AuthProvider) {
         inContext("Authentication") {
             val newCredential = error.credential
             when (error.code) {

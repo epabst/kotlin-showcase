@@ -3,10 +3,6 @@
  */
 package firebase
 
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.asPromise
-import kotlin.js.Promise
-
 @JsModule("firebase/app") @JsNonModule
 external val requireApp: Nothing? = definedExternally
 
@@ -21,11 +17,3 @@ external val requireFirestore: Nothing? = definedExternally
 
 @JsModule("firebase/storage") @JsNonModule
 external val requireStorage: Nothing? = definedExternally
-
-fun <T> Deferred<T>.asFirebasePromise(): firebase.Promise<T> {
-    return asPromise().asFirebasePromise()
-}
-
-fun <T> Promise<T>.asFirebasePromise(): firebase.Promise<T> {
-    return unsafeCast<firebase.Promise<T>>()
-}
