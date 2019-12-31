@@ -48,7 +48,7 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                                 }
                             }
                         }
-                        props.heading?.let { h3("nowrap") { +it } }
+                        props.heading?.let { h3 { +it } }
                     }
                     child(Col::class) {
                         attrs.sm = 4

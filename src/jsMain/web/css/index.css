@@ -5,9 +5,6 @@
   display: flex;
   flex-direction: column;
 }
-#buttonBar {
-  white-space: nowrap;
-}
 #buttonBar .btn {
   vertical-align: top;
 }
