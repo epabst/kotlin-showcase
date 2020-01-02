@@ -11,7 +11,6 @@ import org.w3c.dom.HTMLDivElement
 import react.RBuilder
 import react.RComponent
 import react.RState
-import react.dom.div
 import react.dom.h3
 import react.dom.span
 import react.router.dom.RouteResultHistory
@@ -39,12 +38,8 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                         if (props.history != null) {
                             span {
                                 attrs.id = "backButton"
-                                child(Button::class) {
-                                    attrs.variant = "secondary"
-                                    attrs.className = "nowrap mr-2"
-                                    attrs.onClick = { props.history?.goBack() }
-                                    flaticon("arrow-pointing-to-left-1")
-                                    +"Back"
+                                flaticonButton(flaticon = "arrow-pointing-to-left-1", text = "Back", className = "nowrap mr-2") {
+                                    props.history?.goBack()
                                 }
                             }
                         }

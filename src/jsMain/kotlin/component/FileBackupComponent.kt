@@ -1,6 +1,6 @@
 package component
 
-import bootstrap.Button
+import component.bootstrap.textButton
 import component.repository.LocalStorageRepository
 import component.repository.Repository
 import cordova.*
@@ -81,9 +81,5 @@ class FileBackupComponent(val appNameForFilesystem: String, val allRepositories:
 }
 
 fun RBuilder.backupButton(fileBackupComponent: FileBackupComponent) {
-    child(Button::class) {
-        attrs.onClick = { fileBackupComponent.createBackup() }
-        attrs.variant = "secondary"
-        +"Backup"
-    }
+    textButton("Backup") { fileBackupComponent.createBackup() }
 }
