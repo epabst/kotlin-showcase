@@ -185,5 +185,5 @@ private fun User.hasProvider(provider: AuthProvider): Boolean {
     return providerData.any { it?.providerId == provider.providerId }
 }
 val User.anyPhotoURL: String? get() = photoURL ?: providerData.map { it?.photoURL }.firstOrNull { it != null }
-private val User.anyDisplayName: String? get() = displayName ?: providerData.map { it?.displayName }.firstOrNull { it != null }
+private val User.anyDisplayName: String? get() = displayName ?: providerData. map { it?.displayName }.firstOrNull { it != null }
 private val User.anyEmail: String? get() = email ?: providerData.map { it?.email }.firstOrNull { it != null }

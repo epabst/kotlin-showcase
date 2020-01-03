@@ -3,11 +3,16 @@ package component.firebase
 import component.repository.*
 import firebase.firestore.*
 import kotlinx.coroutines.await
+import kotlin.js.Date
+
+fun Firestore.generateConsecutiveId(): String = collection("ids").generateConsecutiveId()
 
 fun <T : WithID<T>> CollectionReference<T>.doc(id: ID<T>?): DocumentReference<T> {
-    val documentPath = id?.toString()
-    return if (documentPath == null) doc() else doc(documentPath)
+    return doc(id?.toString() ?: generateConsecutiveId())
 }
+
+private fun CollectionReference<*>.generateConsecutiveId() =
+        Date.now().toLong().toString(36) + doc().id.takeLast(3)
 
 suspend fun <E : WithID<E>> DocumentReference<E>.set(entity: E) {
     set(JSON.parse(JSON.stringify(entity.withID(ID(id))))).await()
