@@ -73,7 +73,7 @@ fun RBuilder.currencyInput(label: String, value: Double?, onAnyChange: (Double?)
     }
 }
 
-fun <T> RBuilder.singleSelectInput(label: String,
+fun <T> RBuilder.singleSelectInput(label: String?,
                                    value: T?,
                                    inputDescription: String,
                                    options: List<T>,
@@ -83,7 +83,9 @@ fun <T> RBuilder.singleSelectInput(label: String,
                                    onAnyChange: (T?) -> Unit) {
     child(Form.Group::class) {
         attrs.controlId = "formControl${nextControlId++}"
-        child(Form.Label::class) { +label }
+        if (label != null) {
+            child(Form.Label::class) { +label }
+        }
         child(InputGroup::class) {
             selectControl {
                 attrs.value = value?.let { toOptionValue(it) } ?: ""
@@ -108,12 +110,14 @@ fun <T> RBuilder.singleSelectInput(label: String,
 
 fun RBuilder.textButton(text: String,
                         variant: String = "secondary",
+                        size: String? = null,
                         className: String? = null,
                         disabled: Boolean = false,
                         onClick: (React.ClickEvent<HTMLButtonElement>) -> Unit) {
     child(Button::class) {
         +text
         attrs.variant = variant
+        attrs.size = size
         attrs.className = className
         attrs.disabled = disabled
         attrs.onClick = onClick
