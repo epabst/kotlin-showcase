@@ -38,7 +38,7 @@ fun Double.formatCurrencyForInput(): String = PlatformProvider.instance.formatCu
 
 interface ProviderDate : Comparable<ProviderDate> {
     val year: Int
-    val month: Int
+    val monthIndex: Int
     val dayOfMonth: Int
     val millisecondsSinceUnixEpoch: Long
     val hours: Int

@@ -54,7 +54,7 @@ class JavascriptProviderTest {
     fun toDate_YYYY_0M_0D() {
         val date = PlatformProvider.instance.toDate("2018-02-09")
         date.year.mustBe(2018)
-        date.month.mustBe(1)
+        date.monthIndex.mustBe(1)
         date.dayOfMonth.mustBe(9)
     }
 
@@ -62,7 +62,7 @@ class JavascriptProviderTest {
     fun toDate_YYYY_M_D() {
         val date = PlatformProvider.instance.toDate("2018-2-9")
         date.year.mustBe(2018)
-        date.month.mustBe(1)
+        date.monthIndex.mustBe(1)
         date.dayOfMonth.mustBe(9)
         date.toJsDate().getHours().mustBe(0)
     }
@@ -71,7 +71,7 @@ class JavascriptProviderTest {
     fun toDate_YYYY_MM_DD() {
         val date = PlatformProvider.instance.toDate("2018-12-25")
         date.year.mustBe(2018)
-        date.month.mustBe(11)
+        date.monthIndex.mustBe(11)
         date.dayOfMonth.mustBe(25)
     }
 

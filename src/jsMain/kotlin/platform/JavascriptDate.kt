@@ -9,7 +9,7 @@ package platform
 class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
     override val year: Int
         get() = date.getFullYear()
-    override val month: Int
+    override val monthIndex: Int
         get() = date.getMonth()
     override val dayOfMonth: Int
         get() = date.getDate()

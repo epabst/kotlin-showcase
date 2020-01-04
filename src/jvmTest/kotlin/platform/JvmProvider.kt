@@ -85,7 +85,7 @@ object JvmProvider : PlatformProvider {
 class JvmDate(private val calendar: Calendar) : ProviderDate {
     override val year: Int
         get() = calendar.get(Calendar.YEAR)
-    override val month: Int
+    override val monthIndex: Int
         get() = calendar.get(Calendar.MONTH)
     override val dayOfMonth: Int
         get() = calendar.get(Calendar.DAY_OF_MONTH)
