@@ -32,32 +32,30 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
             child(Container::class) {
                 attrs.fluid = true
                 attrs.id = "buttonBar"
-                child(Row::class) {
-                    child(Col::class) {
-                        attrs.sm = 8
-                        if (props.history != null) {
-                            span {
-                                attrs.id = "backButton"
-                                flaticonButton(flaticon = "arrow-pointing-to-left-1", text = "Back", className = "nowrap mr-2") {
-                                    props.history?.goBack()
-                                }
-                            }
+                if (props.history != null) {
+                    span {
+                        attrs.id = "backButton"
+                        flaticonButton(
+                            flaticon = "arrow-pointing-to-left-1",
+                            text = "Back",
+                            className = "nowrap mr-2"
+                        ) {
+                            props.history?.goBack()
                         }
-                        props.heading?.let { h3 { +it } }
                     }
-                    child(Col::class) {
-                        attrs.sm = 4
-                        attrs.className = "text-right"
-                        val app = props.firebaseApp
-                        if (app != null) {
-                            requireAuth
-                            val provider: GoogleAuthProvider.Companion? = GoogleAuthProvider
-                            if (provider?.PROVIDER_ID != null) {
-                                val providerWithResources = AuthProviderWithResources(
-                                        GoogleAuthProvider(),
-                                        "img/google/btn_google_signin_light_normal_web.png")
-                                authenticationLink(providerWithResources, app, { Unit }, { Unit })
-                            }
+                }
+                props.heading?.let { h3 { +it } }
+                span(classes = "ml-auto") {
+                    val app = props.firebaseApp
+                    if (app != null) {
+                        requireAuth
+                        val provider: GoogleAuthProvider.Companion? = GoogleAuthProvider
+                        if (provider?.PROVIDER_ID != null) {
+                            val providerWithResources = AuthProviderWithResources(
+                                GoogleAuthProvider(),
+                                "img/google/btn_google_signin_light_normal_web.png"
+                            )
+                            authenticationLink(providerWithResources, app, { Unit }, { Unit })
                         }
                     }
                 }
