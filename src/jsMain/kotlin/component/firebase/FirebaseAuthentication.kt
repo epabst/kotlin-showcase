@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package component.firebase
 
 import bootstrap.*
