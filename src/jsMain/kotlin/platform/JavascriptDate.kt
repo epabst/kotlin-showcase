@@ -15,7 +15,7 @@ class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
         get() = date.getMonth()
     override val dayOfMonth: Int
         get() = date.getDate()
-    override val dayOfWeek: Int
+    override val dayOfWeekIndex: Int
         get() = date.getDay()
     override val hours: Int
         get() = date.getHours()

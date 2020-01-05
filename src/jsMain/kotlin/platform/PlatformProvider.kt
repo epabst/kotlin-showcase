@@ -51,7 +51,7 @@ actual object PlatformProvider {
         }
     }
 
-    actual fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
-        return JavascriptDate(Date(year, month, dayOfMonth, hours, minutes))
+    actual fun toDate(year: Int, monthIndex: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
+        return JavascriptDate(Date(year, monthIndex, dayOfMonth, hours, minutes))
     }
 }

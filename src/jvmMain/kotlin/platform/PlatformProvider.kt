@@ -75,8 +75,8 @@ actual object PlatformProvider {
         return JvmDate(calendar)
     }
 
-    actual fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
-        return JvmDate(GregorianCalendar(year, month, dayOfMonth, hours, minutes))
+    actual fun toDate(year: Int, monthIndex: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
+        return JvmDate(GregorianCalendar(year, monthIndex, dayOfMonth, hours, minutes))
     }
 }
 
@@ -87,8 +87,8 @@ class JvmDate(private val calendar: Calendar) : ProviderDate {
         get() = calendar.get(Calendar.MONTH)
     override val dayOfMonth: Int
         get() = calendar.get(Calendar.DAY_OF_MONTH)
-    override val dayOfWeek: Int
-        get() = calendar.get(Calendar.DAY_OF_WEEK)
+    override val dayOfWeekIndex: Int
+        get() = calendar.get(Calendar.DAY_OF_WEEK) - 1
     override val millisecondsSinceUnixEpoch: Long
         get() = calendar.timeInMillis
     override val hours: Int

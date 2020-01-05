@@ -23,7 +23,7 @@ expect object PlatformProvider {
 
     fun toDate(input: String): ProviderDate
 
-    fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int = 0, minutes: Int = 0): ProviderDate
+    fun toDate(year: Int, monthIndex: Int, dayOfMonth: Int, hours: Int = 0, minutes: Int = 0): ProviderDate
 }
 
 enum class Platform {
@@ -40,7 +40,7 @@ interface ProviderDate : Comparable<ProviderDate> {
     val year: Int
     val monthIndex: Int
     val dayOfMonth: Int
-    val dayOfWeek: Int
+    val dayOfWeekIndex: Int
     val millisecondsSinceUnixEpoch: Long
     val hours: Int
     val minutes: Int

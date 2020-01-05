@@ -100,4 +100,10 @@ class PlatformProviderTest {
         val date = PlatformProvider.toDate("2018-10-11")
         date.toIsoDateString().mustBe("2018-10-11")
     }
+
+    @Test
+    fun dayOfWeekIndex() {
+        val date = PlatformProvider.toDate("2020-01-04")
+        date.dayOfWeekIndex.mustBe(6)
+    }
 }
