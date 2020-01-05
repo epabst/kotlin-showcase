@@ -1,4 +1,4 @@
-package common.util
+package util
 
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -55,3 +55,5 @@ fun interceptAny(block: () -> Unit): Exception {
         return exception
     }
 }
+
+expect fun <T> runTest(block: suspend () -> T)

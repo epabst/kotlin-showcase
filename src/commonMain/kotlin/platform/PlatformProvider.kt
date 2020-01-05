@@ -1,14 +1,15 @@
 package platform
 
-import kotlin.properties.Delegates.notNull
-
 /**
  * A provider for date functionality.
  * @author Eric Pabst (epabst@gmail.com)
  * Date: 6/25/16
  * Time: 1:31 PM
  */
-interface PlatformProvider {
+expect object PlatformProvider {
+
+    val platform: Platform
+
     fun now(): ProviderDate
 
     /** @throws IllegalArgumentException if unable to parse */
@@ -23,18 +24,17 @@ interface PlatformProvider {
     fun toDate(input: String): ProviderDate
 
     fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int = 0, minutes: Int = 0): ProviderDate
-
-    companion object {
-        /** This must be set before methods will work. */
-        var instance: PlatformProvider by notNull<PlatformProvider>()
-    }
 }
 
-fun String.parseCurrency(): Double = PlatformProvider.instance.parseCurrency(this)
+enum class Platform {
+    Javascript, Jvm
+}
 
-fun Double.formatCurrency(): String = PlatformProvider.instance.formatCurrency(this)
+fun String.parseCurrency(): Double = PlatformProvider.parseCurrency(this)
 
-fun Double.formatCurrencyForInput(): String = PlatformProvider.instance.formatCurrencyForInput(this)
+fun Double.formatCurrency(): String = PlatformProvider.formatCurrency(this)
+
+fun Double.formatCurrencyForInput(): String = PlatformProvider.formatCurrencyForInput(this)
 
 interface ProviderDate : Comparable<ProviderDate> {
     val year: Int
@@ -55,4 +55,4 @@ interface ProviderDate : Comparable<ProviderDate> {
     }
 }
 
-fun ProviderDate(input: String): ProviderDate = PlatformProvider.instance.toDate(input)
+fun ProviderDate(input: String): ProviderDate = PlatformProvider.toDate(input)

@@ -1,12 +1,10 @@
 package component.repository
 
-import common.util.*
 import component.UndoComponent
 import component.runTest
 import kotlinx.coroutines.delay
 import org.w3c.dom.get
-import platform.JavascriptProvider
-import platform.PlatformProvider
+import util.mustBe
 import kotlin.browser.localStorage
 import kotlin.browser.window
 import kotlin.test.*
@@ -20,13 +18,12 @@ import kotlin.test.*
 @Suppress("unused")
 class LocalStorageRepositoryTest {
     init {
-        PlatformProvider.instance = JavascriptProvider
         val stubRequestAnimationFrame: ((Double) -> Unit) -> Int = { it.invoke(0.toDouble()); 0 }
         window.asDynamic().requestAnimationFrame = stubRequestAnimationFrame
     }
 
     @Test
-    fun LocalStorageRepository_shouldSaveIntoTheSameIndexAsTheOriginal() = runTest {
+    fun shouldSaveIntoTheSameIndexAsTheOriginal() = runTest {
         val id1 = LocalStorageRepositoryForTesting.save(null, EntityForTesting("A"))
         LocalStorageRepositoryForTesting.save(null, EntityForTesting("B"))
         LocalStorageRepositoryForTesting.save(null, EntityForTesting("C"))
@@ -38,13 +35,13 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldUseTheProvidedIdWhenCreatingAnEntity() = runTest {
+    fun shouldUseTheProvidedIdWhenCreatingAnEntity() = runTest {
         val id = LocalStorageRepositoryForTesting.save(null, EntityForTesting("A", id = ID(55442)))
         id.mustBe(ID(55442))
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotifyListeners() = runTest {
+    fun shouldNotifyListeners() = runTest {
         val listener = CountingListener<EntityForTesting>()
         LocalStorageRepositoryForTesting.addListener(listener)
         listener.onSavedCount.mustBe(0)
@@ -57,7 +54,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotLoadFromLocalStorageUntilAMethodIsCalledOnTheRepository() = runTest {
+    fun shouldNotLoadFromLocalStorageUntilAMethodIsCalledOnTheRepository() = runTest {
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
 
@@ -76,7 +73,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldIncludeIdOnOriginalWhenNotifyingListeners() = runTest {
+    fun shouldIncludeIdOnOriginalWhenNotifyingListeners() = runTest {
         val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
             override suspend fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
                 original?.id?.mustBe(replacementWithID.id)
@@ -97,7 +94,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotNotifyListenersForNoOpSave() = runTest {
+    fun shouldNotNotifyListenersForNoOpSave() = runTest {
         val listener = CountingListener<EntityForTesting>()
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
@@ -117,7 +114,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotNotifylistenersForNoOpRemove() = runTest {
+    fun shouldNotNotifylistenersForNoOpRemove() = runTest {
         val listener = CountingListener<EntityForTesting>()
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
@@ -137,7 +134,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldStoreEvenIfListenerFailsForSave() = runTest {
+    fun shouldStoreEvenIfListenerFailsForSave() = runTest {
         val listener: RepositoryListener<EntityForTesting> = object : RepositoryListener<EntityForTesting> {
             override suspend fun onRemoved(item: EntityForTesting) {
             }
@@ -163,7 +160,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldIncludeListenerOperationsInUndoForSave() = runTest {
+    fun shouldIncludeListenerOperationsInUndoForSave() = runTest {
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
         val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
@@ -191,7 +188,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldIncludeListenerOperationsInUndoForRemove() = runTest {
+    fun shouldIncludeListenerOperationsInUndoForRemove() = runTest {
         val localStorageKey = "unitTest"
         localStorage.removeItem(localStorageKey)
         val localRepository = LocalStorageRepositoryForTesting(localStorageKey)
@@ -221,7 +218,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotifyRemovalWhenLocalStorageKeyIsRemoved() = runTest {
+    fun shouldNotifyRemovalWhenLocalStorageKeyIsRemoved() = runTest {
         val relativePath = "unitTest"
         localStorage.removeItem(relativePath + "/a")
         localStorage.removeItem(relativePath + "/b")
@@ -245,7 +242,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldNotifyOfSaveWhenLocalStorageKeyIsAdded() = runTest {
+    fun shouldNotifyOfSaveWhenLocalStorageKeyIsAdded() = runTest {
         val relativePath = "unitTest"
         localStorage.removeItem(relativePath + "/a")
         localStorage.removeItem(relativePath + "/b")
@@ -272,7 +269,7 @@ class LocalStorageRepositoryTest {
     }
 
     @Test
-    fun LocalStorageRepository_shouldRemoveFromOldLocalStorageKeyWhenChangingKeys() = runTest {
+    fun shouldRemoveFromOldLocalStorageKeyWhenChangingKeys() = runTest {
         val relativePath = "unitTest"
         localStorage.removeItem(relativePath + "/a")
         localStorage.removeItem(relativePath + "/b")
@@ -286,12 +283,6 @@ class LocalStorageRepositoryTest {
         val localRepositoryCopy = LocalStorageRepositoryForTesting(relativePath, setOfAll, { relativePath + "/" + it.name.take(1).toLowerCase() })
         localRepositoryCopy.list().size.mustBe(1)
     }
-}
-
-data class EntityForTesting(val name: String, val id: ID<EntityForTesting>? = null) : WithID<EntityForTesting> {
-    override fun getID(): ID<EntityForTesting>? = id
-
-    override fun withID(id: ID<EntityForTesting>): EntityForTesting = copy(id = id)
 }
 
 interface EntityForTestingJS {
@@ -315,30 +306,6 @@ open class LocalStorageRepositoryForTesting(relativePath: String,
 }
 
 class IntentionalException : RuntimeException("intentional")
-
-
-class CountingListener<in T> : RepositoryListener<T> {
-    var onSavedCount: Int = 0
-    var onRemovedCount: Int = 0
-    var onHiddenCount: Int = 0
-    var onVisibleCount: Int = 0
-
-    override suspend fun onSaved(original: T?, replacementWithID: T) {
-        onSavedCount++
-    }
-
-    override suspend fun onRemoved(item: T) {
-        onRemovedCount++
-    }
-
-    override suspend fun onVisibilityChanged(item: T, visible: Boolean) {
-        if (visible) {
-            onVisibleCount++
-        } else {
-            onHiddenCount++
-        }
-    }
-}
 
 suspend fun waitForAsyncOps() {
     delay(40)

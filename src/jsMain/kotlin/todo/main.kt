@@ -1,7 +1,6 @@
 package todo
 
 import component.repository.toID
-import platform.JavascriptProvider
 import platform.handleError
 import platform.PlatformProvider
 import platform.inContext
@@ -22,7 +21,6 @@ interface IdProps : RProps {
 fun main() {
     try {
         inContext("initializeForCordova") { initializeForCordova() }
-        PlatformProvider.instance = JavascriptProvider
 
         val container = document.getElementById("page")
         if (container !is Element) return

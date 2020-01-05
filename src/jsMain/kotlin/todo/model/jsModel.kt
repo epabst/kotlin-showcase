@@ -2,7 +2,7 @@ package todo.model
 
 import component.repository.IDJS
 import component.repository.toNormal
-import platform.JavascriptProvider
+import platform.PlatformProvider
 import util.emptyToNull
 
 /**
@@ -22,5 +22,5 @@ external interface ToDoJS {
 
 fun ToDoJS.toNormal(): ToDo {
     return ToDo(name, dueDateString, notes.emptyToNull(), createDateString
-            ?: JavascriptProvider.now().toIsoTimestampString(), id?.toNormal())
+            ?: PlatformProvider.now().toIsoTimestampString(), id?.toNormal())
 }

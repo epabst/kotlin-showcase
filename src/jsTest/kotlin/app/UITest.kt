@@ -1,10 +1,8 @@
 package app
 
 //import component.UndoComponent
-//import client.util.*
 //import platform.JavascriptProvider
 //import common.*
-//import common.util.*
 //import net.yested.core.properties.*
 //import net.yested.ext.jquery.destinationBack
 //import kotlin.browser.window
@@ -24,8 +22,7 @@ package app
 //    init {
 //        val stubRequestAnimationFrame: ((Double) -> Unit) -> Int = { it.invoke(0.toDouble()); 0 }
 //        window.asDynamic().requestAnimationFrame = stubRequestAnimationFrame
-//        PlatformProvider.instance = JavascriptProvider
-//        today = JavascriptProvider.now()
+//        today = PlatformProvider.now()
 //        toDoRepository.addListener(object : RepositoryListener<ToDo> {
 //            override fun onSaved(original: ToDo?, replacementWithID: ToDo) {
 //                testToDoIds.add(replacementWithID.id!!)

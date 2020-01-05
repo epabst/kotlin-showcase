@@ -7,7 +7,7 @@ import cordova.*
 import org.w3c.dom.get
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
-import platform.JavascriptProvider
+import platform.PlatformProvider
 import platform.handleError
 import platform.handlingErrors
 import react.RBuilder
@@ -56,7 +56,7 @@ class FileBackupComponent(val appNameForFilesystem: String, val allRepositories:
                         flags.create = true
                         @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
                         val directory = directoryEntry as DirectoryEntry
-                        directory.getFile("$appNameForFilesystem-${JavascriptProvider.now().toIsoDateString()}.json", flags, { fileEntry ->
+                        directory.getFile("$appNameForFilesystem-${PlatformProvider.now().toIsoDateString()}.json", flags, { fileEntry ->
                             handlingErrors("createBackup/fileEntry") {
                                 fileEntry.createWriter({ writer ->
                                     handlingErrors("createBackup/writer") {

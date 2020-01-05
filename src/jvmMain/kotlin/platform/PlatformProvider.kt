@@ -3,13 +3,10 @@ package platform
 import java.text.*
 import java.util.*
 
-/**
- * A [PlatformProvider] for the JVM.
- * @author Eric Pabst (epabst@gmail.com)
- * Date: 6/29/16
- * Time: 1:18 AM
- */
-object JvmProvider : PlatformProvider {
+actual object PlatformProvider {
+
+    actual val platform: Platform = Platform.Jvm
+
     private val defaultCurrencyFormat by lazy {
         FunctionThreadLocal<NumberFormat> { NumberFormat.getCurrencyInstance() }
     }
@@ -36,29 +33,30 @@ object JvmProvider : PlatformProvider {
         }
     }
 
-    override fun parseCurrency(input: String): Double {
-        try {
-            return currencyFormat.get().parse(input).toDouble()
+    actual fun parseCurrency(input: String): Double {
+        return try {
+            currencyFormat.get().parse(input).toDouble()
         } catch (e: ParseException) {
             try {
-                return defaultCurrencyFormat.get().parse(input).toDouble()
+                defaultCurrencyFormat.get().parse(input).toDouble()
             } catch (e: ParseException) {
                 throw IllegalArgumentException(e)
             }
         }
     }
 
-    override fun formatCurrency(input: Double): String = currencyFormat.get().format(input)
+    actual fun formatCurrency(input: Double): String = currencyFormat.get().format(input)
 
-    override fun formatCurrencyForInput(input: Double): String = currencyInputFormat.get().format(input)
+    actual fun formatCurrencyForInput(input: Double): String = currencyInputFormat.get().format(input)
 
-    override fun now(): ProviderDate = JvmDate(GregorianCalendar())
+    actual fun now(): ProviderDate =
+        JvmDate(GregorianCalendar())
 
-    override fun toDate(millis: Long): JvmDate {
+    actual fun toDate(millis: Long): ProviderDate {
         return toJvmDate(Date(millis))
     }
 
-    override fun toDate(input: String): JvmDate {
+    actual fun toDate(input: String): ProviderDate {
         val parsePosition = ParsePosition(0)
         // first try ISO Timestamp
         var parsedDate = SimpleDateFormat.getDateTimeInstance().parse(input, parsePosition)
@@ -77,7 +75,7 @@ object JvmProvider : PlatformProvider {
         return JvmDate(calendar)
     }
 
-    override fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
+    actual fun toDate(year: Int, month: Int, dayOfMonth: Int, hours: Int, minutes: Int): ProviderDate {
         return JvmDate(GregorianCalendar(year, month, dayOfMonth, hours, minutes))
     }
 }

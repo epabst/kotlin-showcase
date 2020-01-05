@@ -1,8 +1,7 @@
 package component.repository
 
-import common.util.mustBe
-import platform.JvmProvider
-import platform.PlatformProvider
+import util.mustBe
+import util.runTest
 import kotlin.test.Test
 
 /**
@@ -12,9 +11,6 @@ import kotlin.test.Test
  * Time: 1:58 PM
  */
 class RepositoryTest {
-    init {
-        PlatformProvider.instance = JvmProvider
-    }
 
     @Test
     fun InMemoryRepositoryShouldSnapshotList() = runTest {

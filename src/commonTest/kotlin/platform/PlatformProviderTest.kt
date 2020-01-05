@@ -1,19 +1,11 @@
 package platform
 
 import kotlin.test.*
-import common.util.*
+import util.interceptAny
+import util.mustBe
+import util.mustContain
 
-/**
- * A test for [JavascriptProvider].
- * @author Eric Pabst (epabst@gmail.com)
- * Date: 7/1/16
- * Time: 6:46 AM
- */
-@Suppress("unused")
-class JavascriptProviderTest {
-    init {
-        PlatformProvider.instance = JavascriptProvider
-    }
+class PlatformProviderTest {
 
     @Test
     fun parseCurrency_mustParseVariousNumberFormats() {
@@ -25,10 +17,18 @@ class JavascriptProviderTest {
         "$1".parseCurrency().mustBe(1.0)
         "($1.00)".parseCurrency().mustBe(-1.0)
         "($1)".parseCurrency().mustBe(-1.0)
-        "(1.00)".parseCurrency().mustBe(-1.0)
-        "(1)".parseCurrency().mustBe(-1.0)
-        "-$1.00".parseCurrency().mustBe(-1.0)
-        "-$1".parseCurrency().mustBe(-1.0)
+        assertFailsWith(IllegalArgumentException::class) { "garbage".parseCurrency() }.message!!.mustContain("garbage")
+        if (PlatformProvider.platform == Platform.Jvm) {
+            assertFailsWith(IllegalArgumentException::class) { "(1.00)".parseCurrency() }.message!!.mustContain("(1.00)")
+            assertFailsWith(IllegalArgumentException::class) { "(1)".parseCurrency() }
+            assertFailsWith(IllegalArgumentException::class) { "-$1.00".parseCurrency() }
+            assertFailsWith(IllegalArgumentException::class) { "-$1".parseCurrency() }
+        } else {
+            "(1.00)".parseCurrency().mustBe(-1.0)
+            "(1)".parseCurrency().mustBe(-1.0)
+            "-$1.00".parseCurrency().mustBe(-1.0)
+            "-$1".parseCurrency().mustBe(-1.0)
+        }
     }
 
     @Test
@@ -52,7 +52,7 @@ class JavascriptProviderTest {
 
     @Test
     fun toDate_YYYY_0M_0D() {
-        val date = PlatformProvider.instance.toDate("2018-02-09")
+        val date = PlatformProvider.toDate("2018-02-09")
         date.year.mustBe(2018)
         date.monthIndex.mustBe(1)
         date.dayOfMonth.mustBe(9)
@@ -60,16 +60,15 @@ class JavascriptProviderTest {
 
     @Test
     fun toDate_YYYY_M_D() {
-        val date = PlatformProvider.instance.toDate("2018-2-9")
+        val date = PlatformProvider.toDate("2018-2-9")
         date.year.mustBe(2018)
         date.monthIndex.mustBe(1)
         date.dayOfMonth.mustBe(9)
-        date.toJsDate().getHours().mustBe(0)
     }
 
     @Test
     fun toDate_YYYY_MM_DD() {
-        val date = PlatformProvider.instance.toDate("2018-12-25")
+        val date = PlatformProvider.toDate("2018-12-25")
         date.year.mustBe(2018)
         date.monthIndex.mustBe(11)
         date.dayOfMonth.mustBe(25)
@@ -77,28 +76,28 @@ class JavascriptProviderTest {
 
     @Test
     fun toDate_ISO_today() {
-        val isoDateString = PlatformProvider.instance.now().toIsoDateString()
-        val date = PlatformProvider.instance.toDate(isoDateString)
+        val isoDateString = PlatformProvider.now().toIsoDateString()
+        val date = PlatformProvider.toDate(isoDateString)
         date.toIsoDateString().mustBe(isoDateString)
     }
 
     @Test
     fun toDate_ISO_now() {
-        val isoTimestampString = PlatformProvider.instance.now().toIsoTimestampString()
-        val date = PlatformProvider.instance.toDate(isoTimestampString)
+        val isoTimestampString = PlatformProvider.now().toIsoTimestampString()
+        val date = PlatformProvider.toDate(isoTimestampString)
         date.toIsoTimestampString().mustBe(isoTimestampString)
     }
 
     @Test
     fun toDate_date() {
-        val string = PlatformProvider.instance.toDate(2018, 4, 22).toIsoDateString()
-        val date = PlatformProvider.instance.toDate(string)
+        val string = PlatformProvider.toDate(2018, 4, 22).toIsoDateString()
+        val date = PlatformProvider.toDate(string)
         date.toIsoDateString().mustBe(string)
     }
 
     @Test
     fun toIsoDateString() {
-        val date = PlatformProvider.instance.toDate("2018-10-11")
+        val date = PlatformProvider.toDate("2018-10-11")
         date.toIsoDateString().mustBe("2018-10-11")
     }
 }

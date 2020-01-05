@@ -1,15 +1,13 @@
 package component
 
-import common.util.mustBe
-import common.util.mustNotBe
 import component.repository.EntityForTesting
 import component.repository.LocalStorageRepositoryForTesting
 import component.repository.RepositoryListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
-import platform.JavascriptProvider
-import platform.PlatformProvider
+import util.mustBe
+import util.mustNotBe
 import kotlin.test.Test
 
 /**
@@ -22,7 +20,6 @@ import kotlin.test.Test
 class UndoComponentTest {
     val repository: LocalStorageRepositoryForTesting
     init {
-        PlatformProvider.instance = JavascriptProvider
         repository = LocalStorageRepositoryForTesting
         UndoComponent.watch(repository)
     }
@@ -195,7 +192,6 @@ class UndoComponentTest {
         UndoComponent.redo()
         repository.find(newId)?.name.mustBe("Harry")
     }
-
 
     @Test
     fun itShouldIgnoreANoOpUndoable() = runTest {

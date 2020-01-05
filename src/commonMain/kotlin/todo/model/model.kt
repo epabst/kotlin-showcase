@@ -12,12 +12,12 @@ import component.repository.WithID
  * Time: 6:27 AM
  */
 data class ToDo(val name: String, val dueDateString: String? = null, val notes: String? = null, val createDateString: String, val id: ID<ToDo>? = null) : WithID<ToDo> {
-    constructor(name: String, dueDate: ProviderDate? = null, notes: String? = null, createDate: ProviderDate = PlatformProvider.instance.now(), id: ID<ToDo>? = null) :
+    constructor(name: String, dueDate: ProviderDate? = null, notes: String? = null, createDate: ProviderDate = PlatformProvider.now(), id: ID<ToDo>? = null) :
             this(name, dueDate?.toIsoTimestampString(), notes, createDate.toIsoTimestampString(), id)
 
-    val dueDate: ProviderDate? get() = dueDateString?.let { PlatformProvider.instance.toDate(it) }
+    val dueDate: ProviderDate? get() = dueDateString?.let { PlatformProvider.toDate(it) }
 
-    val createDate: ProviderDate? get() = PlatformProvider.instance.toDate(createDateString)
+    val createDate: ProviderDate? get() = PlatformProvider.toDate(createDateString)
 
     override fun getID(): ID<ToDo>? = id
 
