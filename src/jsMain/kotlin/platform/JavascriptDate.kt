@@ -1,5 +1,7 @@
 package platform
 
+import kotlin.js.Date
+
 /**
  * A ProviderDate backed by Moment.
  * @author Eric Pabst (epabst@gmail.com)
@@ -13,6 +15,8 @@ class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
         get() = date.getMonth()
     override val dayOfMonth: Int
         get() = date.getDate()
+    override val dayOfWeek: Int
+        get() = date.getDay()
     override val hours: Int
         get() = date.getHours()
     override val minutes: Int
@@ -24,6 +28,7 @@ class JavascriptDate(val date: kotlin.js.Date) : ProviderDate {
     override fun toLocalizedDateString(): String = date.toDateString()
     override fun toDisplayDateTimeString(): String = date.toString()
     override fun toIsoTimestampString(): String = date.toISOString()
+    override fun plusDays(days: Int): ProviderDate = JavascriptDate(Date(year, monthIndex, dayOfMonth + days))
 }
 
 fun kotlin.js.Date.toProviderDate(): JavascriptDate = JavascriptDate(this)

@@ -40,6 +40,7 @@ interface ProviderDate : Comparable<ProviderDate> {
     val year: Int
     val monthIndex: Int
     val dayOfMonth: Int
+    val dayOfWeek: Int
     val millisecondsSinceUnixEpoch: Long
     val hours: Int
     val minutes: Int
@@ -47,6 +48,7 @@ interface ProviderDate : Comparable<ProviderDate> {
     fun toLocalizedDateString(): String
     fun toDisplayDateTimeString(): String
     fun toIsoTimestampString(): String
+    fun plusDays(days: Int): ProviderDate
 
     override fun compareTo(other: ProviderDate): Int {
         return millisecondsSinceUnixEpoch.compareTo(other.millisecondsSinceUnixEpoch)
