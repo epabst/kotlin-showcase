@@ -7,14 +7,17 @@ import react.RBuilder
 import react.RElementBuilder
 import react.ReactElement
 import react.dom.option
+import util.emptyToNull
 
 private var nextControlId: Int = 10
 
-fun RBuilder.textInput(label: String,
-                       value: String?,
-                       placeholder: String = "",
-                       required: Boolean = false,
-                       onValueChanged: (String) -> Unit) {
+fun RBuilder.textInput(
+    label: String,
+    value: String?,
+    placeholder: String = "",
+    required: Boolean = false,
+    onValueChanged: (String?) -> Unit
+) {
     child(Form.Group::class) {
         attrs.controlId = "formControl${nextControlId++}"
         child(Form.Label::class) { +label }
@@ -23,7 +26,7 @@ fun RBuilder.textInput(label: String,
                 attrs.value = value ?: ""
                 attrs.required = required
                 attrs.placeholder = placeholder
-                attrs.onAnyChange = { onValueChanged(it.target?.value ?: "") }
+                attrs.onAnyChange = { onValueChanged(it.target?.value?.emptyToNull()) }
             }
             child(Form.Control.Feedback::class) {
                 attrs.type = "invalid"
