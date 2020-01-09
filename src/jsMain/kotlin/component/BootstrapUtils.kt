@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package component
 
 import bootstrap.*
@@ -10,6 +12,18 @@ import react.dom.option
 import util.emptyToNull
 
 private var nextControlId: Int = 10
+
+fun RElementBuilder<RowProps>.column(
+    xs: Int?,
+    className: String? = null,
+    block: RElementBuilder<ColProps>.() -> Unit
+) {
+    child(Col::class) {
+        xs?.let { attrs.xs = xs }
+        className?.let { attrs.className = it }
+        block()
+    }
+}
 
 fun RBuilder.textInput(
     label: String,
