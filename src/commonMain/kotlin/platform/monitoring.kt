@@ -21,7 +21,7 @@ inline fun <T> inContext(contextName: String, f: ()->T): T {
 
 expect fun handleError(throwable: Throwable)
 
-inline fun handlingErrors(contextName: String, f: ()->Any?) {
+inline fun handlingErrors(contextName: String, f: () -> Any?) {
     return inContext(contextName) {
         try {
             f()
@@ -50,12 +50,8 @@ fun <T> asyncHandlingErrors(contextName: String, f: suspend () -> T): Deferred<T
 
 fun launchHandlingErrors(contextName: String, f: suspend () -> Unit) {
     GlobalScope.launch {
-        inContext(contextName) {
-            try {
-                f()
-            } catch (e: Throwable) {
-                handleError(e)
-            }
+        handlingErrors(contextName) {
+            f()
         }
     }
 }

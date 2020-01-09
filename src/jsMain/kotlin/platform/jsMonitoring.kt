@@ -8,6 +8,6 @@ fun showUserExpectedError(message: String) {
 }
 
 actual fun handleError(throwable: Throwable) {
-    console.error("ERROR: " + currentContext + ": ", throwable)
-    window.alert(currentContext + ": " + throwable.toString())
+    console.error("ERROR: $currentContext: ", throwable)
+    window.alert("$currentContext: $throwable")
 }
