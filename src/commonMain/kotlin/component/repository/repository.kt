@@ -10,12 +10,13 @@ package component.repository
  */
 
 @Suppress("unused") // Although T isn't used here it provides type-safety between IDs of different types.
-data class ID<T : WithID<T>>(val _id: String) {
+data class ID<T : WithID<T>>(val _id: String) : Comparable<ID<T>> {
     constructor(id: Long) : this(id.toString())
 
     override fun equals(other: Any?): Boolean = if (other is ID<*>) _id == other._id else false
     override fun hashCode(): Int = _id.hashCode()
     override fun toString(): String = _id
+    override fun compareTo(other: ID<T>): Int = _id.compareTo(other._id)
 }
 
 interface WithID<T : WithID<T>> {
