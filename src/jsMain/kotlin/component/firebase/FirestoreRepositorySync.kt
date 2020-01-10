@@ -6,6 +6,7 @@ import component.repository.*
 import firebase.FieldPath
 import firebase.firestore.*
 import kotlinx.coroutines.await
+import platform.handlingErrors
 import kotlin.js.Date
 import kotlin.js.Promise
 
@@ -60,8 +61,10 @@ fun <E : WithID<E>> QuerySnapshot<E>.toList(): List<E> {
 
 fun <E : WithID<E>> Query<E>.addListener(block: (List<E>) -> Unit): Closeable {
     val release = onSnapshot(onNext = { snapshot ->
-        console.log("got a Firestore snapshot size=${snapshot.size}")
-        block.invoke(snapshot.docs.map { it.data() })
+        handlingErrors("onSnapshot for listener") {
+            console.log("got a Firestore snapshot size=${snapshot.size}")
+            block.invoke(snapshot.docs.map { it.data() })
+        }
     })
     return object : Closeable {
         override fun close() = release.invoke()
