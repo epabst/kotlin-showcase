@@ -1,6 +1,9 @@
 package component
 
 import bootstrap.*
+import component.bootstrap.NavbarPlacement
+import component.bootstrap.flaticonButton
+import component.bootstrap.navbar
 import component.firebase.AuthProviderWithResources
 import component.firebase.authenticationLink
 import firebase.app.App
@@ -14,8 +17,6 @@ import react.RState
 import react.dom.h3
 import react.dom.span
 import react.router.dom.RouteResultHistory
-import util.NavbarPlacement
-import util.navbar
 
 interface ButtonBarProps : HTMLElementProps<HTMLDivElement> {
     var heading: String?

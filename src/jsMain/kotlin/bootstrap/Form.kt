@@ -38,6 +38,8 @@ external interface FormControlProps<E : HTMLElement> : RProps {
     var value: String? get() = definedExternally; set(value) = definedExternally
     var onChange: ((React.ChangeEvent<E /* HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement */>) -> Unit)? get() = definedExternally; set(value) = definedExternally
     var type: String? // see types for https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+    var autoComplete: String? // see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
+    var pattern: String? // e.g. "[0-9]{3}-[0-9]{3}-[0-9]{4}"
     var id: String? get() = definedExternally; set(value) = definedExternally
     var isValid: Boolean? get() = definedExternally; set(value) = definedExternally
     var isInvalid: Boolean? get() = definedExternally; set(value) = definedExternally

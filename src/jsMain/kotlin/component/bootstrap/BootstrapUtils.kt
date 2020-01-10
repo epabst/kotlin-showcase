@@ -1,8 +1,9 @@
 @file:Suppress("unused")
 
-package component
+package component.bootstrap
 
 import bootstrap.*
+import component.flaticon
 import org.w3c.dom.HTMLButtonElement
 import platform.formatCurrencyForInput
 import react.RBuilder
@@ -30,6 +31,10 @@ fun RBuilder.textInput(
     value: String?,
     placeholder: String = "",
     required: Boolean = false,
+    inputDescription: String = placeholder,
+    type: String? = null,
+    pattern: String? = null,
+    autoComplete: String? = null,
     onValueChanged: (String?) -> Unit
 ) {
     child(Form.Group::class) {
@@ -38,16 +43,40 @@ fun RBuilder.textInput(
         child(InputGroup::class) {
             inputFormControl {
                 attrs.value = value ?: ""
+                attrs.type = type
+                attrs.autoComplete = autoComplete
+                attrs.pattern = pattern
                 attrs.required = required
                 attrs.placeholder = placeholder
                 attrs.onAnyChange = { onValueChanged(it.target?.value?.emptyToNull()) }
             }
             child(Form.Control.Feedback::class) {
                 attrs.type = "invalid"
-                +"Please specify $placeholder."
+                +"Please specify $inputDescription."
             }
         }
     }
+}
+
+fun RBuilder.telInput(
+    label: String,
+    value: String?,
+    placeholder: String = "",
+    required: Boolean = false,
+    inputDescription: String = placeholder,
+    onValueChanged: (String?) -> Unit
+) {
+    textInput(
+        label = label,
+        value = value,
+        type = "tel",
+        pattern = """^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?${'$'}""",
+        autoComplete = "tel tel-national",
+        placeholder = placeholder,
+        inputDescription = inputDescription,
+        required = required,
+        onValueChanged = onValueChanged
+    )
 }
 
 fun RBuilder.intInput(label: String, value: Int?, min: Int? = null, required: Boolean = false, onValueChanged: (Int?) -> Unit) {
