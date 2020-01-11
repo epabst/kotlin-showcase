@@ -3,13 +3,11 @@ package app
 import todo.model.ToDo
 import todo.model.ToDoJS
 import todo.model.toNormal
-import platform.JavascriptProvider
-import common.util.*
 import component.repository.LongJS
 import component.repository.toNormal
 import platform.PlatformProvider
 import component.repository.ID
-import component.repository.WithID
+import util.mustBe
 import kotlin.test.Test
 
 /**
@@ -19,15 +17,12 @@ import kotlin.test.Test
  * Time: 6:17 AM
  */
 @Suppress("unused")
-class JSModelTest {
-    init {
-        PlatformProvider.instance = JavascriptProvider
-    }
+class ToDoJSTest {
 
     @Test
     fun ToDoJS_shouldSerializeAndDeserialize() {
         val toDoId = ID<ToDo>(1234)
-        val originalToDo = ToDo("To-Do #1", JavascriptProvider.now(), "some notes", JavascriptProvider.now(), id = toDoId)
+        val originalToDo = ToDo("To-Do #1", PlatformProvider.now(), "some notes", PlatformProvider.now(), id = toDoId)
         val json = JSON.stringify(originalToDo)
         val toDoJS: ToDoJS = JSON.parse(json)
         toDoJS.toNormal().mustBe(originalToDo)
@@ -35,8 +30,8 @@ class JSModelTest {
 
     @Test
     fun ToDoJS_shouldSerializeAndDeserializeAsAnArray() {
-        val toDo1 = ToDo("To-Do #1", JavascriptProvider.now(), "some notes", JavascriptProvider.now(), id = ID(1234))
-        val toDo2 = ToDo("To-Do #2", JavascriptProvider.now(), "other notes", JavascriptProvider.now(), id = ID(5678))
+        val toDo1 = ToDo("To-Do #1", PlatformProvider.now(), "some notes", PlatformProvider.now(), id = ID(1234))
+        val toDo2 = ToDo("To-Do #2", PlatformProvider.now(), "other notes", PlatformProvider.now(), id = ID(5678))
         val originalList = listOf(toDo1, toDo2)
         val json = JSON.stringify(originalList)
         val toDos2: Array<ToDoJS> = JSON.parse<Array<ToDoJS>>(json)
@@ -59,5 +54,3 @@ class JSModelTest {
         return deserialized
     }
 }
-
-fun <T : WithID<T>> ID(id: Long): ID<T> = ID(id.toString())

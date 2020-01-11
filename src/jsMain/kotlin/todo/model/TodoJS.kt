@@ -21,6 +21,11 @@ external interface ToDoJS {
 }
 
 fun ToDoJS.toNormal(): ToDo {
-    return ToDo(name, dueDateString, notes.emptyToNull(), createDateString
-            ?: PlatformProvider.now().toIsoTimestampString(), id?.toNormal())
+    return ToDo(
+        name = name,
+        dueDateString = dueDateString,
+        notes = notes.emptyToNull(),
+        createDateString = createDateString ?: PlatformProvider.now().toIsoTimestampString(),
+        id = id?.toNormal()
+    )
 }
