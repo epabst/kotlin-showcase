@@ -11,7 +11,6 @@ import react.router.dom.routeLink
 import component.repository.Closeable
 import component.repository.onListChanged
 import platform.launchHandlingErrors
-import todo.model.Factory
 import todo.model.ToDo
 
 interface ToDosProps : RProps {
@@ -31,11 +30,11 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
     private val resources = mutableListOf<Closeable>()
 
     override fun ToDosState.init(props: ToDosProps) {
-        list = Factory.toDoRepository.list()
+        list = Config.toDoRepository.list()
     }
 
     override fun componentDidMount() {
-        resources.add(Factory.toDoRepository.onListChanged { _, newList -> setState { list = newList } })
+        resources.add(Config.toDoRepository.onListChanged { _, newList -> setState { list = newList } })
     }
 
     override fun componentWillUnmount() {
@@ -43,7 +42,7 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
     }
 
     private suspend fun delete(todo: ToDo) {
-        Factory.toDoRepository.remove(todo)
+        Config.toDoRepository.remove(todo)
     }
 
     override fun RBuilder.render() {
@@ -104,7 +103,7 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
                 child(Col::class) {
                     attrs.xs = 14
                     attrs.sm = 18
-                    backupButton()
+                    backupButton(Config.fileBackupComponent)
                     routeLink(to = "/toDos/new") {
                         child(Button::class) {
                             +"Add ToDo"

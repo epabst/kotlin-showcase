@@ -2,13 +2,13 @@ package todo
 
 import bootstrap.*
 import component.ButtonBar
-import platform.toDate
+import component.bootstrap.textInput
 import platform.toProviderDate
 import react.*
 import react.router.dom.RouteResultHistory
 import component.repository.ID
 import platform.launchHandlingErrors
-import todo.model.Factory
+import platform.toJsDate
 import todo.model.ToDo
 import util.emptyToNull
 import kotlin.js.Date
@@ -33,18 +33,23 @@ interface ToDoState : RState {
 class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
 
     override fun ToDoState.init(props: ToDoProps) {
-        original = props.id?.let { Factory.toDoRepository.find(it) }
+        original = props.id?.let { Config.toDoRepository.find(it) }
         name = original?.name ?: ""
-        dueDate = original?.dueDate?.toDate()
+        dueDate = original?.dueDate?.toJsDate()
         notes = original?.notes ?: ""
         validated = false
     }
 
     private fun save(event: React.SubmitEvent) {
         if (event.currentTarget?.checkValidity() == true && state.name.isNotBlank()) {
-            val updatedToDo = ToDo(state.name, state.dueDate?.toProviderDate(), state.notes.emptyToNull(), id = state.original?.id)
+            val updatedToDo = ToDo(
+                name = state.name,
+                dueDate = state.dueDate?.toProviderDate(),
+                notes = state.notes.emptyToNull(),
+                id = state.original?.id
+            )
             launchHandlingErrors("save $updatedToDo") {
-                Factory.toDoRepository.save(updatedToDo)
+                Config.toDoRepository.save(updatedToDo)
             }
             props.history.goBack()
         }
@@ -60,7 +65,7 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
     private fun delete() {
         state.original?.id?.let { toDoId ->
             launchHandlingErrors("delete $toDoId") {
-                Factory.toDoRepository.remove(toDoId)
+                Config.toDoRepository.remove(toDoId)
             }
         }
         props.history.goBack()
@@ -76,33 +81,11 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
                 attrs.onSubmit = { save(it); it.preventDefault() }
                 attrs.validated = state.validated
                 attrs.onSubmit = { event -> save(event); event.preventDefault() }
-                child(Form.Group::class) {
-                    attrs.controlId = "name"
-                    child(Form.Label::class) { +"Description" }
-                    child(InputGroup::class) {
-                        textInputControl {
-                            attrs.value = state.name
-                            attrs.required = true
-                            attrs.placeholder = "(some description)"
-                            attrs.size = 40
-                            attrs.onAnyChange = { it.target?.let { setState { name = it.value } } }
-                            attrs.required = true
-                        }
-                        child(Form.Control.Feedback::class) {
-                            attrs.type = "invalid"
-                            +"Please Specify a Name"
-                        }
-                    }
+                textInput("To Do", state.name, "(some description)", required = true) {
+                    setState { name = it ?: "" }
                 }
-                child(Form.Group::class) {
-                    attrs.controlId = "note"
-                    child(Form.Label::class) { +"Notes" }
-                    textInputControl {
-                        attrs.value = state.notes
-                        attrs.placeholder = "(some notes)"
-                        attrs.size = 60
-                        attrs.onAnyChange = { it.target?.let { setState { notes = it.value } } }
-                    }
+                textInput("Notes", state.notes, "(some notes)") {
+                    setState { notes = it ?: "" }
                 }
                 child(Form.Group::class) {
                     child(ButtonToolbar::class) {
