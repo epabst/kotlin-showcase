@@ -4,9 +4,9 @@ import bootstrap.*
 import component.bootstrap.NavbarPlacement
 import component.bootstrap.flaticonButton
 import component.bootstrap.navbar
-import component.firebase.AuthProviderWithResources
 import component.firebase.authenticationLink
 import firebase.app.App
+import firebase.auth.FacebookAuthProvider
 import firebase.auth.GoogleAuthProvider
 import firebase.requireAuth
 import kotlinx.html.id
@@ -15,6 +15,7 @@ import react.RBuilder
 import react.RComponent
 import react.RState
 import react.dom.h3
+import react.dom.img
 import react.dom.span
 import react.router.dom.RouteResultHistory
 
@@ -52,14 +53,28 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                         requireAuth
                         val provider: GoogleAuthProvider.Companion? = GoogleAuthProvider
                         if (provider?.PROVIDER_ID != null) {
-                            val providerWithResources = AuthProviderWithResources(
-                                GoogleAuthProvider(),
-                                "img/google/btn_google_signin_light_normal_web.png"
-                            )
-                            authenticationLink(providerWithResources, app, { Unit }, { Unit })
+                            authenticationLink(app, mapOf(
+                                GoogleAuthProvider() to { onClick ->
+                                    child(Button::class) {
+                                        attrs.variant = "link"
+                                        attrs.onClick = onClick
+                                        attrs.className = "auth-button form-control"
+                                        img(src = "img/google.svg", classes = "auth-icon") {}
+                                    }
+                                },
+                                FacebookAuthProvider() to { onClick ->
+                                    child(Button::class) {
+                                        attrs.variant = "link"
+                                        attrs.onClick = onClick
+                                        attrs.className = "auth-button button-facebook form-control"
+                                        img(src = "img/facebook.svg", classes = "auth-icon") {}
+                                    }
+                                }
+                            ))
                         }
                     }
                 }
+                Unit
             }
         }
     }

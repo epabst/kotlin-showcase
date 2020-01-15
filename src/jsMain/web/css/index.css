@@ -15,6 +15,21 @@
   overflow: hidden;
   width: 36px;
 }
+.auth .input-group-text {
+  color: #757575;
+  background-color: white;
+  border: none;
+}
+button.auth-button.form-control {
+  width: 42px;
+}
+.button-facebook {
+  background-color: #3b5998;
+}
+.auth-icon {
+  width: 18px;
+  height: 18px;
+}
 body.platform-android #backButton {
   display: none;
 }
