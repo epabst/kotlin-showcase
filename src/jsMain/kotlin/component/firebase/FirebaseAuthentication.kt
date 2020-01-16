@@ -4,20 +4,18 @@ package component.firebase
 
 import bootstrap.*
 import firebase.Unsubscribe
-import platform.showUserExpectedError
-import platform.inContext
 import firebase.app.User
 import firebase.app.App
-import firebase.auth.Auth
-import firebase.auth.AuthError
-import firebase.auth.AuthProvider
+import firebase.auth.*
 import kotlinx.html.id
 import kotlinx.html.title
 import org.w3c.dom.events.Event
+import platform.*
 import react.*
 import react.dom.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.js.json
 
 fun Auth.onUserChanged(onUserChanged: (oldUser: User?, newUser: User?) -> Unit): Unsubscribe {
     var oldUser: User? = null
@@ -129,7 +127,8 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
     }
 
     private fun handleAuthError(error: AuthError, priorUser: User?, provider: AuthProvider) {
-        inContext("Authentication") {
+        inContext("handleAuthError") {
+            val auth = props.firebaseApp.auth()
             val newCredential = error.credential
             when (error.code) {
                 "auth/popup-closed-by-user" -> Unit //do nothing
@@ -142,20 +141,50 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                             null
                         }
                         println("priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
-                        props.firebaseApp.auth().signInWithCredential(newCredential).then({ newUserCredentialPair ->
-                            if (newUserCredentialPair.user != null) {
-                                dataFromOldUser?.let { props.addToNewUser.invoke(it) }
-                                priorUser?.delete()
-                                println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
+                        auth.signInWithCredential(newCredential)
+                            .then(onFulfilled = { newUserCredentialPair ->
+                                if (newUserCredentialPair.user != null) {
+                                    dataFromOldUser?.let { props.addToNewUser.invoke(it) }
+                                    priorUser?.delete()
+                                    println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
+                                }
+                            }, onRejected = {
+                                //put the data back since it failed
+                                dataFromOldUser?.let { props.addToNewUser.invoke(it) } ?: Unit
+                            })
+                    }
+                }
+                "auth/account-exists-with-different-credential", "auth/email-already-in-use" -> {
+                    val email = error.email
+                    if (email != null && newCredential != null) {
+                        auth.fetchSignInMethodsForEmail(email).then(onFulfilled = { providers ->
+                            val firstPopupProviderMethod = providers.first()
+
+                            val linkedProvider: AuthProvider = getProvider(firstPopupProviderMethod)
+                            if (linkedProvider is AuthProviderWithCustomParameters) {
+                                linkedProvider.setCustomParameters(json("login_hint" to error.email))
                             }
-                        }, {
-                            //put the data back since it failed
-                            dataFromOldUser?.let { props.addToNewUser.invoke(it) } ?: Unit
-                        })
+
+                            auth.signInWithPopup(linkedProvider).then(onFulfilled = { result ->
+                                result.user?.linkWithCredential(newCredential)
+                            }, onRejected = { error -> handleError(error) })
+                        }, onRejected = { error -> handleError(error) })
                     }
                 }
                 else -> showUserExpectedError(error.message)
             }
+        }
+    }
+
+    private fun getProvider(providerId: String): AuthProvider {
+        return when (providerId) {
+            GoogleAuthProvider.PROVIDER_ID -> GoogleAuthProvider()
+            FacebookAuthProvider.PROVIDER_ID -> FacebookAuthProvider()
+            GithubAuthProvider.PROVIDER_ID -> GithubAuthProvider()
+            PhoneAuthProvider.PROVIDER_ID -> PhoneAuthProvider()
+            EmailAuthProvider.PROVIDER_ID -> EmailAuthProvider()
+            TwitterAuthProvider.PROVIDER_ID -> TwitterAuthProvider()
+            else -> error("Unsupported provider: $providerId")
         }
     }
 }
@@ -195,5 +224,5 @@ private fun User.hasProvider(provider: AuthProvider): Boolean {
 
 val User.anyPhotoURL: String? get() = photoURL ?: providerData.map { it?.photoURL }.firstOrNull { it != null }
 private val User.anyDisplayName: String?
-    get() = displayName ?: providerData. map { it?.displayName }.firstOrNull { it != null }
+    get() = displayName ?: providerData.map { it?.displayName }.firstOrNull { it != null }
 private val User.anyEmail: String? get() = email ?: providerData.map { it?.email }.firstOrNull { it != null }

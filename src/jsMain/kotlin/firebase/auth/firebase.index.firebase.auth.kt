@@ -107,6 +107,13 @@ open external class OAuthCredential : AuthCredential {
 external interface AuthProvider {
     var providerId: String
 }
+abstract external class AuthProviderWithCustomParameters : AuthProvider {
+    override var providerId: String = definedExternally
+    fun setCustomParameters(customOAuthParameters: Any): AuthProvider = definedExternally
+}
+abstract external class AuthProviderWithScopeAndCustomParameters : AuthProviderWithCustomParameters {
+    fun addScope(scope: String): AuthProvider = definedExternally
+}
 external interface ConfirmationResult {
     fun confirm(verificationCode: String): Promise<UserCredential>
     var verificationId: String
@@ -140,11 +147,7 @@ open external class FacebookAuthProvider : FacebookAuthProvider_Instance {
         fun credential(token: String): OAuthCredential
     }
 }
-open external class FacebookAuthProvider_Instance : AuthProvider {
-    open fun addScope(scope: String): AuthProvider
-    override var providerId: String
-    open fun setCustomParameters(customOAuthParameters: Any): AuthProvider
-}
+open external class FacebookAuthProvider_Instance : AuthProviderWithScopeAndCustomParameters
 open external class GithubAuthProvider : GithubAuthProvider_Instance {
     companion object {
         var PROVIDER_ID: String
@@ -152,11 +155,7 @@ open external class GithubAuthProvider : GithubAuthProvider_Instance {
         fun credential(token: String): OAuthCredential
     }
 }
-open external class GithubAuthProvider_Instance : AuthProvider {
-    open fun addScope(scope: String): AuthProvider
-    override var providerId: String
-    open fun setCustomParameters(customOAuthParameters: Any): AuthProvider
-}
+open external class GithubAuthProvider_Instance : AuthProviderWithScopeAndCustomParameters
 open external class GoogleAuthProvider : GoogleAuthProvider_Instance {
     companion object {
         var PROVIDER_ID: String
@@ -164,18 +163,12 @@ open external class GoogleAuthProvider : GoogleAuthProvider_Instance {
         fun credential(idToken: String? = definedExternally /* null */, accessToken: String? = definedExternally /* null */): OAuthCredential
     }
 }
-open external class GoogleAuthProvider_Instance : AuthProvider {
-    open fun addScope(scope: String): AuthProvider
+open external class GoogleAuthProvider_Instance : AuthProviderWithScopeAndCustomParameters
+open external class OAuthProvider(providerId: String) : AuthProviderWithScopeAndCustomParameters {
     override var providerId: String
-    open fun setCustomParameters(customOAuthParameters: Any): AuthProvider
-}
-open external class OAuthProvider(providerId: String) : AuthProvider {
-    override var providerId: String
-    open fun addScope(scope: String): AuthProvider
     open fun credential(optionsOrIdToken: OAuthCredentialOptions, accessToken: String? = definedExternally /* null */): OAuthCredential
     open fun credential(optionsOrIdToken: String, accessToken: String? = definedExternally /* null */): OAuthCredential
     open fun credential(optionsOrIdToken: Nothing?, accessToken: String? = definedExternally /* null */): OAuthCredential
-    open fun setCustomParameters(customOAuthParameters: Any): AuthProvider
 }
 open external class SAMLAuthProvider : AuthProvider {
     override var providerId: String
@@ -220,10 +213,7 @@ open external class TwitterAuthProvider : TwitterAuthProvider_Instance {
         fun credential(token: String, secret: String): OAuthCredential
     }
 }
-open external class TwitterAuthProvider_Instance : AuthProvider {
-    override var providerId: String
-    open fun setCustomParameters(customOAuthParameters: Any): AuthProvider
-}
+open external class TwitterAuthProvider_Instance : AuthProviderWithCustomParameters
 external interface UserCredential {
     var additionalUserInfo: AdditionalUserInfo? get() = definedExternally; set(value) = definedExternally
     var credential: AuthCredential?
