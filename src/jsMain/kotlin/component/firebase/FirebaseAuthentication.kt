@@ -8,6 +8,7 @@ import firebase.app.User
 import firebase.app.App
 import firebase.auth.*
 import firebase.requireAuth
+import kotlinx.coroutines.await
 import kotlinx.html.id
 import kotlinx.html.title
 import platform.*
@@ -53,6 +54,9 @@ interface AuthenticationLinkProps : RProps {
 
 interface AuthenticationLinkState : RState {
     var user: User?
+    var credentialToLink: AuthCredential?
+    var providerTypeToLink: ProviderType?
+    var providerTypeToPopup: ProviderType?
 }
 
 /** Provides a fully implemented link with button to sign-in, user profile image, display name, etc. */
@@ -77,7 +81,31 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
         val enabledProviderTypes = props.enabledProviderTypes
         if (firebaseApp != null && enabledProviderTypes.firstOrNull()?.providerId != null) {
             val user = state.user
-            if (user == null || enabledProviderTypes.none { user.hasProvider(it.authProvider) }) {
+            val providerTypeToPopup = state.providerTypeToPopup
+            val providerTypeToLink = state.providerTypeToLink
+            val credentialToLink = state.credentialToLink
+            if (providerTypeToPopup != null && providerTypeToLink != null && credentialToLink != null) {
+                child(Button::class) {
+                    attrs.variant = "secondary"
+                    +"Link "
+                    img(src = providerTypeToPopup.imageUrl, classes = "auth-icon") {}
+                    +" to "
+                    img(src = providerTypeToLink.imageUrl, classes = "auth-icon") {}
+                    attrs.onClick = {
+                        launchHandlingErrors("link auth providers") {
+                            try {
+                                firebaseApp.auth()
+                                    .signInWithPopup(providerTypeToPopup.authProvider)
+                                    .await()
+                                    .user
+                                    ?.linkWithCredential(credentialToLink)
+                            } catch (error: Throwable) {
+                                handleAuthError(error.unsafeCast<AuthError>(), user, providerTypeToPopup)
+                            }
+                        }
+                    }
+                }
+            } else if (user == null || enabledProviderTypes.none { user.hasProvider(it.authProvider) }) {
                 child(InputGroup::class) {
                     attrs.className = "auth"
                     child(InputGroup.Prepend::class) {
@@ -94,8 +122,9 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                                 attrs.onClick = {
                                     it.preventDefault()
                                     val provider = providerType.authProvider
-                                    val onReject: (Throwable) -> Unit =
-                                        { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
+                                    val onReject: (Throwable) -> Unit = { error ->
+                                        handleAuthError(error.unsafeCast<AuthError>(), user, providerType)
+                                    }
                                     when {
                                         user == null -> {
                                             val dataFromOldUser = props.removeFromOldUser?.invoke()
@@ -131,6 +160,11 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                     child(Dropdown.Menu::class) {
                         attrs.alignRight = true
                         child(Dropdown.Header::class) {
+                            val providerType = user.providerType
+                            if (providerType != null) {
+                                img(src = providerType.imageUrl, classes = "auth-icon") {}
+                                +" "
+                            }
                             user.anyEmail?.let { +it }
                         }
                         child(Dropdown.Item::class) {
@@ -143,21 +177,25 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
         }
     }
 
-    private fun handleAuthError(
-        error: AuthError,
-        priorUser: User?,
-        provider: AuthProvider,
-        attemptingToMergeAccounts: Boolean = false
-    ) {
+    val User.providerType: ProviderType?
+        get() {
+            return providerData
+                .mapNotNull { it?.providerId?.let { it1 -> ProviderType.forProviderIdOrNull(it1) } }
+                .firstOrNull()
+                ?: ProviderType.forProviderIdOrNull(providerId)
+        }
+
+    private fun handleAuthError(error: AuthError, priorUser: User?, providerType: ProviderType) {
         inContext("handleAuthError") {
             val auth = props.firebaseApp!!.auth()
             val newCredential = error.credential
+            console.warn("Got error code '${error.code}'")
             when (error.code) {
                 "auth/popup-closed-by-user" -> Unit //do nothing
                 "auth/cancelled-popup-request" -> Unit // do nothing
                 "auth/credential-already-in-use" -> {
                     if (newCredential != null) {
-                        val dataFromOldUser = if (priorUser?.hasProvider(provider) == false) {
+                        val dataFromOldUser = if (priorUser?.hasProvider(providerType.authProvider) == false) {
                             props.removeFromOldUser?.invoke()
                         } else {
                             null
@@ -180,35 +218,31 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                     val email = error.email
                     if (email != null && newCredential != null) {
                         auth.fetchSignInMethodsForEmail(email).then(onFulfilled = { providers ->
-                            val firstPopupProviderMethod = providers.first()
+                            val matchingProviderId = providers.first()
 
-                            val providerType: ProviderType = ProviderType.values()
-                                .find { it.providerId == firstPopupProviderMethod }
-                                ?: error("Unsupported provider: $firstPopupProviderMethod")
-                            if (providerType.authProvider is AuthProviderWithCustomParameters) {
-                                providerType.authProvider.setCustomParameters(json("login_hint" to error.email))
+                            val matchingProviderType = ProviderType.forProviderId(matchingProviderId)
+                            if (matchingProviderType.authProvider is AuthProviderWithCustomParameters) {
+                                matchingProviderType.authProvider.setCustomParameters(json("login_hint" to error.email))
                             }
 
-                            auth.signInWithPopup(providerType.authProvider).then(onFulfilled = { result ->
+                            auth.signInWithPopup(matchingProviderType.authProvider).then(onFulfilled = { result ->
                                 result.user?.linkWithCredential(newCredential)
                             }, onRejected = { error ->
-                                handleAuthError(
-                                    error.unsafeCast<AuthError>(),
-                                    priorUser,
-                                    provider,
-                                    attemptingToMergeAccounts = true
-                                )
+                                val authError = error.unsafeCast<AuthError>()
+                                if (authError.code == "auth/popup-blocked") {
+                                    setState {
+                                        credentialToLink = newCredential
+                                        providerTypeToLink = providerType
+                                        providerTypeToPopup = matchingProviderType
+                                    }
+                                } else {
+                                    handleAuthError(authError, priorUser, matchingProviderType)
+                                }
                             })
                         }, onRejected = { error -> handleError(error) })
                     }
                 }
-                "auth/popup-blocked" -> {
-                    if (attemptingToMergeAccounts) {
-                        window.alert("Linking multiple accounts was blocked by a popup blocker.  Please enable popups or use a different account.")
-                    } else {
-                        window.alert("Unable to sign in since login popup was blocked")
-                    }
-                }
+                "auth/popup-blocked" -> window.alert("Unable to sign in since popup was blocked")
                 else -> showUserExpectedError(error.message)
             }
         }
@@ -225,7 +259,17 @@ enum class ProviderType(
     Github("img/auth_service_github.svg", GithubAuthProvider(), GithubAuthProvider.PROVIDER_ID),
     Phone("img/auth_service_phone.svg", PhoneAuthProvider(), PhoneAuthProvider.PROVIDER_ID),
     Email("img/auth_service_email.svg", EmailAuthProvider(), EmailAuthProvider.PROVIDER_ID),
-    Twitter("img/auth_service_twitter.svg", TwitterAuthProvider(), TwitterAuthProvider.PROVIDER_ID)
+    Twitter("img/auth_service_twitter.svg", TwitterAuthProvider(), TwitterAuthProvider.PROVIDER_ID);
+
+    companion object {
+        fun forProviderIdOrNull(providerId: String): ProviderType? {
+            return values().find { it.providerId == providerId }
+        }
+
+        fun forProviderId(providerId: String): ProviderType {
+            return forProviderIdOrNull(providerId) ?: error("Unsupported provider: $providerId")
+        }
+    }
 }
 
 /**
