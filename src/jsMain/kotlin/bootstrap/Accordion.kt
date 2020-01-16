@@ -2,9 +2,9 @@
 @file:JsModule("react-bootstrap")
 package bootstrap
 
-import react.RProps
+import org.w3c.dom.HTMLDivElement
 
-external interface AccordionProps : RProps {
+external interface AccordionProps : HTMLElementProps<HTMLDivElement> {
     var activeKey: String? get() = definedExternally; set(value) = definedExternally
     var defaultActiveKey: String? get() = definedExternally; set(value) = definedExternally
 }

@@ -26,7 +26,7 @@ abstract external class React {
     interface KeyboardEventHandler<T>
     interface ReactChild
     interface ChangeEventHandler<T>
-    abstract class ClickEvent<T : HTMLElement> : Event { override val target: T? }
+    abstract class ClickEvent<out T : HTMLElement> : Event { override val target: T? }
     abstract class ChangeEvent<T : HTMLElement> : Event { override val target: T? }
     abstract class SubmitEvent : Event { override val currentTarget: HTMLFormElement? }
 }
