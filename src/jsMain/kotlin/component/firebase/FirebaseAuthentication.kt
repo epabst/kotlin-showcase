@@ -11,6 +11,7 @@ import firebase.requireAuth
 import kotlinx.coroutines.await
 import kotlinx.html.id
 import kotlinx.html.title
+import org.w3c.dom.HTMLElement
 import platform.*
 import react.*
 import react.dom.*
@@ -120,35 +121,14 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                                 attrs.className = "auth-button"
                                 img(src = providerType.imageUrl, classes = "auth-icon") {}
                                 attrs.onClick = {
-                                    it.preventDefault()
-                                    val provider = providerType.authProvider
-                                    val onReject: (Throwable) -> Unit = { error ->
-                                        handleAuthError(error.unsafeCast<AuthError>(), user, providerType)
-                                    }
-                                    when {
-                                        user == null -> {
-                                            val dataFromOldUser = props.removeFromOldUser?.invoke()
-                                            firebaseApp.auth().signInWithPopup(provider)
-                                                .then(onRejected = onReject, onFulfilled = {
-                                                    if (dataFromOldUser != null) {
-                                                        props.addToNewUser?.invoke(dataFromOldUser)
-                                                    }
-                                                })
-                                        }
-                                        user.hasProvider(provider) -> {
-                                            firebaseApp.auth().signInWithPopup(provider)
-                                                .then(onRejected = onReject, onFulfilled = {})
-                                        }
-                                        else -> {
-                                            user.linkWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
-                                        }
-                                    }
+                                    handleOnClick(it, providerType, user, firebaseApp)
                                 }
                             }
                         }
                     }
                 }
             } else if (user.anyPhotoURL != null) {
+                val providerType = user.providerType
                 child(Dropdown::class) {
                     child(Dropdown.Toggle::class) {
                         attrs.variant = "link"
@@ -160,7 +140,6 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                     child(Dropdown.Menu::class) {
                         attrs.alignRight = true
                         child(Dropdown.Header::class) {
-                            val providerType = user.providerType
                             if (providerType != null) {
                                 img(src = providerType.imageUrl, classes = "auth-icon") {}
                                 +" "
@@ -168,11 +147,46 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                             user.anyEmail?.let { +it }
                         }
                         child(Dropdown.Item::class) {
+                            +"Switch Account"
+                            attrs.onClick = { handleOnClick(it, providerType!!, user, firebaseApp) }
+                        }
+                        child(Dropdown.Item::class) {
                             +"Sign out"
                             attrs.onClick = { firebaseApp.auth().signOut() }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun handleOnClick(
+        it: React.ClickEvent<HTMLElement>?,
+        providerType: ProviderType,
+        user: User?,
+        firebaseApp: App
+    ) {
+        it?.preventDefault()
+        val provider = providerType.authProvider
+        val onReject: (Throwable) -> Unit = { error ->
+            handleAuthError(error.unsafeCast<AuthError>(), user, providerType)
+        }
+        when {
+            user == null -> {
+                val dataFromOldUser = props.removeFromOldUser?.invoke()
+                firebaseApp.auth().signInWithPopup(provider)
+                    .then(onRejected = onReject, onFulfilled = {
+                        if (dataFromOldUser != null) {
+                            props.addToNewUser?.invoke(dataFromOldUser)
+                        }
+                    })
+            }
+            user.hasProvider(provider) -> {
+                firebaseApp.auth().signInWithPopup(provider)
+                    .then(onRejected = onReject, onFulfilled = {})
+            }
+            else -> {
+                user.linkWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
             }
         }
     }
