@@ -4,18 +4,15 @@ import bootstrap.*
 import component.bootstrap.NavbarPlacement
 import component.bootstrap.flaticonButton
 import component.bootstrap.navbar
+import component.firebase.ProviderType
 import component.firebase.authenticationLink
 import firebase.app.App
-import firebase.auth.FacebookAuthProvider
-import firebase.auth.GoogleAuthProvider
-import firebase.requireAuth
 import kotlinx.html.id
 import org.w3c.dom.HTMLDivElement
 import react.RBuilder
 import react.RComponent
 import react.RState
 import react.dom.h3
-import react.dom.img
 import react.dom.span
 import react.router.dom.RouteResultHistory
 
@@ -48,33 +45,8 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                 }
                 props.heading?.let { h3 { +it } }
                 span(classes = "ml-auto") {
-                    val app = props.firebaseApp
-                    if (app != null) {
-                        requireAuth
-                        val provider: GoogleAuthProvider.Companion? = GoogleAuthProvider
-                        if (provider?.PROVIDER_ID != null) {
-                            authenticationLink(app, mapOf(
-                                GoogleAuthProvider() to { onClick ->
-                                    child(Button::class) {
-                                        attrs.variant = "link"
-                                        attrs.onClick = onClick
-                                        attrs.className = "auth-button form-control"
-                                        img(src = "img/auth_service_google.svg", classes = "auth-icon") {}
-                                    }
-                                },
-                                FacebookAuthProvider() to { onClick ->
-                                    child(Button::class) {
-                                        attrs.variant = "link"
-                                        attrs.onClick = onClick
-                                        attrs.className = "auth-button form-control"
-                                        img(src = "img/auth_service_facebook.svg", classes = "auth-icon") {}
-                                    }
-                                }
-                            ))
-                        }
-                    }
+                    authenticationLink(props.firebaseApp, ProviderType.Google, ProviderType.Facebook)
                 }
-                Unit
             }
         }
     }

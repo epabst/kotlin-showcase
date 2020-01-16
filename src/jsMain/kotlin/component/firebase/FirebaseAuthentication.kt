@@ -7,9 +7,9 @@ import firebase.Unsubscribe
 import firebase.app.User
 import firebase.app.App
 import firebase.auth.*
+import firebase.requireAuth
 import kotlinx.html.id
 import kotlinx.html.title
-import org.w3c.dom.events.Event
 import platform.*
 import react.*
 import react.dom.*
@@ -43,12 +43,12 @@ suspend fun Auth.waitForUser(): User {
 }
 
 interface AuthenticationLinkProps : RProps {
-    var firebaseApp: App
-    var renderButtonByProvider: Map<AuthProvider, RBuilder.(onClick: (Event?) -> Unit) -> ReactElement>
+    var firebaseApp: App?
+    var enabledProviderTypes: Array<out ProviderType>
     /** action to remove data from an old user when merging an anonymous account into a provider account */
-    var removeFromOldUser: () -> Any
+    var removeFromOldUser: (() -> Any)?
     /** action to add data to a new user when merging an anonymous account into a provider account */
-    var addToNewUser: (Any) -> Unit
+    var addToNewUser: ((Any) -> Unit)?
 }
 
 interface AuthenticationLinkState : RState {
@@ -62,7 +62,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
     private var unsubscribe: Unsubscribe? = null
 
     override fun componentDidMount() {
-        unsubscribe = props.firebaseApp.auth().onUserChanged { _, newUser ->
+        unsubscribe = props.firebaseApp?.auth()?.onUserChanged { _, newUser ->
             setState { user = newUser }
         }
     }
@@ -72,55 +72,70 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
     }
 
     override fun RBuilder.render() {
-        val user = state.user
-        if (user == null || props.renderButtonByProvider.keys.none { user.hasProvider(it) }) {
-            child(InputGroup::class) {
-                attrs.className = "auth"
-                child(InputGroup.Prepend::class) {
-                    child(InputGroup.Text::class) {
-                        +"Sign in using:"
+        requireAuth
+        val firebaseApp = props.firebaseApp
+        val enabledProviderTypes = props.enabledProviderTypes
+        if (firebaseApp != null && enabledProviderTypes.firstOrNull()?.providerId != null) {
+            val user = state.user
+            if (user == null || enabledProviderTypes.none { user.hasProvider(it.authProvider) }) {
+                child(InputGroup::class) {
+                    attrs.className = "auth"
+                    child(InputGroup.Prepend::class) {
+                        child(InputGroup.Text::class) {
+                            +"Sign in using:"
+                        }
                     }
-                }
-                props.renderButtonByProvider.forEach { (provider, renderButton) ->
-                    renderButton {
-                        it?.preventDefault()
-                        val onReject: (Throwable) -> Unit =
-                            { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
-                        when {
-                            user == null -> {
-                                val dataFromOldUser = props.removeFromOldUser.invoke()
-                                props.firebaseApp.auth().signInWithPopup(provider)
-                                    .then(onRejected = onReject, onFulfilled = {
-                                        props.addToNewUser.invoke(dataFromOldUser)
-                                    })
-                            }
-                            user.hasProvider(provider) -> {
-                                props.firebaseApp.auth().signInWithPopup(provider)
-                                    .then(onRejected = onReject, onFulfilled = {})
-                            }
-                            else -> {
-                                user.linkWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
+                    child(ButtonGroup::class) {
+                        enabledProviderTypes.forEach { providerType ->
+                            child(Button::class) {
+                                attrs.variant = "link"
+                                attrs.className = "auth-button"
+                                img(src = providerType.imageUrl, classes = "auth-icon") {}
+                                attrs.onClick = {
+                                    it.preventDefault()
+                                    val provider = providerType.authProvider
+                                    val onReject: (Throwable) -> Unit =
+                                        { error -> handleAuthError(error.unsafeCast<AuthError>(), user, provider) }
+                                    when {
+                                        user == null -> {
+                                            val dataFromOldUser = props.removeFromOldUser?.invoke()
+                                            firebaseApp.auth().signInWithPopup(provider)
+                                                .then(onRejected = onReject, onFulfilled = {
+                                                    if (dataFromOldUser != null) {
+                                                        props.addToNewUser?.invoke(dataFromOldUser)
+                                                    }
+                                                })
+                                        }
+                                        user.hasProvider(provider) -> {
+                                            firebaseApp.auth().signInWithPopup(provider)
+                                                .then(onRejected = onReject, onFulfilled = {})
+                                        }
+                                        else -> {
+                                            user.linkWithPopup(provider).then(onRejected = onReject, onFulfilled = {})
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        } else if (user.anyPhotoURL != null) {
-            child(Dropdown::class) {
-                child(Dropdown.Toggle::class) {
-                    attrs.variant = "link"
-                    img(src = user.anyPhotoURL ?: "") {
-                        attrs.id = "user-img"
-                        attrs.title = user.anyDisplayName ?: ""
+            } else if (user.anyPhotoURL != null) {
+                child(Dropdown::class) {
+                    child(Dropdown.Toggle::class) {
+                        attrs.variant = "link"
+                        img(src = user.anyPhotoURL ?: "") {
+                            attrs.id = "user-img"
+                            attrs.title = user.anyDisplayName ?: ""
+                        }
                     }
-                }
-                child(Dropdown.Menu::class) {
-                    child(Dropdown.Header::class) {
-                        user.anyEmail?.let { +it }
-                    }
-                    child(Dropdown.Item::class) {
-                        +"Sign out"
-                        attrs.onClick = { props.firebaseApp.auth().signOut() }
+                    child(Dropdown.Menu::class) {
+                        child(Dropdown.Header::class) {
+                            user.anyEmail?.let { +it }
+                        }
+                        child(Dropdown.Item::class) {
+                            +"Sign out"
+                            attrs.onClick = { firebaseApp.auth().signOut() }
+                        }
                     }
                 }
             }
@@ -134,7 +149,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
         attemptingToMergeAccounts: Boolean = false
     ) {
         inContext("handleAuthError") {
-            val auth = props.firebaseApp.auth()
+            val auth = props.firebaseApp!!.auth()
             val newCredential = error.credential
             when (error.code) {
                 "auth/popup-closed-by-user" -> Unit //do nothing
@@ -142,7 +157,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                 "auth/credential-already-in-use" -> {
                     if (newCredential != null) {
                         val dataFromOldUser = if (priorUser?.hasProvider(provider) == false) {
-                            props.removeFromOldUser.invoke()
+                            props.removeFromOldUser?.invoke()
                         } else {
                             null
                         }
@@ -150,13 +165,13 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                         auth.signInWithCredential(newCredential)
                             .then(onFulfilled = { newUserCredentialPair ->
                                 if (newUserCredentialPair.user != null) {
-                                    dataFromOldUser?.let { props.addToNewUser.invoke(it) }
+                                    dataFromOldUser?.let { props.addToNewUser?.invoke(it) }
                                     priorUser?.delete()
                                     println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
                                 }
                             }, onRejected = {
                                 //put the data back since it failed
-                                dataFromOldUser?.let { props.addToNewUser.invoke(it) } ?: Unit
+                                dataFromOldUser?.let { props.addToNewUser?.invoke(it) } ?: Unit
                             })
                     }
                 }
@@ -166,12 +181,14 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                         auth.fetchSignInMethodsForEmail(email).then(onFulfilled = { providers ->
                             val firstPopupProviderMethod = providers.first()
 
-                            val linkedProvider: AuthProvider = getProvider(firstPopupProviderMethod)
-                            if (linkedProvider is AuthProviderWithCustomParameters) {
-                                linkedProvider.setCustomParameters(json("login_hint" to error.email))
+                            val providerType: ProviderType = ProviderType.values()
+                                .find { it.providerId == firstPopupProviderMethod }
+                                ?: error("Unsupported provider: $firstPopupProviderMethod")
+                            if (providerType.authProvider is AuthProviderWithCustomParameters) {
+                                providerType.authProvider.setCustomParameters(json("login_hint" to error.email))
                             }
 
-                            auth.signInWithPopup(linkedProvider).then(onFulfilled = { result ->
+                            auth.signInWithPopup(providerType.authProvider).then(onFulfilled = { result ->
                                 result.user?.linkWithCredential(newCredential)
                             }, onRejected = { error ->
                                 handleAuthError(
@@ -195,28 +212,26 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
             }
         }
     }
+}
 
-    private fun getProvider(providerId: String): AuthProvider {
-        return when (providerId) {
-            GoogleAuthProvider.PROVIDER_ID -> GoogleAuthProvider()
-            FacebookAuthProvider.PROVIDER_ID -> FacebookAuthProvider()
-            GithubAuthProvider.PROVIDER_ID -> GithubAuthProvider()
-            PhoneAuthProvider.PROVIDER_ID -> PhoneAuthProvider()
-            EmailAuthProvider.PROVIDER_ID -> EmailAuthProvider()
-            TwitterAuthProvider.PROVIDER_ID -> TwitterAuthProvider()
-            else -> error("Unsupported provider: $providerId")
-        }
-    }
+enum class ProviderType(
+    val imageUrl: String,
+    val authProvider: AuthProvider,
+    val providerId: String
+) {
+    Google("img/auth_service_google.svg", GoogleAuthProvider(), GoogleAuthProvider.PROVIDER_ID),
+    Facebook("img/auth_service_facebook.svg", FacebookAuthProvider(), FacebookAuthProvider.PROVIDER_ID),
+    Github("img/auth_service_github.svg", GithubAuthProvider(), GithubAuthProvider.PROVIDER_ID),
+    Phone("img/auth_service_phone.svg", PhoneAuthProvider(), PhoneAuthProvider.PROVIDER_ID),
+    Email("img/auth_service_email.svg", EmailAuthProvider(), EmailAuthProvider.PROVIDER_ID),
+    Twitter("img/auth_service_twitter.svg", TwitterAuthProvider(), TwitterAuthProvider.PROVIDER_ID)
 }
 
 /**
  * Provides a fully implemented link with button to sign-in, user profile image, display name, etc.
  */
-fun RBuilder.authenticationLink(
-    app: App,
-    renderButtonByProvider: Map<AuthProvider, RBuilder.(onClick: (Event?) -> Unit) -> ReactElement>
-) {
-    authenticationLink(app, { Unit }, {}, renderButtonByProvider)
+fun RBuilder.authenticationLink(app: App?, vararg enabledProviderTypes: ProviderType) {
+    authenticationLink(app, { Unit }, {}, *enabledProviderTypes)
 }
 
 /**
@@ -225,16 +240,16 @@ fun RBuilder.authenticationLink(
  * @param addToNewUser action to add data to a new user when merging an anonymous account into a provider account
  */
 fun <T> RBuilder.authenticationLink(
-    app: App,
+    app: App?,
     removeFromOldUser: () -> T,
     addToNewUser: (T) -> Unit,
-    renderButtonByProvider: Map<AuthProvider, RBuilder.(onClick: (Event?) -> Unit) -> ReactElement>
+    vararg enabledProviderTypes: ProviderType
 ) {
     child(AuthenticationLink::class) {
         attrs.removeFromOldUser = { removeFromOldUser.invoke() as Any }
         attrs.addToNewUser = { addToNewUser.invoke(it.unsafeCast<T>()) }
         attrs.firebaseApp = app
-        attrs.renderButtonByProvider = renderButtonByProvider
+        attrs.enabledProviderTypes = enabledProviderTypes
     }
 }
 
