@@ -59,15 +59,15 @@ class ButtonBar(props: ButtonBarProps) : RComponent<ButtonBarProps, ButtonBarSta
                                         attrs.variant = "link"
                                         attrs.onClick = onClick
                                         attrs.className = "auth-button form-control"
-                                        img(src = "img/google.svg", classes = "auth-icon") {}
+                                        img(src = "img/auth_service_google.svg", classes = "auth-icon") {}
                                     }
                                 },
                                 FacebookAuthProvider() to { onClick ->
                                     child(Button::class) {
                                         attrs.variant = "link"
                                         attrs.onClick = onClick
-                                        attrs.className = "auth-button button-facebook form-control"
-                                        img(src = "img/facebook.svg", classes = "auth-icon") {}
+                                        attrs.className = "auth-button form-control"
+                                        img(src = "img/auth_service_facebook.svg", classes = "auth-icon") {}
                                     }
                                 }
                             ))

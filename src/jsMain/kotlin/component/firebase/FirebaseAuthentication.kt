@@ -13,6 +13,7 @@ import org.w3c.dom.events.Event
 import platform.*
 import react.*
 import react.dom.*
+import kotlin.browser.window
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.js.json
@@ -126,7 +127,12 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
         }
     }
 
-    private fun handleAuthError(error: AuthError, priorUser: User?, provider: AuthProvider) {
+    private fun handleAuthError(
+        error: AuthError,
+        priorUser: User?,
+        provider: AuthProvider,
+        attemptingToMergeAccounts: Boolean = false
+    ) {
         inContext("handleAuthError") {
             val auth = props.firebaseApp.auth()
             val newCredential = error.credential
@@ -167,8 +173,22 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
 
                             auth.signInWithPopup(linkedProvider).then(onFulfilled = { result ->
                                 result.user?.linkWithCredential(newCredential)
-                            }, onRejected = { error -> handleError(error) })
+                            }, onRejected = { error ->
+                                handleAuthError(
+                                    error.unsafeCast<AuthError>(),
+                                    priorUser,
+                                    provider,
+                                    attemptingToMergeAccounts = true
+                                )
+                            })
                         }, onRejected = { error -> handleError(error) })
+                    }
+                }
+                "auth/popup-blocked" -> {
+                    if (attemptingToMergeAccounts) {
+                        window.alert("Linking multiple accounts was blocked by a popup blocker.  Please enable popups or use a different account.")
+                    } else {
+                        window.alert("Unable to sign in since login popup was blocked")
                     }
                 }
                 else -> showUserExpectedError(error.message)
