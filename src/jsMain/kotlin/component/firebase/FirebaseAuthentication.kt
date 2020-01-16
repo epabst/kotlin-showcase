@@ -129,6 +129,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                         }
                     }
                     child(Dropdown.Menu::class) {
+                        attrs.alignRight = true
                         child(Dropdown.Header::class) {
                             user.anyEmail?.let { +it }
                         }
