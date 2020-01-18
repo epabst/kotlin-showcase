@@ -136,6 +136,7 @@ task copyHtmlToPublic(type: Copy) {
     from("src/jsMain/web")
     include("index.html")
     into("build/public")
+    outputs.upToDateWhen { false }
     filter {
         it.replace("../../build/js/node_modules/", "lib/")
                 .replace("distributions/${artifactName}-${version}.js", "distributions/${artifactName}.js")
