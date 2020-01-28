@@ -52,8 +52,8 @@ object Config {
         firebaseApp?.auth()?.useDeviceLanguage()
         firebaseApp?.auth()?.onUserChanged { _, newUser ->
             if (newUser == null) {
-                println("newUser == null so calling signInAnonymously()")
-                firebaseApp.auth().signInAnonymously().catch { handleError(it) }
+                println("newUser == null so calling signInAnonymouslyWithReuse()")
+                firebaseApp.auth().signInAnonymouslyWithReuse().catch { handleError(it) }
             }
             val providerData = newUser?.providerData?.joinToString(";", "[", "]")
             console.log("uid=${newUser?.uid} isAnonymous=${newUser?.isAnonymous} displayName=${newUser?.displayName} email=${newUser?.email} photoURL=${newUser?.anyPhotoURL} $providerData")

@@ -18,7 +18,24 @@ import react.dom.*
 import kotlin.browser.window
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.js.Promise
 import kotlin.js.json
+
+private var anonymousUser: User? = null
+
+fun Auth.signInAnonymouslyWithReuse(): Promise<Unit> {
+    return if (anonymousUser != null) {
+        console.log("updateCurrentUser(${anonymousUser?.uid})")
+        updateCurrentUser(anonymousUser)
+    } else {
+        signInAnonymously().then {
+            if (it.user?.isAnonymous == true) {
+                console.log("setting anonymousUser=${it.user?.uid}")
+                anonymousUser = it.user
+            }
+        }
+    }
+}
 
 fun Auth.onUserChanged(onUserChanged: (oldUser: User?, newUser: User?) -> Unit): Unsubscribe {
     var oldUser: User? = null
@@ -68,6 +85,10 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
 
     override fun componentDidMount() {
         unsubscribe = props.firebaseApp?.auth()?.onUserChanged { _, newUser ->
+            if (anonymousUser == null && newUser?.isAnonymous == true) {
+                console.log("setting anonymousUser=${newUser.uid}")
+                anonymousUser = newUser
+            }
             setState { user = newUser }
         }
     }
@@ -191,7 +212,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
         }
     }
 
-    val User.providerType: ProviderType?
+    private val User.providerType: ProviderType?
         get() {
             return providerData
                 .mapNotNull { it?.providerId?.let { it1 -> ProviderType.forProviderIdOrNull(it1) } }
@@ -219,8 +240,6 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                             .then(onFulfilled = { newUserCredentialPair ->
                                 if (newUserCredentialPair.user != null) {
                                     dataFromOldUser?.let { props.addToNewUser?.invoke(it) }
-                                    priorUser?.delete()
-                                    println("Deleted priorUser.uid=${priorUser?.uid} priorUser.providerId=${priorUser?.providerId}")
                                 }
                             }, onRejected = {
                                 //put the data back since it failed
