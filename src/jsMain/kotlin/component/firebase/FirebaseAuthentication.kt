@@ -276,7 +276,7 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                     }
                 }
                 "auth/popup-blocked" -> window.alert("Unable to sign in since popup was blocked")
-                else -> showUserExpectedError(error.message)
+                else -> handleError(error.message, error)
             }
         }
     }

@@ -2,12 +2,19 @@ package platform
 
 import kotlin.browser.window
 
-fun showUserExpectedError(message: String) {
-    console.warn(message)
-    window.alert(message)
+fun handleError(message: String?, internalDetail: Any) {
+    logError(message, internalDetail)
+    window.alert(message ?: "Failed to complete operation")
 }
 
 actual fun handleError(throwable: Throwable) {
-    console.error("ERROR: $currentContext: ", throwable)
-    window.alert("$currentContext: $throwable")
+    handleError(throwable.message, throwable)
+}
+
+fun logError(throwable: Throwable) {
+    logError(throwable.message, throwable)
+}
+
+fun logError(message: String?, internalDetail: Any) {
+    console.warn("ERROR: $currentContext: ", message ?: "Failed to complete operation", internalDetail)
 }

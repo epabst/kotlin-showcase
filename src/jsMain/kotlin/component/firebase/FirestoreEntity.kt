@@ -7,7 +7,10 @@ import firebase.Unsubscribe
 import firebase.firestore.*
 import firebase.generateConsecutiveId
 import kotlinx.coroutines.await
+import platform.handleError
 import platform.handlingErrors
+import platform.inContext
+import kotlin.js.Promise
 
 fun <T : WithID<T>> CollectionReference<T>.doc(id: ID<T>?): DocumentReference<T> {
     return doc(id?.toString() ?: generateConsecutiveId())
@@ -25,13 +28,49 @@ fun <E : WithID<E>> QuerySnapshot<E>.toList(): List<E> {
     return docs.map { snapshot -> snapshot.data() }
 }
 
-fun <E : WithID<E>> Query<E>.addListener(block: (List<E>) -> Unit): Unsubscribe {
+fun <E : WithID<E>> Query<E>.onSnapshot(
+    onError: (FirestoreError) -> Unit = { handleFirestoreError(it) },
+    block: (List<E>) -> Unit
+): Unsubscribe {
     return onSnapshot(onNext = { snapshot ->
-        handlingErrors("onSnapshot for listener") {
+        handlingErrors("onSnapshot for list listener") {
             console.log("got a Firestore snapshot size=${snapshot.size}")
             block.invoke(snapshot.docs.map { it.data() })
         }
+    }, onError = { error ->
+        inContext("onSnapshot error for list listener") {
+            onError(error.unsafeCast<FirestoreError>())
+        }
     })
+}
+
+fun <E : WithID<E>> DocumentReference<E>.onSnapshot(
+    onError: (FirestoreError) -> Unit = { handleFirestoreError(it) },
+    block: (E?) -> Unit
+): Unsubscribe {
+    return onSnapshot(onNext = { snapshot ->
+        handlingErrors("onSnapshot for $path") {
+            block.invoke(snapshot.data())
+        }
+    }, onError = { error ->
+        inContext("onSnapshot error for $path") {
+            onError(error.unsafeCast<FirestoreError>())
+        }
+    })
+}
+
+fun <T> Promise<QuerySnapshot<T>>.then(
+    onError: (FirestoreError) -> Unit = { handleFirestoreError(it) },
+    onFulfilled: (QuerySnapshot<T>) -> Unit
+) {
+    then(
+        onFulfilled = onFulfilled,
+        onRejected = { inContext("QuerySnapshot.then") { onError(it.unsafeCast<FirestoreError>()) } }
+    )
+}
+
+fun handleFirestoreError(error: FirestoreError) {
+    handleError(error.message, error)
 }
 
 interface FirestoreEntityConverter<E : WithID<E>> : FirestoreDataConverter<E> {
