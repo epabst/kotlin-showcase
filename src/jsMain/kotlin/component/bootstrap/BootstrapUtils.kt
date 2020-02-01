@@ -11,6 +11,8 @@ import react.RElementBuilder
 import react.ReactElement
 import react.dom.option
 import util.emptyToNull
+import util.fromNaNtoNull
+import kotlin.js.Date
 
 private var nextControlId: Int = 10
 
@@ -117,6 +119,30 @@ fun RBuilder.currencyInput(label: String, value: Double?, onAnyChange: (Double?)
             }
         }
     }
+}
+
+fun RBuilder.dateInput(
+    label: String,
+    value: String?,
+    placeholder: String = "",
+    required: Boolean = false,
+    inputDescription: String = placeholder,
+    onValueChanged: (Date?) -> Unit
+) {
+    textInput(
+        label = label,
+        value = value,
+        type = "date",
+        placeholder = placeholder,
+        inputDescription = inputDescription,
+        required = required,
+        onValueChanged = { textOrNull ->
+            val date = textOrNull.emptyToNull()?.let { text ->
+                Date.parse(text).fromNaNtoNull()?.let { Date(it) }
+            }
+            onValueChanged(date)
+        }
+    )
 }
 
 fun <T> RBuilder.singleSelectInput(label: String?,

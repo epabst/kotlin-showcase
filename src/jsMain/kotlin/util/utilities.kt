@@ -12,6 +12,8 @@ fun String?.emptyToNull(): String? {
     return if (this == null || this.isEmpty()) null else this
 }
 
+fun Double?.fromNaNtoNull(): Double? = if (this == null || isNaN()) null else this
+
 fun <T> biasing(selector: (T) -> Boolean): Comparator<T> {
     return compareBy { !selector(it) }
 }
