@@ -254,11 +254,12 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
                             val matchingProviderId = providers.first()
 
                             val matchingProviderType = ProviderType.forProviderId(matchingProviderId)
-                            if (matchingProviderType.authProvider is AuthProviderWithCustomParameters) {
-                                matchingProviderType.authProvider.setCustomParameters(json("login_hint" to error.email))
+                            val authProvider = matchingProviderType.authProvider
+                            if (authProvider is AuthProviderWithCustomParameters) {
+                                authProvider.setCustomParameters(json("login_hint" to error.email))
                             }
 
-                            auth.signInWithPopup(matchingProviderType.authProvider).then(onFulfilled = { result ->
+                            auth.signInWithPopup(authProvider).then(onFulfilled = { result ->
                                 result.user?.linkWithCredential(newCredential)
                             }, onRejected = { error ->
                                 val authError = error.unsafeCast<AuthError>()
@@ -284,15 +285,17 @@ class AuthenticationLink(props: AuthenticationLinkProps) :
 
 enum class ProviderType(
     val imageUrl: String,
-    val authProvider: AuthProvider,
+    private val authProviderSource: () -> AuthProvider,
     val providerId: String
 ) {
-    Google("img/auth_service_google.svg", GoogleAuthProvider(), GoogleAuthProvider.PROVIDER_ID),
-    Facebook("img/auth_service_facebook.svg", FacebookAuthProvider(), FacebookAuthProvider.PROVIDER_ID),
-    Github("img/auth_service_github.svg", GithubAuthProvider(), GithubAuthProvider.PROVIDER_ID),
-    Phone("img/auth_service_phone.svg", PhoneAuthProvider(), PhoneAuthProvider.PROVIDER_ID),
-    Email("img/auth_service_email.svg", EmailAuthProvider(), EmailAuthProvider.PROVIDER_ID),
-    Twitter("img/auth_service_twitter.svg", TwitterAuthProvider(), TwitterAuthProvider.PROVIDER_ID);
+    Google("img/auth_service_google.svg", { GoogleAuthProvider() }, GoogleAuthProvider.PROVIDER_ID),
+    Facebook("img/auth_service_facebook.svg", { FacebookAuthProvider() }, FacebookAuthProvider.PROVIDER_ID),
+    Github("img/auth_service_github.svg", { GithubAuthProvider() }, GithubAuthProvider.PROVIDER_ID),
+    Phone("img/auth_service_phone.svg", { PhoneAuthProvider() }, PhoneAuthProvider.PROVIDER_ID),
+    Email("img/auth_service_email.svg", { EmailAuthProvider() }, EmailAuthProvider.PROVIDER_ID),
+    Twitter("img/auth_service_twitter.svg", { TwitterAuthProvider() }, TwitterAuthProvider.PROVIDER_ID);
+
+    val authProvider: AuthProvider by kotlin.lazy { authProviderSource() }
 
     companion object {
         fun forProviderIdOrNull(providerId: String): ProviderType? {
