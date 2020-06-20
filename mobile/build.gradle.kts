@@ -87,8 +87,8 @@ tasks {
         exclude("plugins/")
         exclude("node_modules/")
         exclude("hooks/before_prepare/")
-        archiveName = "PhoneGap.zip"
-        destinationDir = buildDir
+        archiveFileName.set("PhoneGap.zip")
+        destinationDirectory.set(buildDir)
     }
     makeZip.dependsOn(prepareMobile)
     build.dependsOn(makeZip)

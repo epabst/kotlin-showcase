@@ -11,7 +11,7 @@ Simple To-Do App.
 Search for "ZZZ" and replace it with the information for your custom app.
 
 Change the code to your hearts desire.
-You can supply initial data in src/jsMain/web/initial-data.json,
+You can supply initial data in src/jsMain/resources/initial-data.json,
 whether manually or by copying in the output from the backup button in the app 
 which exports the current state of the data. 
 
@@ -21,7 +21,7 @@ First run "./gradlew build" in this top-level directory.
 
 # How to Run from IntelliJ (v. 2017.1)
 
-In IntelliJ, right-click on src/jsMain/web/index.html and "Open in Browser".  Voila!
+In IntelliJ, right-click on src/jsMain/resources/index.html and "Open in Browser".  Voila!
 Note: This way works with Source Maps for debugging. 
 
 Alternative: If that doesn't work, go to build/public/index.html and "Open in Browser".

@@ -1,30 +1,28 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-}
-
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.3.60'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.4-M2'
 }
 repositories {
     mavenLocal()
     jcenter()
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     maven { url "https://dl.bintray.com/kotlin/kotlin-js-wrappers" }
+    maven { url "https://dl.bintray.com/kotlin/kotlin-eap" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
     mavenCentral()
 }
-def kotlin_version = '1.3.60'
-def ktor_version = '1.1.3'
+def kotlin_version = '1.4-M2'
+def ktor_version = "1.3.2-$kotlin_version"
 def logback_version = '1.2.3'
-def react_dom_version = "16.9.0-pre.88-kotlin-$kotlin_version"
-def react_router_dom_version = "4.3.1-pre.89-kotlin-$kotlin_version"
+def react_version = "16.13.0"
+def react_wrapper_version = "$react_version-pre.93-kotlin-$kotlin_version"
+def react_router_dom_version = "5.1.2-pre.105-kotlin-$kotlin_version-eap-83"
 def artifactName = rootProject.name
 
 kotlin {
     jvm()
     js {
         browser {
+            binaries.executable()
         }
         compilations.all {
             kotlinOptions {
@@ -65,9 +63,13 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.0-M2"
-                implementation "org.jetbrains:kotlin-react-dom:$react_dom_version"
-                implementation npm("react", "16.9.0") // used by kotlin-react-dom
-                implementation npm("react-dom", "16.9.0") // used by kotlin-react-dom
+                implementation "org.jetbrains:kotlin-react-dom:$react_wrapper_version"
+                implementation npm("react", react_version) // used by kotlin-react-dom
+                implementation npm("react-dom", react_version) // used by kotlin-react-dom
+                implementation npm("react-is", react_version) // used by kotlin-react-dom
+                implementation "org.jetbrains:kotlin-styled:1.0.0-pre.107-kotlin-$kotlin_version"
+                implementation npm("styled-components","5.0.0")
+                implementation npm("inline-style-prefixer","5.1.0")
                 implementation npm("core-js", "3.1.4") // used by kotlin-react-dom
                 implementation npm("text-encoding", "0.7.0") // used by ktor-client-js
                 implementation "io.ktor:ktor-client-core:$ktor_version"
@@ -79,6 +81,7 @@ kotlin {
                 implementation npm("numeral", "2.0.6")
                 implementation "org.jetbrains:kotlin-react-router-dom:$react_router_dom_version"
                 implementation npm("react-router-dom", "5.1.2")
+                implementation npm("abort-controller", "3.0.0")
             }
         }
         jsTest {
@@ -91,8 +94,8 @@ kotlin {
 }
 
 jvmJar {
-    dependsOn(jsBrowserWebpack)
-    from(new File(jsBrowserWebpack.entry.name, jsBrowserWebpack.outputPath))
+//     dependsOn(jsBrowserWebpack)
+//     from(new File(jsBrowserWebpack.entry.name, jsBrowserWebpack.outputPath))
 }
 
 task run(type: JavaExec, dependsOn: [jvmJar]) {
@@ -105,7 +108,7 @@ task run(type: JavaExec, dependsOn: [jvmJar]) {
 task copyDependenciesToPublic(type: Copy) {
     dependsOn(jsBrowserWebpack)
     def regex = ~/(?:src|href)=\"..\/..\/(build\/js\/node_modules)\/([^\"]+)\"/
-    file("src/jsMain/web/index.html").readLines().each { String line ->
+    file("src/jsMain/resources/index.html").readLines().each { String line ->
         def matcher = regex.matcher(line)
         if (matcher.find()) {
             from(matcher.group(1))
@@ -126,14 +129,14 @@ task copyDependenciesToPublic(type: Copy) {
 }
 
 task copyWebToPublicExceptHtml(type: Copy) {
-    from('src/jsMain/web')
+    from('src/jsMain/resources')
     include("**/*")
     exclude("index.html")
     into("build/public")
 }
 
 task copyHtmlToPublic(type: Copy) {
-    from("src/jsMain/web")
+    from("src/jsMain/resources")
     include("index.html")
     into("build/public")
     outputs.upToDateWhen { false }
