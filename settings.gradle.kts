@@ -3,10 +3,10 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            url 'https://dl.bintray.com/kotlin/kotlin-eap'
+            url = uri("https://dl.bintray.com/kotlin/kotlin-eap")
         }
     }
 
 }
-rootProject.name = 'kotlin-showcase'
+rootProject.name = "kotlin-showcase"
 include("mobile")
