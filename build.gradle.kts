@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
 plugins {
@@ -51,7 +52,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.0-M2")
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.0-M2")
             }
         }
         commonTest {
@@ -79,6 +80,8 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.0-M2")
                 implementation("org.jetbrains:kotlin-react-dom:$reactWrapperVersion")
+                implementation(npm("pouchdb", "7.2.1"))
+                implementation(npm("@types/pouchdb", "6.4.0"))
                 implementation(npm("react", reactVersion)) // used by kotlin-react-dom
                 implementation(npm("react-dom", reactVersion)) // used by kotlin-react-dom
                 implementation(npm("react-is", reactVersion)) // used by kotlin-react-dom
@@ -173,3 +176,7 @@ val copyToPublic by tasks.registering {
 }
 
 tasks["assemble"].dependsOn(copyToPublic)
+
+NodeJsRootPlugin.apply(project).apply {
+    versions.dukat.version = "0.0.21"
+}
