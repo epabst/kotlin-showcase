@@ -2,11 +2,11 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION",
     "DEPRECATION"
 )
-package PouchDB.Core
+package pouchdb.core
 
-import PouchDB.Content
-import PouchDB.Document
-import PouchDB.EventEmitter
+import pouchdb.Content
+import pouchdb.Document
+import pouchdb.EventEmitter
 import kotlin.js.*
 import kotlin.js.Json
 
@@ -35,7 +35,7 @@ external interface Error {
 }
 
 external interface Options {
-    var fetch: PouchDB.Fetch?
+    var fetch: pouchdb.Fetch?
         get() = definedExternally
         set(value) = definedExternally
 }
@@ -355,7 +355,7 @@ external interface ChangesOptions {
     var view: String?
         get() = definedExternally
         set(value) = definedExternally
-    var selector: PouchDB.Find.Selector?
+    var selector: pouchdb.find.Selector?
         get() = definedExternally
         set(value) = definedExternally
     var return_docs: Boolean?

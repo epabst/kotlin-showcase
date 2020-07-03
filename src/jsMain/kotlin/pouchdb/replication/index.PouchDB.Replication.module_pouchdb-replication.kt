@@ -1,9 +1,9 @@
 @file:JsQualifier("PouchDB.Replication")
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
-package PouchDB.Replication
+package pouchdb.replication
 
-import PouchDB.EventEmitter
-import PouchDB.ExistingDocument
+import pouchdb.EventEmitter
+import pouchdb.ExistingDocument
 import kotlin.js.*
 import kotlin.js.Json
 
@@ -26,7 +26,7 @@ external interface ReplicateOptions {
     var view: String?
         get() = definedExternally
         set(value) = definedExternally
-    var selector: PouchDB.Find.Selector?
+    var selector: pouchdb.find.Selector?
         get() = definedExternally
         set(value) = definedExternally
     var since: Any?

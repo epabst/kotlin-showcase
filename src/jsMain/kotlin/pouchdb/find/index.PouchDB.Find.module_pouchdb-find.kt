@@ -2,9 +2,9 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION",
     "DEPRECATION"
 )
-package PouchDB.Find
+package pouchdb.find
 
-import PouchDB.ExistingDocument
+import pouchdb.ExistingDocument
 import kotlin.js.*
 
 external interface ConditionOperators {

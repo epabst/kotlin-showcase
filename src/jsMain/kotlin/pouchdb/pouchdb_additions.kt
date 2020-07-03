@@ -1,4 +1,6 @@
-package PouchDB
+@file:Suppress("unused", "UNUSED_TYPEALIAS_PARAMETER")
+
+package pouchdb
 
 typealias Content = Any
 
