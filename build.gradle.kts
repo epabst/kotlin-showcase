@@ -52,7 +52,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.0-M2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.0-M2")
             }
         }
         commonTest {
