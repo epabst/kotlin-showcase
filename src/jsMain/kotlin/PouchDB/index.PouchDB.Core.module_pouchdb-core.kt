@@ -1,21 +1,14 @@
 @file:JsQualifier("PouchDB.Core")
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION",
+    "DEPRECATION"
+)
 package PouchDB.Core
 
+import PouchDB.Content
+import PouchDB.Document
+import PouchDB.EventEmitter
 import kotlin.js.*
 import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
 
 external interface Error {
     var status: Number?
@@ -41,10 +34,8 @@ external interface Error {
         set(value) = definedExternally
 }
 
-external interface Fetch
-
 external interface Options {
-    var fetch: Fetch?
+    var fetch: PouchDB.Fetch?
         get() = definedExternally
         set(value) = definedExternally
 }
@@ -64,7 +55,7 @@ external interface DatabaseInfo {
     var update_seq: dynamic /* Number | String */
 }
 
-external interface Revision<Content : Any> {
+external interface Revision<Content > {
     var ok: Content /* Content & IdMeta */
 }
 
@@ -250,8 +241,6 @@ external interface `T$2` {
         set(value) = definedExternally
 }
 
-external interface Content
-
 external interface `T$3` {
     var doc: Document<Content /* Content & AllDocsMeta */> /* Content & RevisionIdMeta */
     var id: DocumentId
@@ -259,7 +248,7 @@ external interface `T$3` {
     var value: `T$2`
 }
 
-external interface AllDocsResponse<Content : Any> {
+external interface AllDocsResponse<Content > {
     var offset: Number
     var total_rows: Number
     var update_seq: dynamic /* Number | String */
@@ -307,7 +296,7 @@ external interface `T$7` {
     var docs: Array<dynamic /* `T$5` | `T$6` */>
 }
 
-external interface BulkGetResponse<Content : Any> {
+external interface BulkGetResponse<Content > {
     var results: Array<`T$7`>
 }
 
@@ -366,7 +355,7 @@ external interface ChangesOptions {
     var view: String?
         get() = definedExternally
         set(value) = definedExternally
-    var selector: Find.Selector?
+    var selector: PouchDB.Find.Selector?
         get() = definedExternally
         set(value) = definedExternally
     var return_docs: Boolean?
@@ -387,7 +376,7 @@ external interface `T$8` {
     var rev: String
 }
 
-external interface ChangesResponseChange<Content : Any> {
+external interface ChangesResponseChange<Content > {
     var id: String
     var seq: dynamic /* Number | String */
     var changes: Array<`T$8`>
@@ -397,16 +386,16 @@ external interface ChangesResponseChange<Content : Any> {
     var doc: Document<Content /* Content & ChangesMeta */> /* Content & RevisionIdMeta */
 }
 
-external interface ChangesResponse<Content : Any> {
+external interface ChangesResponse<Content > {
     var status: String
     var last_seq: dynamic /* Number | String */
     var results: Array<ChangesResponseChange<Content>>
 }
 
-external interface Changes<Content : Any> : EventEmitter, Promise<ChangesResponse<Content>> {
-    fun on(event: String /* 'change' */, listener: (value: ChangesResponseChange<Content>) -> Any): Changes<Content<Any>> /* this */
-    fun on(event: String /* 'complete' */, listener: (value: ChangesResponse<Content>) -> Any): Changes<Content<Any>> /* this */
-    fun on(event: String /* 'error' */, listener: (value: Any) -> Any): Changes<Content<Any>> /* this */
+external interface Changes<Content > : EventEmitter, Promise<ChangesResponse<Content>> {
+    fun on(event: String /* 'change' */, listener: (value: ChangesResponseChange<Content>) -> Any): Changes<Content> /* this */
+    fun on(event: String /* 'complete' */, listener: (value: ChangesResponse<Content>) -> Any): Changes<Content> /* this */
+    fun on(event: String /* 'error' */, listener: (value: Any) -> Any): Changes<Content> /* this */
     fun cancel()
 }
 

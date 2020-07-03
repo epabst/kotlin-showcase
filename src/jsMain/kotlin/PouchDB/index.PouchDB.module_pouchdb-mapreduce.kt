@@ -17,22 +17,22 @@ import org.w3c.performance.*
 import org.w3c.workers.*
 import org.w3c.xhr.*
 
-external interface Filter<Content : Any, Reduction> {
+external interface Filter<Content, Reduction> {
     var map: Map<Content, Reduction>
     var reduce: dynamic /* Reducer<Content, Reduction> | '_sum' | '_count' | '_stats' | String */
         get() = definedExternally
         set(value) = definedExternally
 }
 
-external interface Database<Content : Any> {
-    fun viewCleanup(callback: Core.Callback<Core.BasicResponse>)
-    fun viewCleanup(): Promise<Core.BasicResponse>
-    fun <Result, Model> query(`fun`: String, opts: PouchDB.Query.Options<Model, Result>, callback: Core.Callback<PouchDB.Query.Response<Result>>)
-    fun <Result, Model> query(`fun`: Map<Model, Result>, opts: PouchDB.Query.Options<Model, Result>, callback: Core.Callback<PouchDB.Query.Response<Result>>)
-    fun <Result, Model> query(`fun`: Filter<Model, Result>, opts: PouchDB.Query.Options<Model, Result>, callback: Core.Callback<PouchDB.Query.Response<Result>>)
-    fun <Result, Model> query(`fun`: String, callback: Core.Callback<PouchDB.Query.Response<Result>>)
-    fun <Result, Model> query(`fun`: Map<Model, Result>, callback: Core.Callback<PouchDB.Query.Response<Result>>)
-    fun <Result, Model> query(`fun`: Filter<Model, Result>, callback: Core.Callback<PouchDB.Query.Response<Result>>)
+external interface DatabaseWithMapReduce<Content> : DatabaseWithReplication<Content> {
+    fun viewCleanup(callback: PouchDB.Core.Callback<PouchDB.Core.BasicResponse>)
+    fun viewCleanup(): Promise<PouchDB.Core.BasicResponse>
+    fun <Result, Model> query(`fun`: String, opts: PouchDB.Query.Options<Model, Result>, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
+    fun <Result, Model> query(`fun`: Map<Model, Result>, opts: PouchDB.Query.Options<Model, Result>, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
+    fun <Result, Model> query(`fun`: Filter<Model, Result>, opts: PouchDB.Query.Options<Model, Result>, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
+    fun <Result, Model> query(`fun`: String, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
+    fun <Result, Model> query(`fun`: Map<Model, Result>, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
+    fun <Result, Model> query(`fun`: Filter<Model, Result>, callback: PouchDB.Core.Callback<PouchDB.Query.Response<Result>>)
     fun <Result, Model> query(`fun`: String, opts: PouchDB.Query.Options<Model, Result> = definedExternally /* null */): Promise<PouchDB.Query.Response<Result>>
     fun <Result, Model> query(`fun`: Map<Model, Result>, opts: PouchDB.Query.Options<Model, Result> = definedExternally /* null */): Promise<PouchDB.Query.Response<Result>>
     fun <Result, Model> query(`fun`: Filter<Model, Result>, opts: PouchDB.Query.Options<Model, Result> = definedExternally /* null */): Promise<PouchDB.Query.Response<Result>>

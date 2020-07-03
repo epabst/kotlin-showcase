@@ -1,5 +1,7 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
 
+package PouchDB
+
 import kotlin.js.*
 import kotlin.js.Json
 import org.khronos.webgl.*
@@ -19,7 +21,7 @@ inline var Blob.size: Number get() = this.asDynamic().size; set(value) { this.as
 
 inline var Blob.type: String get() = this.asDynamic().type; set(value) { this.asDynamic().type = value }
 
-inline fun Blob.slice(start: Number? = definedExternally /* null */, end: Number? = definedExternally /* null */, contentType: String? = definedExternally /* null */): Blob = this.asDynamic().slice(start, end, contentType)
+inline fun Blob.slice(start: Number? = null, end: Number? = null, contentType: String? = null): Blob = this.asDynamic().slice(start, end, contentType)
 
 external interface `T$0` {
     var type: String /* 'Buffer' */
@@ -33,7 +35,7 @@ external interface Buffer : Uint8Array {
     fun equals(otherBuffer: Buffer): Boolean
     fun compare(otherBuffer: Buffer, targetStart: Number? = definedExternally /* null */, targetEnd: Number? = definedExternally /* null */, sourceStart: Number? = definedExternally /* null */, sourceEnd: Number? = definedExternally /* null */): Number
     fun copy(targetBuffer: Buffer, targetStart: Number? = definedExternally /* null */, sourceStart: Number? = definedExternally /* null */, sourceEnd: Number? = definedExternally /* null */): Number
-    override fun slice(start: Number?, end: Number?): Buffer
+    fun slice(start: Number?, end: Number?): Buffer
     fun writeUIntLE(value: Number, offset: Number, byteLength: Number, noAssert: Boolean? = definedExternally /* null */): Number
     fun writeUIntBE(value: Number, offset: Number, byteLength: Number, noAssert: Boolean? = definedExternally /* null */): Number
     fun writeIntLE(value: Number, offset: Number, byteLength: Number, noAssert: Boolean? = definedExternally /* null */): Number
@@ -116,5 +118,3 @@ external interface EventEmitter {
 }
 
 typealias Fetch = (url: dynamic /* String | Request */, opts: RequestInit? /* = null */) -> Promise<Response>
-
-external var PouchDB: PouchDB.Static

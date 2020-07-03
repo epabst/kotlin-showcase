@@ -2,20 +2,10 @@
 @file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
 package PouchDB.Replication
 
+import PouchDB.EventEmitter
+import PouchDB.ExistingDocument
 import kotlin.js.*
 import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
 
 external interface ReplicateOptions {
     var live: Boolean?
@@ -36,7 +26,7 @@ external interface ReplicateOptions {
     var view: String?
         get() = definedExternally
         set(value) = definedExternally
-    var selector: Find.Selector?
+    var selector: PouchDB.Find.Selector?
         get() = definedExternally
         set(value) = definedExternally
     var since: Any?
@@ -61,19 +51,19 @@ external interface ReplicateOptions {
         set(value) = definedExternally
 }
 
-external interface ReplicationEventEmitter<Content : Any, C, F> : EventEmitter {
-    fun on(event: String /* 'change' */, listener: (info: C) -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
-    fun on(event: String /* 'paused' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
-    fun on(event: String /* 'denied' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
-    fun on(event: String /* 'error' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
-    fun on(event: String /* 'active' */, listener: () -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
-    fun on(event: String /* 'complete' */, listener: (info: F) -> Any): ReplicationEventEmitter<Content<Any>, C, F> /* this */
+external interface ReplicationEventEmitter<Content, C, F> : EventEmitter {
+    fun on(event: String /* 'change' */, listener: (info: C) -> Any): ReplicationEventEmitter<Content, C, F> /* this */
+    fun on(event: String /* 'paused' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content, C, F> /* this */
+    fun on(event: String /* 'denied' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content, C, F> /* this */
+    fun on(event: String /* 'error' */, listener: (err: Any) -> Any): ReplicationEventEmitter<Content, C, F> /* this */
+    fun on(event: String /* 'active' */, listener: () -> Any): ReplicationEventEmitter<Content, C, F> /* this */
+    fun on(event: String /* 'complete' */, listener: (info: F) -> Any): ReplicationEventEmitter<Content, C, F> /* this */
     fun cancel()
 }
 
-external interface Replication<Content : Any> : ReplicationEventEmitter<Content, ReplicationResult<Content>, ReplicationResultComplete<Content>>, Promise<ReplicationResultComplete<Content>>
+external interface Replication<Content > : ReplicationEventEmitter<Content, ReplicationResult<Content>, ReplicationResultComplete<Content>>, Promise<ReplicationResultComplete<Content>>
 
-external interface ReplicationResult<Content : Any> {
+external interface ReplicationResult<Content > {
     var doc_write_failures: Number
     var docs_read: Number
     var docs_written: Number
@@ -81,10 +71,10 @@ external interface ReplicationResult<Content : Any> {
     var start_time: Date
     var ok: Boolean
     var errors: Array<Any>
-    var docs: Array<Core.ExistingDocument<Content>>
+    var docs: Array<ExistingDocument<Content>>
 }
 
-external interface ReplicationResultComplete<Content : Any> : ReplicationResult<Content> {
+external interface ReplicationResultComplete<Content> : ReplicationResult<Content> {
     var end_time: Date
     var status: String
 }
@@ -98,14 +88,14 @@ external interface SyncOptions : ReplicateOptions {
         set(value) = definedExternally
 }
 
-external interface Sync<Content : Any> : ReplicationEventEmitter<Content, SyncResult<Content>, SyncResultComplete<Content>>, Promise<SyncResultComplete<Content>>
+external interface Sync<Content > : ReplicationEventEmitter<Content, SyncResult<Content>, SyncResultComplete<Content>>, Promise<SyncResultComplete<Content>>
 
-external interface SyncResult<Content : Any> {
+external interface SyncResult<Content > {
     var direction: dynamic /* 'push' | 'pull' */
     var change: ReplicationResult<Content>
 }
 
-external interface SyncResultComplete<Content : Any> {
+external interface SyncResultComplete<Content > {
     var push: ReplicationResultComplete<Content>?
         get() = definedExternally
         set(value) = definedExternally

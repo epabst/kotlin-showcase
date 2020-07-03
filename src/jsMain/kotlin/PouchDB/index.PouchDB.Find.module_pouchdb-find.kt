@@ -1,21 +1,11 @@
 @file:JsQualifier("PouchDB.Find")
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION")
+@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS", "EXTERNAL_DELEGATION",
+    "DEPRECATION"
+)
 package PouchDB.Find
 
+import PouchDB.ExistingDocument
 import kotlin.js.*
-import kotlin.js.Json
-import org.khronos.webgl.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
-import org.w3c.dom.parsing.*
-import org.w3c.dom.svg.*
-import org.w3c.dom.url.*
-import org.w3c.fetch.*
-import org.w3c.files.*
-import org.w3c.notifications.*
-import org.w3c.performance.*
-import org.w3c.workers.*
-import org.w3c.xhr.*
 
 external interface ConditionOperators {
     var `$lt`: Any?
@@ -105,7 +95,7 @@ external interface `T$0` {
     operator fun set(propName: String, value: String /* 'desc' */)
 }
 
-external interface FindRequest<Content : Any> {
+external interface FindRequest<Content > {
     var selector: Selector
     var fields: Array<String>?
         get() = definedExternally
@@ -124,8 +114,8 @@ external interface FindRequest<Content : Any> {
         set(value) = definedExternally
 }
 
-external interface FindResponse<Content : Any> {
-    var docs: Array<Core.ExistingDocument<Content>>
+external interface FindResponse<Content > {
+    var docs: Array<ExistingDocument<Content>>
     var warning: String?
         get() = definedExternally
         set(value) = definedExternally
@@ -148,7 +138,7 @@ external interface CreateIndexOptions {
     var index: `T$1`
 }
 
-external interface CreateIndexResponse<Content : Any> {
+external interface CreateIndexResponse<Content > {
     var result: String
 }
 
@@ -170,7 +160,7 @@ external interface Index {
     var def: `T$3`
 }
 
-external interface GetIndexesResponse<Content : Any> {
+external interface GetIndexesResponse<Content > {
     var indexes: Array<Index>
 }
 
@@ -182,7 +172,7 @@ external interface DeleteIndexOptions {
         set(value) = definedExternally
 }
 
-external interface DeleteIndexResponse<Content : Any> {
+external interface DeleteIndexResponse<Content > {
     @nativeGetter
     operator fun get(propertyName: String): Any?
     @nativeSetter

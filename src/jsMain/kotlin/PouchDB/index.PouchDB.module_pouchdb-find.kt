@@ -17,13 +17,13 @@ import org.w3c.performance.*
 import org.w3c.workers.*
 import org.w3c.xhr.*
 
-external interface Database<Content : Any> {
-    fun find(request: PouchDB.Find.FindRequest<Content>, callback: Core.Callback<PouchDB.Find.FindResponse<Content>>)
+external interface DatabaseWithFind<Content> : DatabaseWithMapReduce<Content> {
+    fun find(request: PouchDB.Find.FindRequest<Content>, callback: PouchDB.Core.Callback<PouchDB.Find.FindResponse<Content>>)
     fun find(request: PouchDB.Find.FindRequest<Content> = definedExternally /* null */): Promise<PouchDB.Find.FindResponse<Content>>
-    fun createIndex(index: PouchDB.Find.CreateIndexOptions, callback: Core.Callback<PouchDB.Find.CreateIndexResponse<Content>>)
+    fun createIndex(index: PouchDB.Find.CreateIndexOptions, callback: PouchDB.Core.Callback<PouchDB.Find.CreateIndexResponse<Content>>)
     fun createIndex(index: PouchDB.Find.CreateIndexOptions = definedExternally /* null */): Promise<PouchDB.Find.CreateIndexResponse<Content>>
-    fun getIndexes(callback: Core.Callback<PouchDB.Find.GetIndexesResponse<Content>>)
+    fun getIndexes(callback: PouchDB.Core.Callback<PouchDB.Find.GetIndexesResponse<Content>>)
     fun getIndexes(): Promise<PouchDB.Find.GetIndexesResponse<Content>>
-    fun deleteIndex(index: PouchDB.Find.DeleteIndexOptions, callback: Core.Callback<PouchDB.Find.DeleteIndexResponse<Content>>)
+    fun deleteIndex(index: PouchDB.Find.DeleteIndexOptions, callback: PouchDB.Core.Callback<PouchDB.Find.DeleteIndexResponse<Content>>)
     fun deleteIndex(index: PouchDB.Find.DeleteIndexOptions = definedExternally /* null */): Promise<PouchDB.Find.DeleteIndexResponse<Content>>
 }
