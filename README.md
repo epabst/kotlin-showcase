@@ -15,17 +15,17 @@ You can supply initial data in src/jsMain/resources/initial-data.json,
 whether manually or by copying in the output from the backup button in the app 
 which exports the current state of the data. 
 
-# How to Build
+# How to build to Run
 
-First run "./gradlew build" in this top-level directory.
+Run "./gradlew jsBrowserDevelopmentWebpack"
 
-# How to Run from IntelliJ (v. 2017.1)
-
-In IntelliJ, right-click on src/jsMain/resources/index.html and "Open in Browser".  Voila!
-Note: This way works with Source Maps for debugging. 
+Then open build/distributions/index.html in a browser.
 
 Alternative: If that doesn't work, go to build/public/index.html and "Open in Browser".
-Note: This one works with Source Maps for debugging. 
+
+# How to do a full Build
+
+Run "./gradlew build" in this top-level directory.
 
 # How to deploy to firebase hosting
 
@@ -47,6 +47,7 @@ Build the mobile app and make sure it has basic functionality.
 # Credit
 Thank you to the following frameworks, tools, libraries, and languages:
 * Kotlin - http://kotlinlang.org/
+* React - https://reactjs.org/
 * Twitter Bootstrap - http://getbootstrap.com/
 * pickadate.js - http://amsul.ca/pickadate.js/ 
 * Javascript - http://javascript.com/

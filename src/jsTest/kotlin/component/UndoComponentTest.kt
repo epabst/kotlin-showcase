@@ -1,8 +1,8 @@
 package component
 
-import component.repository.EntityForTesting
-import component.repository.LocalStorageRepositoryForTesting
-import component.repository.RepositoryListener
+import component.entity.EntityForTesting
+import component.entity.ID
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
@@ -18,72 +18,54 @@ import kotlin.test.Test
  */
 @Suppress("unused")
 class UndoComponentTest {
-    val repository: LocalStorageRepositoryForTesting
-    init {
-        repository = LocalStorageRepositoryForTesting
-        UndoComponent.watch(repository)
-    }
 
     @Test
     fun itShouldAllowCreateUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
-        val newId = repository.save(null, EntityForTesting("George"))
-        repository.find(newId).mustNotBe(null)
+        val newId = doUndoableCreate(null, EntityForTesting("George"))
+        read(newId).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.undo()
-        repository.find(newId).mustBe(null)
+        read(newId).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(0)
 
         UndoComponent.redo()
-        repository.find(newId).mustNotBe(null)
+        read(newId).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.undo()
-        repository.find(newId).mustBe(null)
+        read(newId).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(0)
 
         UndoComponent.redo()
-        repository.find(newId).mustNotBe(null)
+        read(newId).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
     }
 
     @Test
     fun itShouldAllowDeleteUndoRedoUndoRedo() = runTest {
-        repository.addListener(object : RepositoryListener<EntityForTesting> {
-            override suspend fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                console.info(if (original == null) "created $replacementWithID" else "updated to $replacementWithID")
-            }
-
-            override suspend fun onRemoved(item: EntityForTesting) {
-                console.info("deleted $item")
-            }
-
-            override suspend fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
-            }
-        })
-
         val originalUndoCount = UndoComponent.undoCount
-        val newId = repository.save(null, EntityForTesting("George"))
+        val newId = doUndoableCreate(null, EntityForTesting("George"))
 
-        repository.remove(newId)
-        repository.find(newId).mustBe(null)
+        doUndoableDelete(newId)
+        read(newId).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.undo()
-        repository.find(newId).mustNotBe(null)
+        read(newId).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.redo()
-        repository.find(newId).mustBe(null)
+        read(newId).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.undo()
-        repository.find(newId).mustNotBe(null)
+        read(newId).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.redo()
-        repository.find(newId).mustBe(null)
+        read(newId).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
     }
 
@@ -91,27 +73,27 @@ class UndoComponentTest {
     fun itShouldAllowUpdateUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
         val originalValue = EntityForTesting("George")
-        val newId = repository.save(null, originalValue)
+        val newId = doUndoableCreate(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
 
-        repository.save(originalValueWithId, EntityForTesting("Harry"))
-        repository.find(newId)?.name.mustBe("Harry")
+        doUndoableCreate(originalValueWithId, EntityForTesting("Harry"))
+        read(newId)?.name.mustBe("Harry")
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.undo()
-        repository.find(newId)?.name.mustBe("George")
+        read(newId)?.name.mustBe("George")
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.redo()
-        repository.find(newId)?.name.mustBe("Harry")
+        read(newId)?.name.mustBe("Harry")
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.undo()
-        repository.find(newId)?.name.mustBe("George")
+        read(newId)?.name.mustBe("George")
         (UndoComponent.undoCount - originalUndoCount).mustBe(1)
 
         UndoComponent.redo()
-        repository.find(newId)?.name.mustBe("Harry")
+        read(newId)?.name.mustBe("Harry")
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
     }
 
@@ -119,54 +101,54 @@ class UndoComponentTest {
     fun itShouldAllowBatchUndoRedoUndoRedo() = runTest {
         val originalUndoCount = UndoComponent.undoCount
         val originalValue = EntityForTesting("George")
-        val newId = repository.save(null, originalValue)
+        val newId = doUndoableCreate(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
 
-        val newId2 = repository.save(null, EntityForTesting("Bob"))
+        val newId2 = doUndoableCreate(null, EntityForTesting("Bob"))
 
         UndoComponent.undoable("batch", "undo batch") {
-            repository.save(originalValueWithId, EntityForTesting("Harry"))
-            repository.remove(newId2)
+            doUndoableCreate(originalValueWithId, EntityForTesting("Harry"))
+            doUndoableDelete(newId2)
         }
 
-        repository.find(newId)?.name.mustBe("Harry")
-        repository.find(newId2).mustBe(null)
+        read(newId)?.name.mustBe("Harry")
+        read(newId2).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(3)
 
         UndoComponent.undo()
-        repository.find(newId)?.name.mustBe("George")
-        repository.find(newId2).mustNotBe(null)
+        read(newId)?.name.mustBe("George")
+        read(newId2).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.redo()
-        repository.find(newId)?.name.mustBe("Harry")
-        repository.find(newId2).mustBe(null)
+        read(newId)?.name.mustBe("Harry")
+        read(newId2).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(3)
 
         UndoComponent.undo()
-        repository.find(newId)?.name.mustBe("George")
-        repository.find(newId2).mustNotBe(null)
+        read(newId)?.name.mustBe("George")
+        read(newId2).mustNotBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(2)
 
         UndoComponent.redo()
-        repository.find(newId)?.name.mustBe("Harry")
-        repository.find(newId2).mustBe(null)
+        read(newId)?.name.mustBe("Harry")
+        read(newId2).mustBe(null)
         (UndoComponent.undoCount - originalUndoCount).mustBe(3)
     }
 
     @Test
     fun itShouldSupportNotAllowingUndoing() = runTest {
         val originalValue = EntityForTesting("George")
-        val newId = repository.save(null, originalValue)
+        val newId = doUndoableCreate(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
 
-        val newId2 = repository.save(EntityForTesting("Bob"))
+        val newId2 = doUndoableCreate(EntityForTesting("Bob"))
 
         val originalUndoCount = UndoComponent.undoCount
 
         UndoComponent.notUndoable {
-            repository.save(originalValueWithId, EntityForTesting("Harry"))
-            repository.remove(newId2)
+            doUndoableCreate(originalValueWithId, EntityForTesting("Harry"))
+            doUndoableDelete(newId2)
         }
 
         (UndoComponent.undoCount - originalUndoCount).mustBe(0)
@@ -175,22 +157,22 @@ class UndoComponentTest {
     @Test
     fun itShouldHandleUpdatingTheSameEntityTwice() = runTest {
         val originalValue = EntityForTesting("George")
-        val newId = repository.save(null, originalValue)
+        val newId = doUndoableCreate(null, originalValue)
         val originalValueWithId = originalValue.withID(newId)
 
         UndoComponent.undoable("did batch", "undid batch") {
             val updatedValue = originalValueWithId.copy("Bob")
-            repository.save(originalValueWithId, updatedValue)
-            repository.save(updatedValue, updatedValue.copy("Harry"))
+            doUndoableCreate(originalValueWithId, updatedValue)
+            doUndoableCreate(updatedValue, updatedValue.copy("Harry"))
         }
 
-        repository.find(newId)?.name.mustBe("Harry")
+        read(newId)?.name.mustBe("Harry")
 
         UndoComponent.undo()
-        repository.find(newId)?.name.mustBe("George")
+        read(newId)?.name.mustBe("George")
 
         UndoComponent.redo()
-        repository.find(newId)?.name.mustBe("Harry")
+        read(newId)?.name.mustBe("Harry")
     }
 
     @Test
@@ -206,29 +188,81 @@ class UndoComponentTest {
 
     @Test
     fun itShouldUndoCommandsInReverseOrderAndRedoInOriginalOrder() = runTest {
-        repository.addListener(object : RepositoryListener<EntityForTesting> {
-            override suspend fun onSaved(original: EntityForTesting?, replacementWithID: EntityForTesting) {
-                if (replacementWithID.name == "Adam") {
-                    repository.list().find { it.name == "Eve" }.mustBe(null)
-                }
-            }
-
-            override suspend fun onRemoved(item: EntityForTesting) {
-                if (item.name == "Eve") {
-                    repository.list().find { it.name == "Adam" }.mustNotBe(null)
-                }
-            }
-
-            override suspend fun onVisibilityChanged(item: EntityForTesting, visible: Boolean) {
-            }
-        })
-
         UndoComponent.undoable("Ordered Operations", "Undo Ordered Operations") {
-            repository.save(EntityForTesting("Adam"))
-            repository.save(EntityForTesting("Eve"))
+            doUndoableCreate(EntityForTesting("Adam"))
+            doUndoableCreate(EntityForTesting("Eve"))
         }
         UndoComponent.undo()
         UndoComponent.redo()
+        storage.values.toList().map { it.name }.mustBe(listOf("Adam", "Eve"))
+    }
+
+    private val nextId = atomic(100L)
+    val storage = mutableMapOf<ID<EntityForTesting>, EntityForTesting>()
+
+    private fun doUndoableCreate(entityForTesting: EntityForTesting): ID<EntityForTesting> {
+        return doUndoableCreate(null, entityForTesting)
+    }
+
+    private fun doUndoableCreate(previousValue: EntityForTesting?, entityForTesting: EntityForTesting): ID<EntityForTesting> {
+        val newValue = entityForTesting.withID(entityForTesting.id ?: previousValue?.id ?: ID(nextId.incrementAndGet()))
+        val priorValue = storage.put(newValue.requiredId, newValue)
+
+        if (priorValue != null) {
+            UndoComponent.addUndoCommand(object : Command("Reverted $newValue to $priorValue") {
+                private val self = this
+
+                override suspend fun executeAndGetOpposite(): Command {
+                    storage[newValue.requiredId] = priorValue
+                    return object : Command("Saved $newValue") {
+                        override suspend fun executeAndGetOpposite(): Command {
+                            storage[newValue.requiredId] = newValue
+                            return self
+                        }
+                    }
+                }
+            })
+        } else {
+            UndoComponent.addUndoCommand(object : Command("Deleted $newValue") {
+                private val self = this
+
+                override suspend fun executeAndGetOpposite(): Command {
+                    storage.remove(newValue.requiredId)
+                    return object : Command("Added $newValue") {
+                        override suspend fun executeAndGetOpposite(): Command {
+                            storage[newValue.requiredId] = newValue
+                            return self
+                        }
+                    }
+                }
+            })
+        }
+
+        return newValue.requiredId
+    }
+
+    private fun doUndoableDelete(id: ID<EntityForTesting>) {
+        val removedValue = storage.remove(id)
+        if (removedValue != null) {
+            val readdCommand = object : Command("Added $removedValue") {
+                private val self = this
+
+                override suspend fun executeAndGetOpposite(): Command {
+                    storage[id] = removedValue
+                    return object : Command("Removed $removedValue") {
+                        override suspend fun executeAndGetOpposite(): Command {
+                            storage.remove(id)
+                            return self
+                        }
+                    }
+                }
+            }
+            UndoComponent.addUndoCommand(readdCommand)
+        }
+    }
+
+    private fun read(id: ID<EntityForTesting>): EntityForTesting? {
+        return storage[id]
     }
 }
 

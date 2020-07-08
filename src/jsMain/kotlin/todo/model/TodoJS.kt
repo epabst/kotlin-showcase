@@ -1,8 +1,8 @@
 package todo.model
 
-import component.repository.IDJS
-import component.repository.toNormal
+import component.entity.*
 import platform.PlatformProvider
+import pouchdb.Document
 import util.emptyToNull
 
 /**
@@ -12,13 +12,16 @@ import util.emptyToNull
  * Time: 6:27 AM
  */
 
-external interface ToDoJS {
-    val name: String
-    val dueDateString: String?
-    val notes: String?
-    val createDateString: String?
-    val id: IDJS?
+@Suppress("PropertyName")
+abstract class ToDoJS : EntityJS<ToDo> {
+    abstract val name: String
+    abstract val dueDateString: String?
+    abstract val notes: String?
+    abstract val createDateString: String?
+    abstract val _id: String?
+    abstract val _rev: String?
 }
+
 
 fun ToDoJS.toNormal(): ToDo {
     return ToDo(
@@ -26,6 +29,9 @@ fun ToDoJS.toNormal(): ToDo {
         dueDateString = dueDateString,
         notes = notes.emptyToNull(),
         createDateString = createDateString ?: PlatformProvider.now().toIsoTimestampString(),
-        id = id?.toNormal()
+        _id = _id,
+        _rev = _rev
     )
 }
+
+fun Document<ToDoJS>.parse(): ToDo = this.unsafeCast<ToDoJS>().toNormal()

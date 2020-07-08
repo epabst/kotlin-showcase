@@ -241,7 +241,7 @@ external interface `T$2` {
         set(value) = definedExternally
 }
 
-external interface `T$3` {
+external interface Row<Content> {
     var doc: Document<Content /* Content & AllDocsMeta */> /* Content & RevisionIdMeta */
     var id: DocumentId
     var key: DocumentKey
@@ -254,7 +254,7 @@ external interface AllDocsResponse<Content > {
     var update_seq: dynamic /* Number | String */
         get() = definedExternally
         set(value) = definedExternally
-    var rows: Array<`T$3`>
+    var rows: Array<Row<Content>>
 }
 
 external interface BulkDocsOptions : Options {

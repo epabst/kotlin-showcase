@@ -1,21 +1,17 @@
 package todo
 
-import component.FileBackupComponent
-import component.UndoComponent
+import PouchDB
+import component.entity.create
 import platform.handleError
 import component.firebase.*
-import component.repository.LocalStorageRepository
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.w3c.dom.get
 import firebase.app.User
 import firebase.app.initializeApp
+import kotlinx.coroutines.await
 import todo.model.ToDo
 import todo.model.ToDoJS
 import todo.model.toNormal
-import kotlin.browser.localStorage
 import kotlin.js.json
 
 object Config {
@@ -35,20 +31,15 @@ object Config {
     }
     var user: User? = null
 
-    val toDoRepository = LocalStorageRepository<ToDo, ToDoJS>("toDos", "toDos") { it.toNormal() }
-    private val allRepositories = listOf(toDoRepository)
-    val fileBackupComponent = FileBackupComponent(appNameForFilesystem, allRepositories = allRepositories)
+    val toDoDb = PouchDB<ToDoJS>("toDos")
 
     init {
-        if (toDoRepository.localStorageKeys.all { localStorage[it] == null }) {
-            GlobalScope.launch {
-                val client = HttpClient()
-                val initialData = client.get<String>("initial-data.json")
-                fileBackupComponent.initializeData(initialData)
+        GlobalScope.launch {
+            if (toDoDb.allDocs().await().rows.isEmpty()) {
+                toDoDb.create(ToDo("Write down some to-dos"), ToDoJS::toNormal)
             }
         }
 
-        UndoComponent.watch(toDoRepository)
         firebaseApp?.auth()?.useDeviceLanguage()
         firebaseApp?.auth()?.onUserChanged { _, newUser ->
             if (newUser == null) {

@@ -4,7 +4,7 @@ package pouchdb
 
 typealias Content = Any
 
-typealias Document<T> = Any
+external interface Document<T>
 
 typealias PostDocument<T> = Any
 

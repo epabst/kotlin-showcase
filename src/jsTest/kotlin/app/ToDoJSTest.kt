@@ -3,10 +3,11 @@ package app
 import todo.model.ToDo
 import todo.model.ToDoJS
 import todo.model.toNormal
-import component.repository.LongJS
-import component.repository.toNormal
+import component.entity.LongJS
+import component.entity.toNormal
 import platform.PlatformProvider
-import component.repository.ID
+import component.entity.ID
+import component.entity.Revision
 import util.mustBe
 import kotlin.test.Test
 
@@ -22,9 +23,9 @@ class ToDoJSTest {
     @Test
     fun ToDoJS_shouldSerializeAndDeserialize() {
         val toDoId = ID<ToDo>(1234)
-        val originalToDo = ToDo("To-Do #1", PlatformProvider.now(), "some notes", PlatformProvider.now(), id = toDoId)
+        val originalToDo = ToDo("To-Do #1", PlatformProvider.now(), "some notes", PlatformProvider.now(), id = toDoId, rev = Revision("123"))
         val json = JSON.stringify(originalToDo)
-        val toDoJS: ToDoJS = JSON.parse(json)
+        val toDoJS = JSON.parse<ToDoJS>(json)
         toDoJS.toNormal().mustBe(originalToDo)
     }
 
@@ -34,7 +35,7 @@ class ToDoJSTest {
         val toDo2 = ToDo("To-Do #2", PlatformProvider.now(), "other notes", PlatformProvider.now(), id = ID(5678))
         val originalList = listOf(toDo1, toDo2)
         val json = JSON.stringify(originalList)
-        val toDos2: Array<ToDoJS> = JSON.parse<Array<ToDoJS>>(json)
+        val toDos2 = JSON.parse<Array<ToDoJS>>(json)
         toDos2.toList().map { it.toNormal() }.mustBe(originalList)
     }
 

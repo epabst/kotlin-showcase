@@ -1,9 +1,10 @@
 package component
 
-import component.repository.Repository
-import component.repository.RepositoryListener
-import component.repository.UndoProvider
-import component.repository.WithID
+import bootstrap.Button
+import component.entity.Closeable
+import component.entity.UndoProvider
+import platform.launchHandlingErrors
+import react.*
 
 /**
  * Support for undoing user actions.
@@ -13,13 +14,22 @@ import component.repository.WithID
  */
 object UndoComponent : UndoProvider {
     private var commandRecorder: CommandRecorder = NormalCommandRecorder
-    /** New commands are added at the end, calling [Property.set] each time. */
-    private val undoCommands: MutableList<Command> = mutableListOf()
+
     /** New commands are added at the end. */
-    private val redoCommands: MutableList<Command> = mutableListOf<Command>()
+    private val undoCommands: MutableList<Command> = mutableListOf()
+
+    /** New commands are added at the end. */
+    private val redoCommands: MutableList<Command> = mutableListOf()
 
     val undoCount: Int get() = undoCommands.size
     val redoCount: Int get() = redoCommands.size
+
+    private val listeners = mutableListOf<() -> Unit>()
+
+    fun addListener(listener: () -> Unit): Closeable {
+        listeners.add(listener)
+        return Closeable { listeners.remove(listener) }
+    }
 
     suspend fun undo() {
         notUndoable {
@@ -30,6 +40,7 @@ object UndoComponent : UndoProvider {
             console.info("$commandToUndo (undoing: $commandToUndo)")
             undoCommands.removeAt(index)
             redoCommands.add(redoCommand)
+            listeners.forEach { it.invoke() }
         }
     }
 
@@ -42,34 +53,27 @@ object UndoComponent : UndoProvider {
             console.info("$commandToRedo (redo)")
             redoCommands.removeAt(index)
             undoCommands.add(undoCommand)
+            listeners.forEach { it.invoke() }
         }
     }
-
-//    internal fun render(builder: RBuilder) {
-//        builder.apply {
-//            btsButton(size = ButtonSize.Default, look = ButtonLook.Default, onclick = { undo() }) {
-//                undoCommands.onNext {
-//                    visible = it.isNotEmpty()
-//                    disabled = it.isEmpty()
-//                }
-//                +"Undo"
-//            }
-//        }
-//    }
 
     /**
      * Group a series of Repository actions into a single UndoableGroup.
      * Without doing this, each repository action (save or remove)
      * will each be individually undoable.
      */
-    override suspend fun <T> undoable(pastTenseDescription: String, undoPastTenseDescription: String, function: suspend () -> T): T {
+    override suspend fun <T> undoable(
+        pastTenseDescription: String,
+        undoPastTenseDescription: String,
+        function: suspend () -> T
+    ): T {
         if (commandRecorder == NormalCommandRecorder) {
             val undoableGroup = UndoableGroup(pastTenseDescription, undoPastTenseDescription)
             commandRecorder = undoableGroup
             try {
                 val result = function()
                 if (!undoableGroup.isEmpty()) {
-                    addUndoCommand(undoableGroup)
+                    addTopLevelUndoCommand(undoableGroup)
                 }
                 return result
             } finally {
@@ -92,58 +96,23 @@ object UndoComponent : UndoProvider {
     }
 
     fun addUndoCommand(undoCommand: Command) {
-        redoCommands.clear()
-        undoCommands.add(undoCommand)
+        commandRecorder.addUndoCommandIfAppropriate(undoCommand)
     }
 
-    /** Watch changes to a given Repository for the purposes of undoing. */
-    fun <T : WithID<T>> watch(repository: Repository<T>) {
-        repository.addListener(object : RepositoryListener<T> {
-            override suspend fun onSaved(original: T?, replacementWithID: T) {
-                val isUpdate = original != null && original.getID() != null
-                commandRecorder.addUndoCommandIfAppropriate(object : Command(if (isUpdate) "Reverted $original" else "Deleted $replacementWithID") {
-                    override suspend fun executeAndGetOpposite(): Command {
-                        if (isUpdate) {
-                            repository.save(replacementWithID, original!!)
-                        } else {
-                            repository.remove(replacementWithID)
-                        }
-                        val undoCommand = this
-                        return object : Command(if (isUpdate) "Updated $original" else "Added $replacementWithID") {
-                            override suspend fun executeAndGetOpposite(): Command {
-                                repository.save(original, replacementWithID)
-                                return undoCommand
-                            }
-                        }
-                    }
-                })
-            }
+    private fun addTopLevelUndoCommand(undoCommand: Command) {
+        redoCommands.clear()
+        undoCommands.add(undoCommand)
+        listeners.forEach { it.invoke() }
+    }
 
-            override suspend fun onRemoved(item: T) {
-                commandRecorder.addUndoCommandIfAppropriate(object : Command("Restored $item") {
-                    override suspend fun executeAndGetOpposite(): Command {
-                        repository.save(null, item)
-                        val undoCommand = this
-                        return object : Command("Deleted $item") {
-                            override suspend fun executeAndGetOpposite(): Command {
-                                repository.remove(item)
-                                return undoCommand
-                            }
-                        }
-                    }
-                })
-            }
-
-            override suspend fun onVisibilityChanged(item: T, visible: Boolean) {}
-        })
+    private object NormalCommandRecorder : CommandRecorder {
+        override fun addUndoCommandIfAppropriate(undoCommand: Command) {
+            addTopLevelUndoCommand(undoCommand)
+        }
     }
 }
 
-//fun RBuilder.undoComponent() {
-//    UndoComponent.render(this)
-//}
-
-abstract class Command(val pastTenseDescription: String) {
+abstract class Command(private val pastTenseDescription: String) {
     abstract suspend fun executeAndGetOpposite(): Command
 
     override fun toString(): String = pastTenseDescription
@@ -151,12 +120,6 @@ abstract class Command(val pastTenseDescription: String) {
 
 private interface CommandRecorder {
     fun addUndoCommandIfAppropriate(undoCommand: Command)
-}
-
-private object NormalCommandRecorder : CommandRecorder {
-    override fun addUndoCommandIfAppropriate(undoCommand: Command) {
-        UndoComponent.addUndoCommand(undoCommand)
-    }
 }
 
 private object NoOpCommandRecorder : CommandRecorder {
@@ -186,6 +149,48 @@ private class UndoableGroup(private val redoPastTenseDescription: String, undoPa
             override suspend fun executeAndGetOpposite(): Command {
                 redoCommands.forEach { it.executeAndGetOpposite() }
                 return undoCommand
+            }
+        }
+    }
+}
+
+external interface UndoProps : RProps
+
+external interface UndoState : RState {
+    var showUndoButton: Boolean?
+}
+
+class UndoButtons(props: UndoProps) : RComponent<UndoProps, UndoState>(props) {
+    private val resources = mutableListOf<Closeable>()
+
+    override fun UndoState.init(props: UndoProps) {
+        showUndoButton = UndoComponent.undoCount > 0
+    }
+
+    override fun componentDidMount() {
+        resources.add(UndoComponent.addListener {
+            setState {
+                showUndoButton = UndoComponent.undoCount > 0
+            }
+        })
+    }
+
+    override fun componentWillUnmount() {
+        resources.forEach { it.close() }
+        resources.clear()
+    }
+
+    override fun RBuilder.render() {
+        if (state.showUndoButton == true) {
+            child(Button::class) {
+                attrs.variant = "secondary"
+                attrs.onClick = {
+                    it.stopPropagation()
+                    launchHandlingErrors("Undo") {
+                        UndoComponent.undo()
+                    }
+                }
+                +"Undo"
             }
         }
     }

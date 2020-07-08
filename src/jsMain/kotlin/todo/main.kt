@@ -1,8 +1,7 @@
 package todo
 
-import component.repository.toID
+import component.entity.toID
 import platform.handleError
-import platform.PlatformProvider
 import platform.inContext
 import cordova.initializeForCordova
 import org.w3c.dom.Element

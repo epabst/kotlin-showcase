@@ -24,6 +24,7 @@ val reactVersion = "16.13.0"
 val reactWrapperVersion = "$reactVersion-pre.93-kotlin-$kotlinVersion"
 val reactRouterDomVersion = "5.1.2-pre.105-kotlin-$kotlinVersion-eap-83"
 val artifactName = rootProject.name
+val variant = if (false) "Production" else "Development"
 
 kotlin {
     js {
@@ -41,8 +42,8 @@ kotlin {
     jvm {
         compilations.named("main") {
             tasks.getByName<Copy>(processResourcesTaskName) {
-                dependsOn("jsBrowserProductionWebpack")
-                tasks.named<KotlinWebpack>("jsBrowserProductionWebpack") {
+                dependsOn("jsBrowser${variant}Webpack")
+                tasks.named<KotlinWebpack>("jsBrowser${variant}Webpack") {
                     from(entry.name, destinationDirectory)
                 }
             }
@@ -108,6 +109,9 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.7")
             }
         }
+        all {
+            languageSettings.enableLanguageFeature("InlineClasses")
+        }
     }
 }
 
@@ -121,7 +125,7 @@ tasks.register<JavaExec>("run") {
 }
 
 val copyDependenciesToPublic by tasks.registering(Copy::class) {
-    dependsOn("jsBrowserWebpack")
+    dependsOn("jsBrowser${variant}Webpack")
     val regex = Regex("""~/(?:src|href)="../../(build/js/node_modules)/([^"]+)"""")
     file("src/jsMain/resources/index.html").readLines().forEach { line ->
         val matchResult = regex.find(line)

@@ -2,7 +2,7 @@
 
 package component.firebase
 
-import component.repository.*
+import component.entity.*
 import firebase.Unsubscribe
 import firebase.firestore.*
 import firebase.generateConsecutiveId
@@ -12,23 +12,23 @@ import platform.handlingErrors
 import platform.inContext
 import kotlin.js.Promise
 
-fun <T : WithID<T>> CollectionReference<T>.doc(id: ID<T>?): DocumentReference<T> {
+fun <T : Entity<T>> CollectionReference<T>.doc(id: ID<T>?): DocumentReference<T> {
     return doc(id?.toString() ?: generateConsecutiveId())
 }
 
-suspend fun <E : WithID<E>> DocumentReference<E>.set(entity: E) {
+suspend fun <E : Entity<E>> DocumentReference<E>.set(entity: E) {
     set(JSON.parse(JSON.stringify(entity.withID(ID(id))))).await()
 }
 
-suspend fun <E : WithID<E>> CollectionReference<E>.save(entity: E) {
-    doc(entity.getID()).set(entity).await()
+suspend fun <E : Entity<E>> CollectionReference<E>.save(entity: E) {
+    doc(entity.id).set(entity).await()
 }
 
-fun <E : WithID<E>> QuerySnapshot<E>.toList(): List<E> {
+fun <E : Entity<E>> QuerySnapshot<E>.toList(): List<E> {
     return docs.map { snapshot -> snapshot.data() }
 }
 
-fun <E : WithID<E>> Query<E>.onSnapshot(
+fun <E : Entity<E>> Query<E>.onSnapshot(
     onError: (FirestoreError) -> Unit = { handleFirestoreError(it) },
     block: (List<E>) -> Unit
 ): Unsubscribe {
@@ -44,7 +44,7 @@ fun <E : WithID<E>> Query<E>.onSnapshot(
     })
 }
 
-fun <E : WithID<E>> DocumentReference<E>.onSnapshot(
+fun <E : Entity<E>> DocumentReference<E>.onSnapshot(
     onError: (FirestoreError) -> Unit = { handleFirestoreError(it) },
     block: (E?) -> Unit
 ): Unsubscribe {
@@ -73,7 +73,7 @@ fun handleFirestoreError(error: FirestoreError) {
     handleError(error.message, error)
 }
 
-interface FirestoreEntityConverter<E : WithID<E>> : FirestoreDataConverter<E> {
+interface FirestoreEntityConverter<E : Entity<E>> : FirestoreDataConverter<E> {
 
     fun toNormal(json: DocumentData): E
 

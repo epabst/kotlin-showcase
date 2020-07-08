@@ -1,4 +1,4 @@
-package component.repository
+package component.entity
 
 /**
  * Serialization support for util classes.
@@ -26,11 +26,18 @@ fun LongJS?.toNormal(): Long? {
     }
 }
 
-fun <E : WithID<E>> String.toID(): ID<E>? = ID(this)
+fun <E : Entity<E>> String.toID(): ID<E>? = ID(this)
+
+interface EntityJS<T : Entity<T>>
 
 external interface IDJS {
-    val id: LongJS?
     val _id: String?
 }
 
-fun <E : WithID<E>> IDJS.toNormal(): ID<E> = (id.toNormal()?.toString() ?: _id) ?.let { ID<E>(it) } ?: error("required ID not present")
+fun <E : Entity<E>> IDJS.toNormal(): ID<E> = _id?.let { ID(it) } ?: error("required ID is not present")
+
+external interface RevisionJS {
+    val _rev: String?
+}
+
+fun <E : Entity<E>> RevisionJS.toNormal(): Revision<E> = _rev?.let { Revision(it) } ?: error("required revision is not present")

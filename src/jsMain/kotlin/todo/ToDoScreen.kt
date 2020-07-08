@@ -3,13 +3,19 @@ package todo
 import bootstrap.*
 import component.ButtonBar
 import component.bootstrap.textInput
+import component.entity.*
 import platform.toProviderDate
 import react.*
 import react.router.dom.RouteResultHistory
-import component.repository.ID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import platform.launchHandlingErrors
 import platform.toJsDate
+import react.dom.div
 import todo.model.ToDo
+import todo.model.ToDoJS
+import todo.model.toNormal
 import util.emptyToNull
 import kotlin.js.Date
 
@@ -19,6 +25,7 @@ interface ToDoProps : RProps {
 }
 
 interface ToDoState : RState {
+    var loading: Boolean
     var original: ToDo?
     var name: String
     var dueDate: Date?
@@ -33,11 +40,21 @@ interface ToDoState : RState {
 class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
 
     override fun ToDoState.init(props: ToDoProps) {
-        original = props.id?.let { Config.toDoRepository.find(it) }
-        name = original?.name ?: ""
-        dueDate = original?.dueDate?.toJsDate()
-        notes = original?.notes ?: ""
-        validated = false
+        loading = true
+    }
+
+    override fun componentDidMount() {
+        GlobalScope.launch {
+            val jsEntity = props.id?.let { Config.toDoDb.get(it).await() }
+            setState {
+                original = jsEntity?.toNormal()
+                name = original?.name ?: ""
+                dueDate = original?.dueDate?.toJsDate()
+                notes = original?.notes ?: ""
+                validated = false
+                loading = false
+            }
+        }
     }
 
     private fun save(event: React.SubmitEvent) {
@@ -46,10 +63,11 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
                 name = state.name,
                 dueDate = state.dueDate?.toProviderDate(),
                 notes = state.notes.emptyToNull(),
-                id = state.original?.id
+                id = state.original?.id,
+                rev = state.original?.rev
             )
             launchHandlingErrors("save $updatedToDo") {
-                Config.toDoRepository.save(updatedToDo)
+                Config.toDoDb.saveAllowingUndo(state.original, updatedToDo, ToDoJS::toNormal)
             }
             props.history.goBack()
         }
@@ -63,9 +81,9 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
     }
 
     private fun delete() {
-        state.original?.id?.let { toDoId ->
-            launchHandlingErrors("delete $toDoId") {
-                Config.toDoRepository.remove(toDoId)
+        state.original?.let { toDo ->
+            launchHandlingErrors("delete ${toDo.id}") {
+                Config.toDoDb.removeAllowingUndo(toDo, ToDoJS::toNormal)
             }
         }
         props.history.goBack()
@@ -77,34 +95,38 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
             attrs.heading = "To-Do"
         }
         child(Container::class) {
-            child(Form::class) {
-                attrs.onSubmit = { save(it); it.preventDefault() }
-                attrs.validated = state.validated
-                attrs.onSubmit = { event -> save(event); event.preventDefault() }
-                textInput("To Do", state.name, "(some description)", required = true) {
-                    setState { name = it ?: "" }
-                }
-                textInput("Notes", state.notes, "(some notes)") {
-                    setState { notes = it ?: "" }
-                }
-                child(Form.Group::class) {
-                    child(ButtonToolbar::class) {
-                        child(Button::class) {
-                            attrs.type = "submit"
-                            attrs.variant = "primary"
-                            +"Save"
-                        }
-                        child(Button::class) {
-                            attrs.variant = "secondary"
-                            attrs.className = "mr-2"
-                            attrs.onClick = { cancel() }
-                            +"Cancel"
-                        }
-                        if (state.original?.id != null) {
+            if (state.loading) {
+                div { +"Loading..." }
+            } else {
+                child(Form::class) {
+                    attrs.onSubmit = { save(it); it.preventDefault() }
+                    attrs.validated = state.validated
+                    attrs.onSubmit = { event -> save(event); event.preventDefault() }
+                    textInput("To Do", state.name, "(some description)", required = true) {
+                        setState { name = it ?: "" }
+                    }
+                    textInput("Notes", state.notes, "(some notes)") {
+                        setState { notes = it ?: "" }
+                    }
+                    child(Form.Group::class) {
+                        child(ButtonToolbar::class) {
                             child(Button::class) {
-                                attrs.variant = "danger"
-                                attrs.onClick = { delete() }
-                                +"Delete To-Do"
+                                attrs.type = "submit"
+                                attrs.variant = "primary"
+                                +"Save"
+                            }
+                            child(Button::class) {
+                                attrs.variant = "secondary"
+                                attrs.className = "mr-2"
+                                attrs.onClick = { cancel() }
+                                +"Cancel"
+                            }
+                            if (state.original?.id != null) {
+                                child(Button::class) {
+                                    attrs.variant = "danger"
+                                    attrs.onClick = { delete() }
+                                    +"Delete To-Do"
+                                }
                             }
                         }
                     }
