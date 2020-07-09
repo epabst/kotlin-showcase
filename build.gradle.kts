@@ -52,7 +52,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.0-M2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.7")
             }
         }
         commonTest {
@@ -78,7 +78,7 @@ kotlin {
         named("jsMain") {
             dependencies {
                 implementation(kotlin("stdlib-js"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.0-M2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.7")
                 implementation("org.jetbrains:kotlin-react-dom:$reactWrapperVersion")
                 implementation(npm("pouchdb", "7.2.1"))
                 implementation(npm("@types/pouchdb", "6.4.0"))
@@ -105,7 +105,7 @@ kotlin {
         named("jsTest") {
             dependencies {
                 implementation(kotlin("test-js"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.0-M2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.7")
             }
         }
     }
