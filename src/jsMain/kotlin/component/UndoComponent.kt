@@ -37,7 +37,7 @@ object UndoComponent : UndoProvider {
             val index = undoCommandsCopy.size - 1
             val commandToUndo = undoCommandsCopy[index]
             val redoCommand = commandToUndo.executeAndGetOpposite()
-            console.info("$commandToUndo (undoing: $commandToUndo)")
+            console.info("$commandToUndo (undoing: $redoCommand)")
             undoCommands.removeAt(index)
             redoCommands.add(redoCommand)
             listeners.forEach { it.invoke() }
