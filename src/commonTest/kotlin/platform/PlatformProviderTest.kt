@@ -1,9 +1,7 @@
 package platform
 
+import util.*
 import kotlin.test.*
-import util.interceptAny
-import util.mustBe
-import util.mustContain
 
 class PlatformProviderTest {
 

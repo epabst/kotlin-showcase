@@ -6,6 +6,13 @@ Simple To-Do App.
 * this directory - multiplatform project for browser and JVM backend.
 * mobile - hybrid mobile application using KotlinJS and Cordova to run on Android, iOS, Windows Phones, etc.
 
+# Kotlin Packages
+
+* todo - the app itself.  (It can depend on everything).
+* util - reusable code that has no dependencies on external modules.
+* bootstrap, cordova, pouchdb, etc. - external definitions for Javascript modules.
+* extensions - custom reusable extensions to external modules.  These should not be app-specific and are a la carte.  They should not import anything beyond what is intuitive from the package name.
+
 # To Personalize
 
 Search for "ZZZ" and replace it with the information for your custom app.

@@ -1,21 +1,18 @@
 package todo
 
 import bootstrap.*
-import component.ButtonBar
-import component.UndoButtons
-import component.entity.*
+import extensions.firebase.reactbootstrap.ButtonBar
+import extensions.reactbootstrap.UndoButton
+import extensions.pouchdb.onChangedMap
+import extensions.pouchdb.removeAllowingUndo
 import react.*
 import react.dom.br
 import react.dom.div
 import react.router.dom.RouteResultHistory
 import react.router.dom.routeLink
-import platform.launchHandlingErrors
+import util.launchHandlingErrors
 import pouchdb.Document
 import pouchdb.core.Changes
-import todo.model.ToDo
-import todo.model.ToDoJS
-import todo.model.parse
-import todo.model.toNormal
 
 interface ToDosProps : RProps {
     var history: RouteResultHistory
@@ -113,7 +110,7 @@ class ToDosScreen(props: ToDosProps) : RComponent<ToDosProps, ToDosState>(props)
                 child(Row::class) {
                     child(Col::class) {
                         attrs.xs = 6
-                        child(UndoButtons::class) { }
+                        child(UndoButton::class) { }
                     }
                     child(Col::class) {
                         attrs.xs = 6

@@ -1,21 +1,21 @@
 package todo
 
 import bootstrap.*
-import component.ButtonBar
-import component.bootstrap.textInput
-import component.entity.*
-import platform.toProviderDate
+import extensions.firebase.reactbootstrap.ButtonBar
+import extensions.reactbootstrap.textInput
+import extensions.pouchdb.get
+import extensions.pouchdb.removeAllowingUndo
+import extensions.pouchdb.saveAllowingUndo
+import util.toProviderDate
 import react.*
 import react.router.dom.RouteResultHistory
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import platform.launchHandlingErrors
-import platform.toJsDate
+import util.launchHandlingErrors
+import util.toJsDate
 import react.dom.div
-import todo.model.ToDo
-import todo.model.ToDoJS
-import todo.model.toNormal
+import util.ID
 import util.emptyToNull
 import kotlin.js.Date
 

@@ -1,8 +1,8 @@
 package todo
 
-import component.entity.toID
-import platform.handleError
-import platform.inContext
+import util.toID
+import util.handleError
+import util.inContext
 import cordova.initializeForCordova
 import org.w3c.dom.Element
 import react.RProps

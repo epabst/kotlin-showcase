@@ -1,17 +1,14 @@
 package todo
 
 import PouchDB
-import component.entity.create
-import platform.handleError
-import component.firebase.*
+import extensions.pouchdb.create
+import util.handleError
+import extensions.firebase.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import firebase.app.User
 import firebase.app.initializeApp
 import kotlinx.coroutines.await
-import todo.model.ToDo
-import todo.model.ToDoJS
-import todo.model.toNormal
 import kotlin.js.json
 
 object Config {
