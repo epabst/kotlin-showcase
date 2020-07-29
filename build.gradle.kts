@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
 plugins {
-    kotlin("multiplatform") version "1.4-M2"
+    kotlin("multiplatform") version "1.4.0-rc"
 }
 group = "com.github.epabst"
 version = "1.0-SNAPSHOT"
@@ -11,18 +11,19 @@ repositories {
     mavenLocal()
     jcenter()
     mavenCentral()
-    maven { url = uri("https://dl.bintray.com/kotlin/ktor") }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlin-js-wrappers") }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlinx") }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+    maven("https://dl.bintray.com/kotlin/ktor")
+    maven("https://dl.bintray.com/kotlin/kotlin-js-wrappers")
+    maven("https://dl.bintray.com/kotlin/kotlin-eap")
+    maven("https://dl.bintray.com/kotlin/kotlinx")
 }
-val kotlinVersion = "1.4-M2"
-val ktorVersion = "1.3.2-$kotlinVersion"
+val kotlinVersion = "1.4.0-rc"
 val logbackVersion = "1.2.3"
-val reactVersion = "16.13.0"
-val reactWrapperVersion = "$reactVersion-pre.93-kotlin-$kotlinVersion"
-val reactRouterDomVersion = "5.1.2-pre.105-kotlin-$kotlinVersion-eap-83"
+val reactVersion = "16.13.1"
+val ktorVersion = "1.3.2-$kotlinVersion"
+val reactWrapperVersion = "$reactVersion-pre.110-kotlin-$kotlinVersion"
+val reactRouterDomVersion = "5.1.2-pre.110-kotlin-$kotlinVersion"
+val kotlinStyledVersion = "1.0.0-pre.110-kotlin-$kotlinVersion"
+val kotlinxCoroutinesVersion = "1.3.8"
 val artifactName = rootProject.name
 val variant = if (false) "Production" else "Development"
 
@@ -53,7 +54,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.7")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$kotlinxCoroutinesVersion")
             }
         }
         commonTest {
@@ -64,7 +65,6 @@ kotlin {
         }
         named("jvmMain") {
             dependencies {
-                implementation(kotlin("stdlib-jdk8"))
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("io.ktor:ktor-html-builder:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -85,12 +85,12 @@ kotlin {
                 implementation(npm("@types/pouchdb", "6.4.0"))
                 implementation(npm("react", reactVersion)) // used by kotlin-react-dom
                 implementation(npm("react-dom", reactVersion)) // used by kotlin-react-dom
-                implementation(npm("react-is", reactVersion)) // used by kotlin-react-dom
-                implementation("org.jetbrains:kotlin-styled:1.0.0-pre.107-kotlin-$kotlinVersion")
-                implementation(npm("styled-components","5.0.0"))
+                implementation(npm("react-is", reactVersion)) // used by kotlin-react-dom - still explicitly needed?
+                implementation("org.jetbrains:kotlin-styled:$kotlinStyledVersion")
+                implementation(npm("styled-components","5.0.0")) //still explicitly needed?
                 implementation(npm("inline-style-prefixer","5.1.0"))
-                implementation(npm("core-js", "3.1.4")) // used by kotlin-react-dom
-                implementation(npm("text-encoding", "0.7.0")) // used by ktor-client-js
+                implementation(npm("core-js", "3.1.4")) // used by kotlin-react-dom - still explicitly needed?
+                implementation(npm("text-encoding", "0.7.0")) // used by ktor-client-js - still explicitly needed?
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
                 implementation(npm("react-bootstrap", "1.0.0-beta.16"))
@@ -99,14 +99,13 @@ kotlin {
                 implementation(npm("firebase", "7.6.1"))
                 implementation(npm("numeral", "2.0.6"))
                 implementation("org.jetbrains:kotlin-react-router-dom:$reactRouterDomVersion")
-                implementation(npm("react-router-dom", "5.1.2"))
-                implementation(npm("abort-controller", "3.0.0"))
+                implementation(npm("react-router-dom", "5.1.2")) //still explicitly needed?
+                implementation(npm("abort-controller", "3.0.0")) //still explicitly needed?
             }
         }
         named("jsTest") {
             dependencies {
                 implementation(kotlin("test-js"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.7")
             }
         }
         all {
