@@ -1,7 +1,7 @@
 package cordova
 
 import org.w3c.dom.Window
-import kotlin.browser.window
+import kotlinx.browser.window
 
 /**
  * Support for Cordova.

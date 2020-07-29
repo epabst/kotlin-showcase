@@ -18,7 +18,7 @@ import react.dom.img
 import util.handleError
 import util.inContext
 import util.launchHandlingErrors
-import kotlin.browser.window
+import kotlinx.browser.window
 import kotlin.js.json
 
 /**

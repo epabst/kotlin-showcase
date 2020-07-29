@@ -1,6 +1,6 @@
 package util
 
-import kotlin.browser.window
+import kotlinx.browser.window
 
 fun handleError(message: String?, internalDetail: Any) {
     logError(message, internalDetail)

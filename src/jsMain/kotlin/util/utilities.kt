@@ -6,7 +6,7 @@
  */
 package util
 
-import kotlin.browser.window
+import kotlinx.browser.window
 
 fun String?.emptyToNull(): String? {
     return if (this == null || this.isEmpty()) null else this
