@@ -106,6 +106,11 @@ kotlin {
         named("jsTest") {
             dependencies {
                 implementation(kotlin("test-js"))
+                implementation(npm("cheerio", "0.22.0"))
+                implementation(npm("@types/cheerio", "0.22.21"))
+                implementation(npm("enzyme", "3.10.0"))
+                implementation(npm("@types/enzyme", "3.10.5"))
+                implementation(npm("enzyme-adapter-react-16", "1.15.2"))
             }
         }
         all {
