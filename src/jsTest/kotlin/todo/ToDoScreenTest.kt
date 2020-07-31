@@ -1,5 +1,6 @@
 package todo
 
+import enzyme.mount
 import extensions.pouchdb.createAndGetId
 import kotlinext.js.jsObject
 import kotlinx.coroutines.delay
@@ -12,51 +13,55 @@ import kotlin.test.Test
 /** A test for [ToDoScreen]. */
 @Suppress("unused")
 class ToDoScreenTest {
+    private val date = PlatformProvider.toDate(2020, 5, 3)
 
     @Test
     fun shouldStartEmpty() = runTest {
-        val wrapper = enzyme.mount(ToDoScreen::class) {
+        mount(ToDoScreen::class) {
             attrs.history = jsObject()
+        }.apply {
+            props().id.mustBe(null)
+            props().history.mustNotBe(null)
+            state().loading.mustBe(true)
+
+            waitForAsyncProcessing()
+            state().loading.mustBe(false)
+            state().original.mustBe(null)
+            state().name.mustBe("")
+            state().validated.mustBe(false)
+
+            instance().setToDo(ToDo("Do homework", dueDate = date))
+            state().name.mustBe("Do homework")
+            state().dueDate?.getFullYear().mustBe(2020)
         }
-        wrapper.props().id.mustBe(null)
-        wrapper.props().history.mustNotBe(null)
-        wrapper.state().loading.mustBe(true)
-
-        waitForAsyncProcessing()
-        wrapper.state().loading.mustBe(false)
-        wrapper.state().original.mustBe(null)
-        wrapper.state().name.mustBe("")
-        wrapper.state().validated.mustBe(false)
-
-        wrapper.instance().setToDo(ToDo("Do homework", dueDate = PlatformProvider.toDate(2020, 5, 3)))
-        wrapper.state().name.mustBe("Do homework")
-        wrapper.state().dueDate?.getFullYear().mustBe(2020)
     }
 
     @Test
     fun shouldAllowEditing() = runTest {
-        val wrapper = enzyme.mount(ToDoScreen::class) {
+        mount(ToDoScreen::class) {
             attrs.history = jsObject()
+        }.apply {
+            waitForAsyncProcessing()
+            instance().setToDo(ToDo("Do homework", dueDate = date))
+            state().name.mustBe("Do homework")
+            state().dueDate?.getFullYear().mustBe(2020)
         }
-        waitForAsyncProcessing()
-        wrapper.instance().setToDo(ToDo("Do homework", dueDate = PlatformProvider.toDate(2020, 5, 3)))
-        wrapper.state().name.mustBe("Do homework")
-        wrapper.state().dueDate?.getFullYear().mustBe(2020)
     }
 
     @Test
     fun shouldLoadData() = runTest {
         val newId = Config.toDoDb.createAndGetId(ToDo("Sleep"), ToDoJS::toNormal)
 
-        val wrapper = enzyme.mount(ToDoScreen::class) {
+        mount(ToDoScreen::class) {
             attrs.id = newId
             attrs.history = jsObject()
+        }.apply {
+            waitForAsyncProcessing()
+            state().name.mustBe("Sleep")
         }
-        waitForAsyncProcessing()
-        wrapper.state().name.mustBe("Sleep")
     }
+}
 
-    private suspend fun waitForAsyncProcessing() {
-        delay(10)
-    }
+private suspend fun waitForAsyncProcessing() {
+    delay(10)
 }
