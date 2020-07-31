@@ -45,15 +45,19 @@ class ToDoScreen(props: ToDoProps) : RComponent<ToDoProps, ToDoState>(props) {
 
     override fun componentDidMount() {
         GlobalScope.launch {
-            val jsEntity = props.id?.let { Config.toDoDb.get(it).await() }
-            setState {
-                original = jsEntity?.toNormal()
-                name = original?.name ?: ""
-                dueDate = original?.dueDate?.toJsDate()
-                notes = original?.notes ?: ""
-                validated = false
-                loading = false
-            }
+            val entity = props.id?.let { Config.toDoDb.get(it).await().toNormal() }
+            setToDo(entity)
+        }
+    }
+
+    fun setToDo(toDo: ToDo?) {
+        setState {
+            original = toDo
+            name = original?.name ?: ""
+            dueDate = original?.dueDate?.toJsDate()
+            notes = original?.notes ?: ""
+            validated = false
+            loading = false
         }
     }
 

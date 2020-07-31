@@ -2,20 +2,21 @@ package extensions.pouchdb
 
 import util.undo.Command
 import util.undo.UndoComponent
-import util.Entity
-import util.EntityJS
-import util.ID
-import util.IdGenerator
-import util.Revision
 import kotlinext.js.jsObject
 import kotlinx.coroutines.await
 import pouchdb.Database
 import pouchdb.Document
 import pouchdb.core.*
+import util.*
+import util.Revision
 import kotlin.js.Promise
 
 fun <JS : EntityJS<T>, T : Entity<T>> Database<JS>.get(id: ID<T>): Promise<JS> {
     return get(id._id)
+}
+
+suspend fun <JS : EntityJS<T>, T : Entity<T>> Database<JS>.createAndGetId(entity: Entity<T>, toNormal: JS.() -> T): ID<T> {
+    return create(entity, toNormal).id.toID()!!
 }
 
 suspend fun <JS : EntityJS<T>, T : Entity<T>> Database<JS>.create(entity: Entity<T>, toNormal: JS.() -> T): Response {
