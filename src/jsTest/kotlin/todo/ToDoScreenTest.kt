@@ -1,6 +1,7 @@
 package todo
 
 import enzyme.mount
+import enzyme.shallow
 import extensions.pouchdb.createAndGetId
 import kotlinext.js.jsObject
 import kotlinx.coroutines.delay
@@ -38,7 +39,7 @@ class ToDoScreenTest {
 
     @Test
     fun shouldAllowEditing() = runTest {
-        mount(ToDoScreen::class) {
+        shallow(ToDoScreen::class) {
             attrs.history = jsObject()
         }.apply {
             waitForAsyncProcessing()
@@ -52,7 +53,7 @@ class ToDoScreenTest {
     fun shouldLoadData() = runTest {
         val newId = Config.toDoDb.createAndGetId(ToDo("Sleep"), ToDoJS::toNormal)
 
-        mount(ToDoScreen::class) {
+        shallow(ToDoScreen::class) {
             attrs.id = newId
             attrs.history = jsObject()
         }.apply {
