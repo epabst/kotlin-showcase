@@ -23,13 +23,6 @@ fun <P : RProps, S : RState, C : Component<P, S>> shallow(
 
 fun <P : RProps, S : RState, C : Component<P, S>> shallow(
     klazz: KClass<out C>,
-    props: P
-): ShallowWrapper<P, S, C> {
-    return shallow(toElement(klazz, props))
-}
-
-fun <P : RProps, S : RState, C : Component<P, S>> shallow(
-    klazz: KClass<out C>,
     props: P,
     handler: RHandler<P>
 ): ShallowWrapper<P, S, C> {
